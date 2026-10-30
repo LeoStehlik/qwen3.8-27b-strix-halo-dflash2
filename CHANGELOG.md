@@ -33,6 +33,9 @@
 - Added a separate ROCm/vLLM investigation plan covering `gfx1151`, AMD
   MXFP4/MXFP6, DFlash2, tools, vision, prefix caching and rollback.
 - Added a shared real-agent benchmark plan for OpenClaw, OpenCode and OpenWork.
+- Added a complete OpenCode/Q5 case study: four merged security pull requests,
+  72,053 generated tokens, 155,534 final context tokens and context-bucketed
+  decode declining from 21.68 tok/s below 25K to about 14 tok/s above 100K.
 
 ## 2026-10-30 — Local deployment
 

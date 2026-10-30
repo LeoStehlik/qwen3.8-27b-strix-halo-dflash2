@@ -53,6 +53,14 @@ tool-loop turns had a 47.5-second median and eight completed inside one minute.
 The server is usable once a session is warm; OpenClaw must reduce and stabilise
 its initial prompt to make a new session interactive.
 
+A later OpenCode run demonstrated useful Q5 coding-agent work. One high-reasoning
+session produced four merged, CI-green security pull requests addressing eight
+alerts. It generated 72,053 tokens across 122 model turns and reached 155,534
+context tokens. Weighted decode fell from 21.68 tok/s below 25K context to about
+14 tok/s beyond 100K, showing why successful work per hour and context growth
+matter more than a short-prompt peak. See the
+[OpenCode Q5 case study](docs/OPENCODE-Q5-CASE-STUDY.md).
+
 For agent and tool-calling traffic, the current starting point is:
 
 ```json
@@ -166,6 +174,7 @@ Capture the non-sensitive environment details needed with a benchmark report:
 - [Tuning cookbook and roadmap](docs/TUNING.md)
 - [ROCm and vLLM investigation](docs/ROCM-VLLM.md)
 - [OpenClaw, OpenCode and OpenWork benchmark plan](docs/AGENT-CLIENT-BENCHMARKS.md)
+- [OpenCode Q5 security-remediation case study](docs/OPENCODE-Q5-CASE-STUDY.md)
 - [OpenClaw integration](docs/OPENCLAW.md)
 - [Sanitized OpenClaw live trace](docs/OPENCLAW-LIVE-TRACE.md)
 - [Troubleshooting](docs/TROUBLESHOOTING.md)

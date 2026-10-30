@@ -152,6 +152,23 @@ make OpenClaw's 150K-token cold hydration interactive. The sanitized per-turn
 record and OpenClaw action items are in
 [OPENCLAW-LIVE-TRACE.md](OPENCLAW-LIVE-TRACE.md).
 
+## OpenCode Q5 security-remediation trace
+
+A complete OpenCode run used the Q5 target at high reasoning to remediate
+Dependabot alerts in a public TypeScript monorepo. It completed 122 model turns,
+generated 72,053 tokens, reached 155,534 populated context tokens and produced
+four reviewed, CI-green merged pull requests addressing eight alerts.
+
+Across the full run, weighted decode was 15.83 tok/s and DFlash acceptance was
+62.57%. Context depth materially changed the result: weighted decode was 21.68
+tok/s below 25K, 17.78 tok/s from 50K--75K and 14.06 tok/s from 125K--150K.
+Generation consumed 91.96% of backend inference time. Prefix reuse was usually
+96--100%, so the late-session slowdown was not primarily a cache failure.
+
+The full sanitized outcome, configuration, context-depth table, limitations and
+reproduction record are in
+[OPENCODE-Q5-CASE-STUDY.md](OPENCODE-Q5-CASE-STUDY.md).
+
 ## One versus two versus four slots
 
 Four simultaneous clients each sent a distinct cold prompt containing 9,263

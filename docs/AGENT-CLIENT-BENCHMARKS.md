@@ -9,6 +9,20 @@ change latency more than a small server-side throughput difference.
 Do not rank clients from one ad-hoc task. Pin the client version and record its
 configuration before every published comparison.
 
+## Completed OpenCode Q5 observation
+
+The first substantial OpenCode workload is now documented. A high-reasoning
+Q5 session fixed eight Dependabot alerts through four merged pull requests. The
+server recorded 122 model turns, 72,053 generated tokens, 15.83 tok/s weighted
+decode and 155,534 final context tokens. Decode declined from 21.68 tok/s below
+25K context to approximately 14 tok/s beyond 100K, despite strong prefix reuse.
+
+This is evidence that the deployment can complete useful coding-agent work, not
+a controlled OpenCode-versus-OpenClaw ranking. Client version and request-level
+sampling were not captured, model quantization differed, and the workloads had
+different context profiles. See the complete
+[OpenCode Q5 case study](OPENCODE-Q5-CASE-STUDY.md).
+
 ## Shared server configuration
 
 Unless the test explicitly changes a server factor, hold these constant:
