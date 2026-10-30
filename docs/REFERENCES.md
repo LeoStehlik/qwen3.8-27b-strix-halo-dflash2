@@ -18,12 +18,19 @@ the download scripts.
 - [Qwen function calling guide](https://github.com/QwenLM/Qwen3/blob/main/docs/source/framework/function_call.md)
 - [OpenClaw model configuration](https://docs.openclaw.ai/gateway/config-agents/models)
 - [OpenClaw local model guidance](https://docs.openclaw.ai/gateway/local-models)
+- [OpenClaw streaming and chunking](https://docs.openclaw.ai/concepts/streaming)
+- [OpenClaw Discord channel reference](https://github.com/openclaw/openclaw/blob/main/docs/channels/discord.md)
 
 ## Backend and Strix Halo context
 
 - [“I tuned llama.cpp”](https://medium.com/@bkpaine1/i-tuned-llama-cpp-33d68b1c851d), the article that prompted a more careful discussion of workload-dependent Vulkan/ROCm results
 - [llama.cpp Strix Halo Vulkan performance discussion](https://github.com/ggml-org/llama.cpp/discussions/10879)
 - [Known-good Strix Halo ROCm/Vulkan discussion](https://github.com/ggml-org/llama.cpp/discussions/20856)
+- [AMD Strix Halo system optimisation](https://rocm.docs.amd.com/en/docs-7.2.0/how-to/system-optimization/strixhalo.html)
+- [vLLM ROCm installation](https://docs.vllm.ai/en/latest/getting_started/installation/gpu/)
+- [vLLM Qwen3.8-27B recipe](https://recipes.vllm.ai/Qwen/Qwen3.8-27B)
+- [vLLM DFlash2 ROCm performance RFC](https://github.com/vllm-project/vllm/issues/61761)
+- [AEON Qwen3.8-27B DFlash2 model card](https://huggingface.co/AEON-7/AEON-DFlash2-Qwen3.8-27B)
 
 Community benchmark reports are useful hypotheses, not substitutes for a
 same-model, same-commit test on the local machine.

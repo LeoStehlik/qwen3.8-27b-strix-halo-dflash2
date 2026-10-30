@@ -112,6 +112,7 @@ Full installation and operational details are in [docs/INSTALL.md](docs/INSTALL.
 | Setting | Value |
 |---|---|
 | Runtime | llama.cpp Vulkan portable v0.8.0, build 11001, commit `629d2f7b4` |
+| Live checkpoint candidate | build 11003, commit `a82001bd3`; validated locally, not yet the portable download |
 | KV context | 245,760 tokens |
 | Active slots | 1 (winner of controlled 1/2/4-slot comparison) |
 | Target KV | Q8_0 K and V |
@@ -127,6 +128,8 @@ Full installation and operational details are in [docs/INSTALL.md](docs/INSTALL.
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the reasoning behind the
 design and [docs/TUNING.md](docs/TUNING.md) for the remaining experiments.
+The separate [ROCm/vLLM investigation](docs/ROCM-VLLM.md) records the planned
+AMD MXFP4/DFlash2 comparison without changing the known-good Vulkan service.
 
 ## Repository contents
 
@@ -161,6 +164,8 @@ Capture the non-sensitive environment details needed with a benchmark report:
 - [Architecture and decisions](docs/ARCHITECTURE.md)
 - [Benchmarks and validation](docs/BENCHMARKS.md)
 - [Tuning cookbook and roadmap](docs/TUNING.md)
+- [ROCm and vLLM investigation](docs/ROCM-VLLM.md)
+- [OpenClaw, OpenCode and OpenWork benchmark plan](docs/AGENT-CLIENT-BENCHMARKS.md)
 - [OpenClaw integration](docs/OPENCLAW.md)
 - [Sanitized OpenClaw live trace](docs/OPENCLAW-LIVE-TRACE.md)
 - [Troubleshooting](docs/TROUBLESHOOTING.md)

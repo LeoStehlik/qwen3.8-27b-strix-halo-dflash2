@@ -72,6 +72,69 @@ After enabling reasoning preservation, a temperature-0.2 weather-tool smoke
 request completed with a valid `get_weather` call, valid JSON arguments,
 26.64 tok/s and 79.17% draft acceptance for that short response.
 
+## Later live streaming and tool-loop trace
+
+A later sanitized OpenClaw/Discord run exercised preview streaming and several
+consecutive model calls at approximately 43K--50K populated context. The API
+returned HTTP 200 when each streaming request opened; the backend continued
+generating while the client was able to update its preview. The calls were a
+tool loop, not repeated full prefills: longest-common-prefix similarity was
+typically 97--99.9% and some follow-ups processed only tens or hundreds of new
+prompt tokens.
+
+Representative completed calls were:
+
+| Output tokens | Decode | DFlash acceptance | Mean accepted length |
+|---:|---:|---:|---:|
+| 1,160 | 20.42 tok/s | 60.04% | 3.40 |
+| 169 | 17.25 tok/s | 58.33% | 3.33 |
+| 134 | 22.14 tok/s | 83.06% | 4.32 |
+| 165 | 20.61 tok/s | 62.77% | 3.51 |
+| 82 | 24.38 tok/s | 94.12% | 4.76 |
+| 405 | 19.99 tok/s | 50.00% | 3.00 |
+| 2,668 | 17.97 tok/s | 49.61% | 2.98 |
+
+The 1,160-token call needed 7.11 seconds for 1,803 new prompt tokens and 56.77
+seconds for generation. The 2,668-token call needed 13.76 seconds for 3,256
+new prompt tokens and 148.43 seconds for generation. This confirms two things:
+
+1. Warm prefix reuse keeps prompt work manageable.
+2. Long responses remain output-bound even after preview streaming makes them
+   feel alive.
+
+During the 2,668-token call, GPU utilisation samples were mostly 62--74%, GPU
+clock was approximately 2.0--2.3 GHz against a reported 2.9 GHz top state, and
+temperature was about 62 C. The run was not thermally throttled. Power policy,
+host scheduling and dispatch gaps are therefore valid A/B targets.
+
+High acceptance did not by itself produce 30 tok/s: the short 94.12%-acceptance
+call reached 24.38 tok/s. The path to 30 tok/s must also improve verification
+and scheduling efficiency or use a better target-specific drafter.
+
+## Persistent slot checkpoint candidate
+
+The live host also validated a local checkpoint-persistence backport based on
+llama.cpp commit `a82001bd3`. This candidate preserves the hybrid model's
+recurrent context state when a server slot is saved and restored. It is not yet
+the portable runtime downloaded by this repository's installer.
+
+The sanitized live checkpoint contained 35,074 saved tokens and five recurrent
+checkpoints. Its file size was 2,373,324,072 bytes, with mode `0600`. Saving
+took 399.65 ms and restoring took 327.73 ms. The launcher restored slot 0 before
+starting the public proxy, preventing an incoming remote request from racing
+the restore.
+
+The first measured request after restart reused 26,926 cached tokens, processed
+8,326 new prompt tokens in 24.13 seconds, generated 502 tokens at 18.76 tok/s
+and completed in 50.84 seconds. The following steady-state request reused
+34,221 tokens, processed 1,660 new tokens in 5.67 seconds, generated 947 tokens
+at 21.09 tok/s and completed in 50.53 seconds.
+
+This proves useful restart recovery, but not indefinite cache durability across
+model, template or runtime changes. Treat checkpoint files as runtime-specific
+cache artifacts, keep restrictive permissions, and regenerate them after a
+material model or chat-template change.
+
 ## Live OpenClaw cold and warm trace
 
 Francis ran a real OpenClaw tool session against the production Q4 preset. The
@@ -203,10 +266,18 @@ the image-token floor.
 ## Not yet measured
 
 - Prefill at 8K, 32K and 128K across ubatch sizes
-- DFlash `p_split` and `p_min`
+- Vulkan FA Wave32 enabled versus disabled
+- GPU/CPU performance policy, polling, priority and physical-core affinity
+- DFlash widths 3/4/5 on representative OpenClaw-like outputs
+- Q4 versus Q8 versus F16/BF16 draft weights
 - F16 versus Q8 draft KV for throughput
+- Q8_0 versus Q4_0 versus IQ4_NL target KV at populated context
 - Hard vision accuracy and latency
 - OpenClaw compaction behaviour
 - Quality delta between Q4 and Q5 on representative tasks
+
+`p_split` and `p_min` were removed from the DFlash2 plan after source
+inspection showed that the selector-lattice path does not consume them as
+general acceptance controls.
 
 Do not present planned tests as completed results.

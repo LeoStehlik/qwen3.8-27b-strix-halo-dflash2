@@ -85,6 +85,45 @@ OpenClaw supports model-scoped `params.temperature`, `params.topP`,
 providers. The server itself also has `--reasoning-preserve` enabled so that a
 compatible client can retain Qwen reasoning across tool-result turns.
 
+## Discord preview streaming
+
+The inference endpoint already streams provider deltas. If Discord remains
+silent until the whole answer is complete, buffering is in OpenClaw's channel
+delivery rather than llama.cpp. Discord defaults to progress-oriented preview
+behaviour; use `partial` mode when the reader should see the answer grow:
+
+```json5
+{
+  channels: {
+    discord: {
+      streaming: {
+        mode: "partial",
+        preview: {
+          chunk: {
+            minChars: 120,
+            maxChars: 700,
+            breakPreference: "paragraph",
+          },
+          toolProgress: true,
+          commandText: "status",
+        },
+        block: { enabled: false },
+      },
+    },
+  },
+}
+```
+
+Discord uses one temporary message and edits it as output arrives. Explicit
+Discord block streaming suppresses preview streaming, so do not enable both
+paths during the initial test. Restart the OpenClaw gateway after changing the
+configuration and validate the channel with `openclaw channels status --probe`.
+
+Preview streaming improves perceived latency but cannot remove time to first
+token. A cold or changed prefix must still be processed before answer text
+exists. Tool-heavy turns can also have gaps between separate model calls;
+`toolProgress` makes those phases visible without exposing raw command text.
+
 ## Evaluation plan
 
 Francis, the OpenClaw-resident agent, will conduct the authoritative evaluation
