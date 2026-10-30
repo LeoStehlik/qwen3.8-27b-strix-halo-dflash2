@@ -12,8 +12,9 @@
 - Retained DFlash2 width 4 after Q4 and Q5 width sweeps.
 - Retained temperature 0.2 as the conservative agent/tool starting point.
 - Added a streaming exact-request coalescer for concurrent retries.
-- Configured two continuously batched slots with unified Q8 KV and a 491,520
-  token total pool, preserving 245,760 tokens per slot.
+- Tested one, two and four continuously batched slots with four simultaneous
+  cold prompts. Retained one 245,760-token slot because it produced the first
+  result and drained the queue sooner than either multi-slot configuration.
 - Increased the host-RAM prompt cache from its 8 GiB default to 24 GiB after
   observing repeated eviction of approximately 6 GiB OpenClaw snapshots.
 

@@ -72,16 +72,49 @@ After enabling reasoning preservation, a temperature-0.2 weather-tool smoke
 request completed with a valid `get_weather` call, valid JSON arguments,
 26.64 tok/s and 79.17% draft acceptance for that short response.
 
-## Two-slot and coalescing deployment check
+## One versus two versus four slots
 
-The production service was changed to two unified-KV slots with a 491,520-token
-total pool. The runtime exposed both slots with a 262,144-token native-model
-cap, preserving the advertised 245,760-token client allowance. Q4, DFlash2
-width 4 and the F16 vision projector all loaded with full GPU offload.
+Four simultaneous clients each sent a distinct cold prompt containing 9,263
+input tokens and requested 64 output tokens. The Q4 target, DFlash2 width 4,
+Q8_0 target KV, batch/ubatch 2,048 and all other inference settings were held
+constant. Labels changed between configurations to prevent prompt-cache reuse.
 
-Two concurrent byte-identical 32-token requests were sent while OpenClaw was
-cold-prefilling an unrelated approximately 112K-token request in the other
-slot. Both clients received the same complete response. Coalescer deltas were:
+| Slots | First result | Mean | p50 | p95 | Last / wall | Delivered tok/s | Mean reported decode | Draft acceptance |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| **1** | **25.06 s** | **62.89 s** | **62.81 s** | **97.05 s** | **100.88 s** | **2.54** | **18.83 tok/s** | 35.37% |
+| 2 | 52.71 s | 86.43 s | 92.12 s | 108.62 s | 108.79 s | 2.35 | 3.61 tok/s | 33.97% |
+| 4 | 102.56 s | 105.00 s | 105.16 s | 107.02 s | 107.11 s | 2.39 | 2.56 tok/s | 33.73% |
+
+One slot won every user-facing latency measure and the total-drain comparison.
+Two slots roughly doubled time to first result; four made all clients wait for
+almost the full batch. Production therefore uses one 245,760-token slot. This
+is an empirical conclusion for this particular Vulkan/DFlash2 build and
+workload, not a general statement about llama.cpp or continuous batching.
+
+The same conclusion appeared more strongly with real OpenClaw-sized traffic.
+Two simultaneous cold prompts of roughly 112K--120K tokens reduced prefill to
+about 145 tok/s for the older request and took approximately 14 minutes to
+finish it. A short generation sharing the other slot reported only 0.46 tok/s.
+The original one-slot cold-prefill traces were roughly 310 tok/s. Large cold
+OpenClaw prefixes still take minutes even with one slot; reducing, prewarming,
+or reusing that prefix is required for sub-minute interaction.
+
+Reproduce the controlled test with `concurrency-bench.py`, changing both the
+server slot configuration and `--label` for every run:
+
+```bash
+./concurrency-bench.py qwen3.8-27b-q4-fast --concurrency 4 \
+  --pad-words 8192 --max-tokens 64 --label slots-N
+```
+
+## Coalescing deployment check
+
+Q4, DFlash2 width 4 and the F16 vision projector loaded with full GPU offload.
+
+During the temporary two-slot test, two concurrent byte-identical 32-token
+requests were sent while OpenClaw was cold-prefilling an unrelated
+approximately 112K-token request in the other slot. Both clients received the
+same complete response. Coalescer deltas were:
 
 ```text
 upstream requests: 1
@@ -157,8 +190,6 @@ the image-token floor.
 - F16 versus Q8 draft KV for throughput
 - Hard vision accuracy and latency
 - Real OpenClaw agent/tool/compaction behaviour
-- Two-slot aggregate throughput and latency with real OpenClaw prompts
-- Four-slot scaling relative to the two-slot production setting
 - Quality delta between Q4 and Q5 on representative tasks
 
 Do not present planned tests as completed results.

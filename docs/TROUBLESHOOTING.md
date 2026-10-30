@@ -78,11 +78,12 @@ multimodal projector loading successfully.
 
 ## Out of memory or severe swapping
 
-Confirm the router is still using `--models-max 1`, `parallel = 2` and unified
-KV. Do not attempt to keep both 27B targets resident merely to avoid
-model-switch latency. The 24 GiB host prompt-cache limit is a ceiling, not an
-eager allocation, but cached entries still consume real unified system memory.
-Check host swap and GPU memory pressure before increasing slots or KV capacity.
+Confirm the router is still using `--models-max 1`, `parallel = 1` and a
+245,760-token context. Do not attempt to keep both 27B targets resident merely
+to avoid model-switch latency. The 24 GiB host prompt-cache limit is a ceiling,
+not an eager allocation, but cached entries still consume real unified system
+memory. Check host swap and GPU memory pressure before increasing slots or KV
+capacity.
 
 ## Benchmark numbers differ
 

@@ -7,8 +7,8 @@ draft acceptance; neither metric is sufficient alone.
 ## Current production settings
 
 ```ini
-ctx-size = 491520
-parallel = 2
+ctx-size = 245760
+parallel = 1
 kv-unified = true
 batch-size = 2048
 ubatch-size = 2048
@@ -99,10 +99,11 @@ count, prompt time and total latency. The existing 1024 floor is provisional.
 
 ## 6. Concurrent serving
 
-The production default is two slots with DFlash2 enabled. Test two and four
-concurrent requests using actual OpenClaw-sized prefixes. Compare DFlash2 width
-4 against no drafter because speculative decoding can trade aggregate
-throughput for single-request latency at larger batch sizes.
+The production default is one slot with DFlash2 enabled. A controlled four-
+client comparison has already rejected two and four slots for this stack: both
+first-result latency and total drain time were worse. Repeat that comparison
+after a material runtime, backend or batching change; do not infer that more
+slots improve useful concurrency.
 
 Compare separately:
 
@@ -125,6 +126,15 @@ Run a small distinct-request and duplicate-request pair with:
 
 For the duplicate run, the coalescer metric delta should report one upstream
 request and one follower.
+
+For a repeat cold 1-versus-2-versus-4 slot comparison, use four clients and
+change the label between configurations so no prior prefix can be reused.
+First-completed latency matters alongside aggregate throughput:
+
+```bash
+./concurrency-bench.py qwen3.8-27b-q4-fast --concurrency 4 \
+  --pad-words 8192 --max-tokens 64 --label slots-N
+```
 
 Use the mixed prefill/decode probe when sweeping physical batch size:
 

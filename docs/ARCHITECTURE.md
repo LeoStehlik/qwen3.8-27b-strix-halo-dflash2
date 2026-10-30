@@ -17,7 +17,7 @@ OpenAI-compatible client
                  |
                  +-- shared DFlash2 Q4_K_M drafter
                  +-- shared F16 vision projector
-                 `-- two 245,760-token slots sharing a 491,520-token Q8_0 KV pool
+                 `-- one 245,760-token Q8_0 KV context
 ```
 
 `--models-max 1` ensures that only one 27B target is resident. This avoids
@@ -48,17 +48,21 @@ while being a conservative quality choice. The DFlash draft KV remains F16 by
 default. Because this machine has ample memory, a draft-Q8 test is only useful
 if it improves throughput; it is not currently deployed.
 
-## Why two slots and unified KV
+## Why one slot
 
-The production workload can issue simultaneous OpenClaw requests. Two slots
-allow continuous batching instead of queueing every request behind one long
-prefill. A 491,520-token unified KV pool preserves the original 245,760-token
-allowance for each slot. Two approximately 112K sessions therefore fit
-concurrently without reducing the long-session ceiling.
+The production workload can issue simultaneous OpenClaw requests, but local
+measurement showed that admitting more of them to the GPU at once is worse on
+this Vulkan/DFlash2 stack. With four distinct cold 9,263-token prompts, one
+slot returned the first result in 25.1 seconds and drained all four in 100.9
+seconds. Two slots took 52.7 and 108.8 seconds respectively; four took 102.6
+and 107.1 seconds. Multi-slot runs also reduced reported decode throughput
+from 18.8 tok/s to 3.6 and 2.6 tok/s on average.
 
-Four slots remain a benchmark target rather than the production default. They
-would improve admission concurrency but require a larger KV pool for the
-observed 100K-plus prompts and may reduce per-request DFlash performance.
+The deployed one-slot setting gives predictable queueing and the best observed
+first-response and total-drain latency. The front proxy still collapses exact
+concurrent duplicates to one generation, while the 24 GiB prompt cache retains
+reusable prefixes across independent calls. Unified KV remains enabled because
+that is the exact configuration used in the winning controlled run.
 
 ## Exact-request coalescing
 

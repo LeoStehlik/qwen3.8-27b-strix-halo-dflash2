@@ -103,6 +103,37 @@ The Q5 preset should not automatically be used for every long task. The
 evaluation should determine which task classes actually benefit enough to
 justify its slower decode and model-switch latency.
 
+## Interactive latency and cache-friendly prompts
+
+Use 60 seconds as the normal user-facing target and 120 seconds as the hard
+threshold for a Discord interaction. The client should post progress or a
+clear timeout before that threshold; increasing an HTTP timeout only hides the
+problem.
+
+The live 100K-plus OpenClaw prompts cold-prefilled at roughly 300--310 tok/s.
+That implies five to seven minutes of prefill before the first generated token,
+even when decode is healthy. For a cold request, keep initial hydration around
+15K tokens for the normal target and below roughly 30K tokens for the hard
+target, leaving time for reasoning and generation. These are latency budgets,
+not context-window limits.
+
+The server's 24 GiB prompt cache can make a long session fast when the leading
+token sequence is unchanged. To maximise reuse:
+
+- Put stable system, SOUL, agent and tool-schema material first.
+- Put timestamps, request IDs, current state and the new user message later.
+- Avoid injecting changing values near the beginning of the assembled prompt.
+- Keep canonical ordering and serialization for tool schemas and memory files.
+- Prewarm the exact production prefix after a service or model switch when a
+  large stable prefix is unavoidable.
+- Expect compaction to create a cold prefix unless its compacted form has
+  already been warmed.
+
+Exact-request coalescing is separate: it saves concurrent duplicate requests,
+but cannot merge requests whose bodies or suffixes differ. One-slot queueing
+is also intentional; controlled one/two/four-slot testing found one slot gave
+both the earliest first result and the shortest total drain time.
+
 ## Compaction
 
 The server exposes 245,760 active tokens, while Qwen reports a 262,144 training

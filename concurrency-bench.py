@@ -19,6 +19,15 @@ DEFAULT_PROMPT = (
 )
 
 
+def percentile(values: list[float], fraction: float) -> float:
+    ordered = sorted(values)
+    position = (len(ordered) - 1) * fraction
+    lower = int(position)
+    upper = min(lower + 1, len(ordered) - 1)
+    weight = position - lower
+    return ordered[lower] * (1 - weight) + ordered[upper] * weight
+
+
 def fetch_metrics(origin: str) -> dict[str, float]:
     try:
         with urllib.request.urlopen(f"{origin.rstrip('/')}/coalescer/metrics", timeout=5) as response:
@@ -66,19 +75,28 @@ def main() -> None:
     parser.add_argument("--max-tokens", type=int, default=128)
     parser.add_argument("--duplicates", action="store_true", help="send byte-identical bodies")
     parser.add_argument("--prompt", default=DEFAULT_PROMPT)
+    parser.add_argument("--pad-words", type=int, default=0)
+    parser.add_argument("--label", default=str(time.time_ns()))
     parser.add_argument(
         "--base-url",
         default=os.environ.get("QWEN_BASE_URL", "http://127.0.0.1:8080/v1"),
     )
     args = parser.parse_args()
-    if args.concurrency < 1:
-        parser.error("--concurrency must be positive")
+    if args.concurrency < 1 or args.pad_words < 0:
+        parser.error("--concurrency must be positive and --pad-words non-negative")
 
     origin = args.base_url.removesuffix("/v1").rstrip("/")
     metrics_before = fetch_metrics(origin)
     payloads = []
+    vocabulary = "alpha beta gamma delta epsilon zeta eta theta "
+    padding_words = (vocabulary * ((args.pad_words // 8) + 1)).split()[: args.pad_words]
+    padding = " ".join(padding_words)
     for index in range(args.concurrency):
-        prompt = args.prompt if args.duplicates else f"{args.prompt}\nRequest variant: {index}."
+        variant = 0 if args.duplicates else index
+        prompt = f"Cold-prefix marker {args.label}-{variant}.\n"
+        if padding:
+            prompt += padding + "\n"
+        prompt += args.prompt
         payloads.append(
             json.dumps(
                 {
@@ -117,16 +135,23 @@ def main() -> None:
         )
         if key in metrics_after
     }
+    elapsed_values = [row["elapsed_seconds"] for row in rows]
     print(
         json.dumps(
             {
                 "model": args.model,
                 "concurrency": args.concurrency,
                 "duplicates": args.duplicates,
+                "label": args.label,
+                "configured_pad_words": args.pad_words,
                 "wall_seconds": wall_elapsed,
                 "delivered_completion_tokens_per_second": total_completion / wall_elapsed,
                 "estimated_model_completion_tokens_per_second": model_completion / wall_elapsed,
                 "mean_request_seconds": statistics.mean(row["elapsed_seconds"] for row in rows),
+                "first_completed_request_seconds": min(elapsed_values),
+                "last_completed_request_seconds": max(elapsed_values),
+                "p50_request_seconds": percentile(elapsed_values, 0.50),
+                "p95_request_seconds": percentile(elapsed_values, 0.95),
                 "mean_reported_decode_tokens_per_second": statistics.mean(
                     row["predicted_per_second"] for row in rows
                 ),

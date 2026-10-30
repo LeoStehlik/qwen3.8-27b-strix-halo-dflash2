@@ -2,7 +2,7 @@
 
 A reproducible local deployment of Qwen3.8-27B on a Ryzen AI Max+ 395 / Radeon
 8060S, using llama.cpp Vulkan, DFlash2 speculative decoding, vision, a 245,760
-token context per slot, two concurrent slots, exact-request coalescing, and
+token context, exact-request coalescing, a 24 GiB prompt cache, and
 on-demand Q4/Q5 model routing.
 
 The service exposes an OpenAI-compatible endpoint on localhost by default:
@@ -39,6 +39,13 @@ Width 4 is therefore the deployed setting. Short-prompt throughput varies with
 the workload and draft acceptance; observed Q4 runs ranged roughly from 23 to
 31 tok/s. See [the benchmark record](docs/BENCHMARKS.md) before comparing these
 numbers with another system.
+
+A controlled four-client cold-prefill comparison also tested one, two and four
+slots. One slot had the best first response (25.1 s), last response (100.9 s)
+and aggregate delivered throughput. Two slots delayed the first response to
+52.7 s; four delayed it to 102.6 s. Production therefore deliberately queues
+independent requests in one slot while coalescing byte-identical concurrent
+requests. More admission concurrency was slower on this Vulkan/DFlash2 stack.
 
 For agent and tool-calling traffic, the current starting point is:
 
@@ -99,8 +106,8 @@ Full installation and operational details are in [docs/INSTALL.md](docs/INSTALL.
 | Setting | Value |
 |---|---|
 | Runtime | llama.cpp Vulkan portable v0.8.0, build 11001, commit `629d2f7b4` |
-| Shared KV pool | 491,520 tokens total; 245,760 per slot |
-| Active slots | 2 with unified KV and continuous batching |
+| KV context | 245,760 tokens |
+| Active slots | 1 (winner of controlled 1/2/4-slot comparison) |
 | Target KV | Q8_0 K and V |
 | Draft KV | Runtime default F16 |
 | Flash attention | On |
