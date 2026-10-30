@@ -103,6 +103,10 @@ The Q5 preset should not automatically be used for every long task. The
 evaluation should determine which task classes actually benefit enough to
 justify its slower decode and model-switch latency.
 
+The first real Francis/OpenClaw live trace is documented in
+[OPENCLAW-LIVE-TRACE.md](OPENCLAW-LIVE-TRACE.md). Its 152,781-token cold prompt
+took 9m32s end to end, while ten cached follow-ups had a 47.5-second median.
+
 ## Interactive latency and cache-friendly prompts
 
 Use 60 seconds as the normal user-facing target and 120 seconds as the hard
@@ -110,12 +114,12 @@ threshold for a Discord interaction. The client should post progress or a
 clear timeout before that threshold; increasing an HTTP timeout only hides the
 problem.
 
-The live 100K-plus OpenClaw prompts cold-prefilled at roughly 300--310 tok/s.
-That implies five to seven minutes of prefill before the first generated token,
-even when decode is healthy. For a cold request, keep initial hydration around
-15K tokens for the normal target and below roughly 30K tokens for the hard
-target, leaving time for reasoning and generation. These are latency budgets,
-not context-window limits.
+The measured 152,781-token live OpenClaw prompt cold-prefilled at 280.20 tok/s.
+Prompt processing took 545.25 seconds and generation took another 26.44
+seconds. For a cold request, keep initial hydration around 15K tokens for the
+normal target and below roughly 30K tokens for the hard target, leaving time
+for reasoning and generation. These are latency budgets, not context-window
+limits.
 
 The server's 24 GiB prompt cache can make a long session fast when the leading
 token sequence is unchanged. To maximise reuse:

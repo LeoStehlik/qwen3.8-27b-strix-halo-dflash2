@@ -72,6 +72,23 @@ After enabling reasoning preservation, a temperature-0.2 weather-tool smoke
 request completed with a valid `get_weather` call, valid JSON arguments,
 26.64 tok/s and 79.17% draft acceptance for that short response.
 
+## Live OpenClaw cold and warm trace
+
+Francis ran a real OpenClaw tool session against the production Q4 preset. The
+first assembled request contained 152,781 prompt tokens. Cold prompt processing
+took 545.25 seconds at 280.20 tok/s; generating 321 tokens took another 26.44
+seconds at 12.10 tok/s. Total server time was 571.69 seconds, or 9m32s.
+
+The next ten tool-loop turns retained 96.6--99% prefix similarity. Their median
+total time was 47.5 seconds, mean was 53.6 seconds, eight finished inside 60
+seconds, and all finished inside 120 seconds. A later independent approximately
+150K-token request missed the live prefix and queued another request behind it.
+
+The inference stack therefore delivers usable warm-session latency, but cannot
+make OpenClaw's 150K-token cold hydration interactive. The sanitized per-turn
+record and OpenClaw action items are in
+[OPENCLAW-LIVE-TRACE.md](OPENCLAW-LIVE-TRACE.md).
+
 ## One versus two versus four slots
 
 Four simultaneous clients each sent a distinct cold prompt containing 9,263
@@ -189,7 +206,7 @@ the image-token floor.
 - DFlash `p_split` and `p_min`
 - F16 versus Q8 draft KV for throughput
 - Hard vision accuracy and latency
-- Real OpenClaw agent/tool/compaction behaviour
+- OpenClaw compaction behaviour
 - Quality delta between Q4 and Q5 on representative tasks
 
 Do not present planned tests as completed results.

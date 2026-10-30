@@ -17,6 +17,8 @@
   result and drained the queue sooner than either multi-slot configuration.
 - Increased the host-RAM prompt cache from its 8 GiB default to 24 GiB after
   observing repeated eviction of approximately 6 GiB OpenClaw snapshots.
+- Added a sanitized real OpenClaw trace: a 152,781-token cold prompt took
+  9m32s, while ten prefix-cached tool turns had a 47.5-second median.
 
 ## 2026-10-30 — Local deployment
 

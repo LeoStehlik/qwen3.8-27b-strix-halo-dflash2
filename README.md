@@ -47,6 +47,12 @@ and aggregate delivered throughput. Two slots delayed the first response to
 independent requests in one slot while coalescing byte-identical concurrent
 requests. More admission concurrency was slower on this Vulkan/DFlash2 stack.
 
+Francis's first real OpenClaw trace exposed the more important application
+bottleneck. A 152,781-token cold prompt took 9m32s, but the next ten cached
+tool-loop turns had a 47.5-second median and eight completed inside one minute.
+The server is usable once a session is warm; OpenClaw must reduce and stabilise
+its initial prompt to make a new session interactive.
+
 For agent and tool-calling traffic, the current starting point is:
 
 ```json
@@ -156,6 +162,7 @@ Capture the non-sensitive environment details needed with a benchmark report:
 - [Benchmarks and validation](docs/BENCHMARKS.md)
 - [Tuning cookbook and roadmap](docs/TUNING.md)
 - [OpenClaw integration](docs/OPENCLAW.md)
+- [Sanitized OpenClaw live trace](docs/OPENCLAW-LIVE-TRACE.md)
 - [Troubleshooting](docs/TROUBLESHOOTING.md)
 - [Sources and references](docs/REFERENCES.md)
 - [Security](SECURITY.md)

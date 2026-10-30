@@ -28,8 +28,14 @@ The draft KV types are not specified, so the runtime default is F16.
 
 ## 1. OpenClaw evaluation
 
-This will be run inside OpenClaw using its real prompts and tools. Compare Q4
-and Q5 at temperatures 0.1, 0.2 and 0.3. Record:
+The first real Francis/OpenClaw tool session is complete. Its 152,781-token
+cold request took 9m32s; ten prefix-cached turns had a 47.5-second median and
+all completed within two minutes. See
+[OPENCLAW-LIVE-TRACE.md](OPENCLAW-LIVE-TRACE.md).
+
+The next evaluation must reduce cold input below 30K tokens by measuring prompt
+components, deferring non-core tool schemas and avoiding bulk memory hydration.
+Then compare Q4 and Q5 at temperatures 0.1, 0.2 and 0.3. Continue to record:
 
 - Correct tool selection and valid arguments
 - Unnecessary tool calls
