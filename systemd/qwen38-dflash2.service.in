@@ -1,0 +1,17 @@
+[Unit]
+Description=Qwen3.8 27B Q4/Q5 on-demand router with DFlash2 and vision
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=@REPO_DIR@
+ExecStart=@REPO_DIR@/run-router.sh
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=600
+TimeoutStopSec=45
+KillSignal=SIGINT
+LimitNOFILE=1048576
+
+[Install]
+WantedBy=default.target

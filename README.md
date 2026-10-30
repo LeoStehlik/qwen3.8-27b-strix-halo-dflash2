@@ -1,0 +1,155 @@
+# Qwen3.8 27B + DFlash2 on AMD Strix Halo
+
+A reproducible local deployment of Qwen3.8-27B on a Ryzen AI Max+ 395 / Radeon
+8060S, using llama.cpp Vulkan, DFlash2 speculative decoding, vision, a 245,760
+token context window, and on-demand Q4/Q5 model routing.
+
+The service exposes an OpenAI-compatible endpoint on localhost:
+
+```text
+http://127.0.0.1:8080/v1
+```
+
+Two API model IDs are available:
+
+| API model | Target quant | Intended use |
+|---|---|---|
+| `qwen3.8-27b-q4-fast` | UD-Q4_K_XL | Default, faster agent/chat traffic |
+| `qwen3.8-27b-q5-quality` | UD-Q5_K_XL | Quality-sensitive requests |
+
+Both targets share the Q4_K_M DFlash2 drafter and F16 vision projector. The
+router keeps one target resident at a time; Q4 loads at startup and Q5 loads on
+demand.
+
+## Measured result
+
+On the reference 128 GB Strix Halo machine, the controlled DFlash width sweep
+produced:
+
+| DFlash width | Q4 decode | Q5 decode |
+|---:|---:|---:|
+| 2 | 21.61 tok/s | 18.59 tok/s |
+| **4** | **24.87 tok/s** | **20.73 tok/s** |
+| 6 | 20.36 tok/s | 17.23 tok/s |
+
+Width 4 is therefore the deployed setting. Short-prompt throughput varies with
+the workload and draft acceptance; observed Q4 runs ranged roughly from 23 to
+31 tok/s. See [the benchmark record](docs/BENCHMARKS.md) before comparing these
+numbers with another system.
+
+For agent and tool-calling traffic, the current starting point is:
+
+```json
+{
+  "temperature": 0.2,
+  "top_p": 0.95,
+  "top_k": 20,
+  "min_p": 0.0,
+  "presence_penalty": 0.0,
+  "repeat_penalty": 1.0
+}
+```
+
+Sampling is deliberately set by the client rather than globally by the server.
+Thinking is enabled by default, and reasoning is preserved across tool turns.
+
+## Quick start
+
+Prerequisites: x86-64 Linux, a Strix Halo iGPU accessible through `/dev/dri`,
+`curl`, `git`, Python 3, the Hugging Face `hf` CLI, and the system Vulkan loader.
+
+```bash
+git clone git@github.com:LeoStehlik/qwen3.8-27b-strix-halo-dflash2.git
+cd qwen38-dflash2
+
+./scripts/download-runtime.sh
+./scripts/download-models.sh
+./scripts/verify-install.sh
+./scripts/install-service.sh
+```
+
+Enable user-service startup before login once, if desired:
+
+```bash
+sudo loginctl enable-linger "$USER"
+```
+
+Check the service:
+
+```bash
+systemctl --user status qwen38-dflash2
+curl http://127.0.0.1:8080/health
+./smoke-test.py qwen3.8-27b-q4-fast
+```
+
+Vision check:
+
+```bash
+./make-vision-card.py
+./smoke-test.py qwen3.8-27b-q4-fast --image vision-test-card.bmp
+```
+
+Full installation and operational details are in [docs/INSTALL.md](docs/INSTALL.md).
+
+## Configuration summary
+
+| Setting | Value |
+|---|---|
+| Runtime | llama.cpp Vulkan portable v0.8.0, build 11001, commit `629d2f7b4` |
+| Target context | 245,760 tokens; model training context 262,144 |
+| Active slots | 1 |
+| Target KV | Q8_0 K and V |
+| Draft KV | Runtime default F16 |
+| Flash attention | On |
+| Logical / physical batch | 2048 / 2048 |
+| CPU threads | 16 generation, 16 batch |
+| DFlash width | 4 |
+| Vision floor | 1,024 image tokens |
+| Binding | `127.0.0.1:8080` only |
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the reasoning behind the
+design and [docs/TUNING.md](docs/TUNING.md) for the remaining experiments.
+
+## Repository contents
+
+| Path | Purpose |
+|---|---|
+| `models.ini` | Router presets shared by Q4 and Q5 |
+| `run-router.sh` | Production launcher and artifact checks |
+| `run-server.sh` | Simpler single-target launcher |
+| `smoke-test.py` | Text and vision API smoke test |
+| `tool-temperature-test.py` | Small tool-selection sampling probe |
+| `dflash-width-bench.py` | Repeatable DFlash throughput/acceptance probe |
+| `make-vision-card.py` | Dependency-free generated vision fixture |
+| `scripts/` | Pinned downloads, validation, service installation |
+| `systemd/` | Portable user-service template |
+| `docs/` | Cookbook, results, decisions and roadmap |
+
+Model files, extracted runtime binaries, virtual environments and generated
+fixtures are intentionally excluded from Git.
+
+Capture the non-sensitive environment details needed with a benchmark report:
+
+```bash
+./scripts/capture-environment.sh
+```
+
+## Documentation
+
+- [Installation cookbook](docs/INSTALL.md)
+- [Architecture and decisions](docs/ARCHITECTURE.md)
+- [Benchmarks and validation](docs/BENCHMARKS.md)
+- [Tuning cookbook and roadmap](docs/TUNING.md)
+- [OpenClaw integration](docs/OPENCLAW.md)
+- [Troubleshooting](docs/TROUBLESHOOTING.md)
+- [Sources and references](docs/REFERENCES.md)
+- [Security](SECURITY.md)
+- [Contributing benchmark results](CONTRIBUTING.md)
+
+## License and third-party artifacts
+
+The original scripts and documentation in this repository are released under
+the [MIT License](LICENSE). Third-party models and runtime binaries are not
+redistributed or relicensed; the installation scripts download them from their
+original publishers and verify exact SHA-256 hashes. Review the respective
+upstream licenses before use or redistribution.

@@ -1,0 +1,26 @@
+# Model artifacts (tracked by filename, size and SHA-256 in documentation)
+models/*
+!models/.gitkeep
+!models/SHA256SUMS
+
+# Downloaded runtime bundle and extracted binaries
+runtime/*
+!runtime/.gitkeep
+
+# Local Python environments and caches
+.venv/
+hf-venv/
+__pycache__/
+*.py[cod]
+
+# Generated fixtures and benchmark output
+vision-test-card.bmp
+vision-test-cat.jpg
+results/
+.generated/
+
+# Editor and OS files
+.DS_Store
+.idea/
+.vscode/
+*~
