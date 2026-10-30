@@ -7,6 +7,8 @@ target="${QWEN_TARGET_MODEL:-$base/models/Qwen3.8-27B-UD-Q4_K_XL.gguf}"
 model_alias="${QWEN_MODEL_ALIAS:-qwen3.8-27b-ud-q4-xl-dflash2}"
 draft="$base/models/Qwen3.8-27B-DFlash2-Q4_K_M.gguf"
 projector="$base/models/mmproj-F16.gguf"
+bind_host=${QWEN_BIND_HOST:-127.0.0.1}
+listen_port=${QWEN_PUBLIC_PORT:-8080}
 
 for model in "$target" "$draft" "$projector"; do
     if [[ ! -s "$model" ]]; then
@@ -42,8 +44,8 @@ exec "$base/runtime/vulkan/llama-server" \
     --reasoning auto \
     --reasoning-preserve \
     --reasoning-format deepseek \
-    --host 127.0.0.1 \
-    --port 8080 \
+    --host "$bind_host" \
+    --port "$listen_port" \
     --cors-origins localhost \
     --no-cors-credentials \
     --metrics \

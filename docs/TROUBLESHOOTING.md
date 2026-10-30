@@ -32,6 +32,23 @@ The router can answer health checks while its startup Q4 child is still loading.
 Initial model load and a Q4/Q5 switch are expected to take several seconds.
 Wait for the journal to report `model loaded` when scripting cold benchmarks.
 
+## Duplicate requests are still reaching the model
+
+Check the coalescer counters:
+
+```bash
+curl http://127.0.0.1:8080/coalescer/metrics
+```
+
+`qwen_coalescer_followers_total` increments when a concurrent byte-identical
+request joins an existing generation. Requests with different JSON encoding,
+headers, model parameters or dynamic prompt fields are intentionally treated
+as different requests. Completed responses are not cached.
+
+Set `LLAMA_SERVER_SLOTS_DEBUG=1` in `~/.config/qwen38-dflash2.env` and restart
+to expose additional prompt-cache state through the child server's `/slots`
+endpoint during a controlled investigation.
+
 ## Q5 appears to hang immediately after restart
 
 Avoid requesting the non-startup model while the Q4 startup child is still
@@ -61,10 +78,11 @@ multimodal projector loading successfully.
 
 ## Out of memory or severe swapping
 
-Confirm the router is still using `--models-max 1` and `parallel = 1`. Do not
-attempt to keep both 27B targets with full 245K KV arenas resident merely to
-avoid model-switch latency. Check host swap and GPU memory pressure before
-reducing quantization or context.
+Confirm the router is still using `--models-max 1`, `parallel = 2` and unified
+KV. Do not attempt to keep both 27B targets resident merely to avoid
+model-switch latency. The 24 GiB host prompt-cache limit is a ceiling, not an
+eager allocation, but cached entries still consume real unified system memory.
+Check host swap and GPU memory pressure before increasing slots or KV capacity.
 
 ## Benchmark numbers differ
 

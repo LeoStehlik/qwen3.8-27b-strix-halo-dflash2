@@ -7,12 +7,16 @@ draft acceptance; neither metric is sufficient alone.
 ## Current production settings
 
 ```ini
-ctx-size = 245760
-parallel = 1
+ctx-size = 491520
+parallel = 2
+kv-unified = true
 batch-size = 2048
 ubatch-size = 2048
 cache-type-k = q8_0
 cache-type-v = q8_0
+cache-prompt = true
+cache-ram = 24576
+cache-idle-slots = true
 threads = 16
 threads-batch = 16
 spec-draft-n-max = 4
@@ -93,27 +97,48 @@ Use a stable local fixture set:
 Compare image-token floors 512, 1024 and 2048. Record correctness, visual token
 count, prompt time and total latency. The existing 1024 floor is provisional.
 
-## 6. Vulkan versus ROCm
+## 6. Concurrent serving
 
-Build a separate ROCm runtime from the same llama.cpp source commit. Do not
-replace the working Vulkan service during the experiment. Use the same model
-hashes, KV types, context, prompts, DFlash parameters and power state.
+The production default is two slots with DFlash2 enabled. Test two and four
+concurrent requests using actual OpenClaw-sized prefixes. Compare DFlash2 width
+4 against no drafter because speculative decoding can trade aggregate
+throughput for single-request latency at larger batch sizes.
 
 Compare separately:
 
-- Short and long prefill
-- Decode without speculation
-- Decode with DFlash2
-- Vision prefill
-- Cold load and steady-state power
+- Exact concurrent duplicates, which should coalesce to one upstream request
+- Shared-prefix requests with different suffixes
+- Independent sessions
+- Aggregate throughput and per-request decode speed
+- Median and p95 time to first token
+- Tool-call correctness and DFlash acceptance
 
-Backend conclusions must name the phase and workload. “Vulkan always wins” and
-“ROCm always wins” are both too broad for this system.
+The Vulkan/DFlash2 route is the selected production backend. ROCm comparison is
+not part of the current deployment plan.
+
+Run a small distinct-request and duplicate-request pair with:
+
+```bash
+./concurrency-bench.py qwen3.8-27b-q4-fast --concurrency 2
+./concurrency-bench.py qwen3.8-27b-q4-fast --concurrency 2 --duplicates
+```
+
+For the duplicate run, the coalescer metric delta should report one upstream
+request and one follower.
+
+Use the mixed prefill/decode probe when sweeping physical batch size:
+
+```bash
+./prefill-fairness-bench.py qwen3.8-27b-q4-fast --long-words 32768 --label ubatch-512
+```
+
+Change the label between runs so the long request cannot reuse an earlier
+prompt cache entry.
 
 ## 7. Prompt-cache reuse
 
-Exact-prefix caching and an 8 GiB RAM prompt cache are already enabled by
-runtime defaults. After OpenClaw compaction is operational, test
+Exact-prefix caching and a 24 GiB RAM prompt cache are explicitly enabled.
+After OpenClaw compaction is operational, test
 `--cache-reuse 256` and `512` for shifted common chunks. Retain it only if it
 improves post-compaction time to first token without incorrect reuse.
 

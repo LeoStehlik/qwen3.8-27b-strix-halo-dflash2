@@ -123,6 +123,7 @@ From another terminal:
 ```bash
 curl http://127.0.0.1:8080/health
 curl http://127.0.0.1:8080/v1/models
+curl http://127.0.0.1:8080/coalescer/metrics
 ```
 
 ## 6. Install the user service
@@ -135,6 +136,17 @@ sudo loginctl enable-linger "$USER"
 The installer renders the current repository path into
 `~/.config/systemd/user/qwen38-dflash2.service`, reloads the user manager, and
 enables the service.
+
+The public proxy binds to localhost by default. To expose it only on a
+Tailscale address, create `~/.config/qwen38-dflash2.env` and restart:
+
+```bash
+QWEN_BIND_HOST=100.x.y.z
+```
+
+The model router remains private on `127.0.0.1:8081`. The optional
+`QWEN_PUBLIC_PORT` and `QWEN_BACKEND_PORT` variables override the default
+ports.
 
 Useful commands:
 

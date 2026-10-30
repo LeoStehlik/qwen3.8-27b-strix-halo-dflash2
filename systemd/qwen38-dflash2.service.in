@@ -5,6 +5,7 @@ After=network-online.target
 [Service]
 Type=simple
 WorkingDirectory=@REPO_DIR@
+EnvironmentFile=-%h/.config/qwen38-dflash2.env
 ExecStart=@REPO_DIR@/run-router.sh
 Restart=on-failure
 RestartSec=5

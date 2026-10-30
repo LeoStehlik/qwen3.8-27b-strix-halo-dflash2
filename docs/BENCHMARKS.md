@@ -15,7 +15,7 @@ runtime commit and DFlash acceptance.
 | Host RADV | Mesa 26.0.8 |
 | Runtime RADV | bundled Mesa 26.2.4 |
 | llama.cpp | build 11001, commit `629d2f7b4` |
-| Context / slots | 245,760 / 1 |
+| Original context / slots | 245,760 / 1 |
 | Target KV | Q8_0 K and V |
 | Batch / ubatch | 2048 / 2048 |
 | Threads | 16 / 16 batch |
@@ -71,6 +71,30 @@ sweep is the better like-for-like comparison.
 After enabling reasoning preservation, a temperature-0.2 weather-tool smoke
 request completed with a valid `get_weather` call, valid JSON arguments,
 26.64 tok/s and 79.17% draft acceptance for that short response.
+
+## Two-slot and coalescing deployment check
+
+The production service was changed to two unified-KV slots with a 491,520-token
+total pool. The runtime exposed both slots with a 262,144-token native-model
+cap, preserving the advertised 245,760-token client allowance. Q4, DFlash2
+width 4 and the F16 vision projector all loaded with full GPU offload.
+
+Two concurrent byte-identical 32-token requests were sent while OpenClaw was
+cold-prefilling an unrelated approximately 112K-token request in the other
+slot. Both clients received the same complete response. Coalescer deltas were:
+
+```text
+upstream requests: 1
+followers:         1
+upstream errors:   0
+```
+
+This proves the production single-flight path, including real GPU contention.
+It is not a decode-speed baseline: the small generation took 81.61 seconds and
+reported only 0.46 tok/s while sharing execution with the large prefill. That
+reveals a latency-fairness problem with 2,048-token physical prefill batches.
+The planned 512/1,024/2,048 ubatch sweep must therefore record small-request
+latency during a concurrent long prefill, not merely aggregate prefill speed.
 
 ## Tool sampling probe
 
@@ -133,7 +157,8 @@ the image-token floor.
 - F16 versus Q8 draft KV for throughput
 - Hard vision accuracy and latency
 - Real OpenClaw agent/tool/compaction behaviour
-- Same-commit Vulkan versus ROCm
+- Two-slot aggregate throughput and latency with real OpenClaw prompts
+- Four-slot scaling relative to the two-slot production setting
 - Quality delta between Q4 and Q5 on representative tasks
 
 Do not present planned tests as completed results.

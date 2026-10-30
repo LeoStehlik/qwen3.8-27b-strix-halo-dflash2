@@ -6,7 +6,10 @@
 OpenAI-compatible client
         |
         v
-127.0.0.1:8080 router
+127.0.0.1:8080 coalescing proxy
+        |
+        v
+127.0.0.1:8081 router
         |
         +-- qwen3.8-27b-q4-fast       (loads at startup)
         |
@@ -14,7 +17,7 @@ OpenAI-compatible client
                  |
                  +-- shared DFlash2 Q4_K_M drafter
                  +-- shared F16 vision projector
-                 `-- one 245,760-token slot, Q8_0 target KV
+                 `-- two 245,760-token slots sharing a 491,520-token Q8_0 KV pool
 ```
 
 `--models-max 1` ensures that only one 27B target is resident. This avoids
@@ -45,11 +48,33 @@ while being a conservative quality choice. The DFlash draft KV remains F16 by
 default. Because this machine has ample memory, a draft-Q8 test is only useful
 if it improves throughput; it is not currently deployed.
 
-## Why one slot
+## Why two slots and unified KV
 
-The target workload is a single interactive agent. A second active slot would
-divide the context budget and can reduce DFlash acceptance under concurrent
-sequences. One slot gives predictable latency and preserves the full window.
+The production workload can issue simultaneous OpenClaw requests. Two slots
+allow continuous batching instead of queueing every request behind one long
+prefill. A 491,520-token unified KV pool preserves the original 245,760-token
+allowance for each slot. Two approximately 112K sessions therefore fit
+concurrently without reducing the long-session ceiling.
+
+Four slots remain a benchmark target rather than the production default. They
+would improve admission concurrency but require a larger KV pool for the
+observed 100K-plus prompts and may reduce per-request DFlash performance.
+
+## Exact-request coalescing
+
+The public endpoint is a dependency-free streaming reverse proxy. The first
+copy of a byte-identical inference request opens the upstream generation;
+concurrent copies subscribe to the same response stream. Authentication and
+tenant headers are part of the identity key. The proxy deliberately drops the
+entry as soon as the upstream response finishes, so later intentional repeats
+are generated independently.
+
+This is primarily retry protection. Prefix caching still handles requests that
+share a long prefix but differ in their final messages.
+
+The `X-Qwen-Coalescer` response header reports `leader` or `follower`. This
+layer deduplicates model inference only; clients remain responsible for making
+downstream tool execution idempotent.
 
 ## Why Vulkan first
 
@@ -80,7 +105,8 @@ OCR and chart tasks remain to be benchmarked.
 
 ## Caching
 
-The runtime enables prompt caching. This llama.cpp build also defaults to an
-8 GiB RAM prompt cache, context checkpoints and idle-slot caching. Exact-prefix
-reuse therefore works without an additional flag. `--cache-reuse` for shifted
-chunks after compaction is an untested optional experiment.
+Prompt caching, idle-slot caching and a 24 GiB host-RAM cache are explicitly
+enabled. Live measurements showed an OpenClaw prefix snapshot consuming about
+6 GiB, so the runtime default of 8 GiB repeatedly evicted the previous entry.
+The larger cache should retain several such prefixes. `--cache-reuse` for
+shifted chunks after compaction remains an untested optional experiment.

@@ -7,6 +7,8 @@
 - [incoai Qwen3.8-27B DFlash2 GGUF](https://huggingface.co/incoai/Qwen3.8-27B-DFlash2-GGUF)
 - [Strix Halo llama.cpp portable runtime](https://github.com/Nathanw1014/strix-halo-llamacpp)
 - [llama.cpp speculative decoding documentation](https://github.com/ggml-org/llama.cpp/blob/master/docs/speculative.md)
+- [llama.cpp server and continuous-batching options](https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md)
+- [llama.cpp host-RAM prompt-cache implementation](https://github.com/ggml-org/llama.cpp/pull/16391)
 
 Exact revisions, sizes and checksums are pinned in [INSTALL.md](INSTALL.md) and
 the download scripts.

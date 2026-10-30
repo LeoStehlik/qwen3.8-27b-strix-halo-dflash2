@@ -2,6 +2,14 @@
 
 The local service implements the OpenAI-compatible Chat Completions endpoint at
 `http://127.0.0.1:8080/v1` and accepts text, tools and `image_url` content.
+Remote clients should use the machine's Tailscale address when
+`QWEN_BIND_HOST` is configured accordingly.
+
+Concurrent byte-identical inference requests are coalesced while they are in
+flight. This is useful when OpenClaw retries a request after its own timeout.
+The response is not retained after completion, and merely sharing a prompt
+prefix does not coalesce requests; that case is handled by llama.cpp's KV
+prompt cache.
 
 OpenClaw changes quickly; validate the final configuration against the version
 being installed. The following is a starting shape, not a substitute for the

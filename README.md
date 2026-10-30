@@ -2,9 +2,10 @@
 
 A reproducible local deployment of Qwen3.8-27B on a Ryzen AI Max+ 395 / Radeon
 8060S, using llama.cpp Vulkan, DFlash2 speculative decoding, vision, a 245,760
-token context window, and on-demand Q4/Q5 model routing.
+token context per slot, two concurrent slots, exact-request coalescing, and
+on-demand Q4/Q5 model routing.
 
-The service exposes an OpenAI-compatible endpoint on localhost:
+The service exposes an OpenAI-compatible endpoint on localhost by default:
 
 ```text
 http://127.0.0.1:8080/v1
@@ -19,7 +20,9 @@ Two API model IDs are available:
 
 Both targets share the Q4_K_M DFlash2 drafter and F16 vision projector. The
 router keeps one target resident at a time; Q4 loads at startup and Q5 loads on
-demand.
+demand. A streaming front proxy collapses concurrent byte-identical inference
+requests into one upstream generation, which avoids duplicate work from client
+retries without caching completed responses.
 
 ## Measured result
 
@@ -96,8 +99,8 @@ Full installation and operational details are in [docs/INSTALL.md](docs/INSTALL.
 | Setting | Value |
 |---|---|
 | Runtime | llama.cpp Vulkan portable v0.8.0, build 11001, commit `629d2f7b4` |
-| Target context | 245,760 tokens; model training context 262,144 |
-| Active slots | 1 |
+| Shared KV pool | 491,520 tokens total; 245,760 per slot |
+| Active slots | 2 with unified KV and continuous batching |
 | Target KV | Q8_0 K and V |
 | Draft KV | Runtime default F16 |
 | Flash attention | On |
@@ -105,7 +108,9 @@ Full installation and operational details are in [docs/INSTALL.md](docs/INSTALL.
 | CPU threads | 16 generation, 16 batch |
 | DFlash width | 4 |
 | Vision floor | 1,024 image tokens |
-| Binding | `127.0.0.1:8080` only |
+| Public binding | `127.0.0.1:8080` by default; configurable with `QWEN_BIND_HOST` |
+| Internal router | `127.0.0.1:8081` by default |
+| Prompt cache | 24 GiB host-RAM cache with idle-slot caching |
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the reasoning behind the
 design and [docs/TUNING.md](docs/TUNING.md) for the remaining experiments.
@@ -116,10 +121,13 @@ design and [docs/TUNING.md](docs/TUNING.md) for the remaining experiments.
 |---|---|
 | `models.ini` | Router presets shared by Q4 and Q5 |
 | `run-router.sh` | Production launcher and artifact checks |
+| `coalescing-proxy.py` | Streaming exact-request single-flight proxy |
 | `run-server.sh` | Simpler single-target launcher |
 | `smoke-test.py` | Text and vision API smoke test |
 | `tool-temperature-test.py` | Small tool-selection sampling probe |
 | `dflash-width-bench.py` | Repeatable DFlash throughput/acceptance probe |
+| `concurrency-bench.py` | Concurrent-slot and duplicate-coalescing probe |
+| `prefill-fairness-bench.py` | Short decode latency during a cold long prefill |
 | `make-vision-card.py` | Dependency-free generated vision fixture |
 | `scripts/` | Pinned downloads, validation, service installation |
 | `systemd/` | Portable user-service template |

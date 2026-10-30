@@ -11,6 +11,11 @@
 - Enabled preservation of Qwen reasoning across compatible tool histories.
 - Retained DFlash2 width 4 after Q4 and Q5 width sweeps.
 - Retained temperature 0.2 as the conservative agent/tool starting point.
+- Added a streaming exact-request coalescer for concurrent retries.
+- Configured two continuously batched slots with unified Q8 KV and a 491,520
+  token total pool, preserving 245,760 tokens per slot.
+- Increased the host-RAM prompt cache from its 8 GiB default to 24 GiB after
+  observing repeated eviction of approximately 6 GiB OpenClaw snapshots.
 
 ## 2026-10-30 — Local deployment
 

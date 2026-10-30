@@ -3,6 +3,11 @@
 The reference service binds to `127.0.0.1` and has no API authentication. This
 is intentional for a single-user local agent.
 
+The coalescing proxy limits request bodies to 64 MiB by default. Binding it to
+an individual Tailscale address can provide a private network allowlist, but it
+does not add application-layer authentication. The internal model router stays
+on localhost and should never be exposed directly.
+
 Do not change the bind address to `0.0.0.0` or expose port 8080 through a router
 without adding an authenticated reverse proxy, TLS, request-size limits and an
 explicit network allowlist. The model endpoint can consume substantial compute
