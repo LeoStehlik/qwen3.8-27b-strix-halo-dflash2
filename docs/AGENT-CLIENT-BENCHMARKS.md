@@ -18,9 +18,9 @@ decode and 155,534 final context tokens. Decode declined from 21.68 tok/s below
 25K context to approximately 14 tok/s beyond 100K, despite strong prefix reuse.
 
 This is evidence that the deployment can complete useful coding-agent work, not
-a controlled OpenCode-versus-OpenClaw ranking. Client version and request-level
-sampling were not captured, model quantization differed, and the workloads had
-different context profiles. See the complete
+a controlled OpenCode-versus-OpenClaw ranking. The client was OpenCode v2.0.11,
+but request-level sampling was not captured, model quantization differed, and
+the workloads had different context profiles. See the complete
 [OpenCode Q5 case study](OPENCODE-Q5-CASE-STUDY.md).
 
 ## Shared server configuration

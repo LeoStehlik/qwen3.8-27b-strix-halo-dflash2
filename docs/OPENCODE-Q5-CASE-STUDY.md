@@ -47,15 +47,15 @@ the direct manifest, root override and lockfile.
 | Batch / ubatch | 2,048 / 2,048 |
 | Threads | 16 generation, 16 batch |
 | Vision | F16 projector loaded; unused by this task |
+| Client | OpenCode v2.0.11 |
 | Reasoning | OpenCode `high`; mapped by the model template to `xhigh` guidance |
 
 This used the local persistent-slot candidate runtime rather than the portable
 runtime downloaded by the repository installer. Persistent restart recovery
 was available but was not needed during the continuous run.
 
-The exact OpenCode version and request-level sampling fields were not captured.
-Do not treat this trace as a controlled comparison with another client or
-quantization.
+Request-level sampling fields were not captured. Do not treat this trace as a
+controlled comparison with another client or quantization.
 
 ## Complete server-side totals
 
