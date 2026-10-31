@@ -138,6 +138,9 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the reasoning behind the
 design and [docs/TUNING.md](docs/TUNING.md) for the remaining experiments.
 The separate [ROCm/vLLM investigation](docs/ROCM-VLLM.md) records the planned
 AMD MXFP4/DFlash2 comparison without changing the known-good Vulkan service.
+The [experimental Qwen3.6 ROCmFP4/MTP fast path](docs/QWEN36-ROCMFP4-MTP.md)
+records the separate Strix-specific MoE deployment that reached 101 tok/s at
+32K depth and supports tools, vision, streaming, and RAM prefix restoration.
 
 ## Repository contents
 
@@ -173,6 +176,7 @@ Capture the non-sensitive environment details needed with a benchmark report:
 - [Benchmarks and validation](docs/BENCHMARKS.md)
 - [Tuning cookbook and roadmap](docs/TUNING.md)
 - [ROCm and vLLM investigation](docs/ROCM-VLLM.md)
+- [Experimental Qwen3.6 ROCmFP4/MTP fast path](docs/QWEN36-ROCMFP4-MTP.md)
 - [OpenClaw, OpenCode and OpenWork benchmark plan](docs/AGENT-CLIENT-BENCHMARKS.md)
 - [OpenCode Q5 security-remediation case study](docs/OPENCODE-Q5-CASE-STUDY.md)
 - [OpenClaw integration](docs/OPENCLAW.md)
