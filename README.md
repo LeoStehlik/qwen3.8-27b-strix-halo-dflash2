@@ -142,6 +142,12 @@ The [experimental Qwen3.6 ROCmFP4/MTP fast path](docs/QWEN36-ROCMFP4-MTP.md)
 records the separate Strix-specific MoE deployment that reached 101 tok/s at
 32K depth and supports tools, vision, streaming, and RAM prefix restoration.
 
+Current Qwen3.6 development now lives in the separate
+[Qwen3.6 35B-A3B Strix Halo repository](https://github.com/LeoStehlik/qwen3.6-35b-a3b-strix-halo).
+It contains the ordered source patches, 64K prefill experiments, validation
+limits, deployment instructions, and [Francis handoff](https://github.com/LeoStehlik/qwen3.6-35b-a3b-strix-halo/blob/main/handoff.md).
+The Qwen3.6 page here remains the historical 2026-10-31 deployment snapshot.
+
 ## Repository contents
 
 | Path | Purpose |
