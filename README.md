@@ -24,6 +24,15 @@ demand. A streaming front proxy collapses concurrent byte-identical inference
 requests into one upstream generation, which avoids duplicate work from client
 retries without caching completed responses.
 
+## Current direction — 2026-11-05
+
+Qwen3.8 GPU serving is restored after Qwen3.6 was retired from daily OpenClaw use.
+The new focus is faster long-context prefill while retaining this model's observed
+agent capability and configured context. A 64K diagnostic places 62.65% of GPU
+time in quantized dense matrix multiplication and 20.20% in attention; existing
+attention/fusion optimizations are already present. No new kernel was deployed.
+Read the [investigation](docs/PREFILL-RETURN-2026-11-05.md) and [Francis handoff](handoff.md).
+
 ## Measured result
 
 On the reference 128 GB Strix Halo machine, the controlled DFlash width sweep
@@ -50,8 +59,9 @@ requests. More admission concurrency was slower on this Vulkan/DFlash2 stack.
 Francis's first real OpenClaw trace exposed the more important application
 bottleneck. A 152,781-token cold prompt took 9m32s, but the next ten cached
 tool-loop turns had a 47.5-second median and eight completed inside one minute.
-The server is usable once a session is warm; OpenClaw must reduce and stabilise
-its initial prompt to make a new session interactive.
+The server was usable once that session was warm. The current investigation
+targets backend prefill and exact-prefix reuse while retaining OpenClaw tools
+and useful context; reducing its initial prompt is not a prerequisite.
 
 A later OpenCode run demonstrated useful Q5 coding-agent work. One high-reasoning
 session produced four merged, CI-green security pull requests addressing eight

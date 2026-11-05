@@ -1,0 +1,60 @@
+{
+  "scope": "Historical single uninstrumented run per setting; not a fresh paired baseline.",
+  "protocol": {
+    "prompt_tokens": 65536,
+    "prompt_sha256": "6efd5cb8693d5c7fc9fa826da0e454895172071c7d30283f6eb6c04978875346",
+    "context_capacity": 131072,
+    "batch": 2048,
+    "threads": 16,
+    "warmup": "2048 distinct prompt tokens, 16 generated tokens, then cache_prompt=false for the measured request",
+    "measured_generation_tokens": 128,
+    "temperature": 0,
+    "cache_prompt": false,
+    "checkpoints": "disabled in all disposable servers",
+    "scope": "Existing model weights and respective runtimes/KV precision; same tokenized source prompt; DFlash2 or MTP enabled"
+  },
+  "runs": [
+    {
+      "label": "qwen38-ub2048-r1",
+      "model": "qwen38",
+      "ubatch": 2048,
+      "batch": 2048,
+      "wall_seconds": 186.33425636898028,
+      "first_output_seconds": 178.41961397597333,
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 65536,
+        "prompt_ms": 178410.678,
+        "prompt_per_token_ms": 2.7223309020996096,
+        "prompt_per_second": 367.3322736882374,
+        "predicted_n": 128,
+        "predicted_ms": 7908.326,
+        "predicted_per_token_ms": 62.27028346456693,
+        "predicted_per_second": 16.05902437507002,
+        "draft_n": 194,
+        "draft_n_accepted": 78
+      }
+    },
+    {
+      "label": "qwen38-ub1024-r1",
+      "model": "qwen38",
+      "ubatch": 1024,
+      "batch": 2048,
+      "wall_seconds": 192.7062774070073,
+      "first_output_seconds": 184.8300033279811,
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 65536,
+        "prompt_ms": 184822.516,
+        "prompt_per_token_ms": 2.8201677856445313,
+        "prompt_per_second": 354.58883159019433,
+        "predicted_n": 128,
+        "predicted_ms": 7869.333,
+        "predicted_per_token_ms": 61.96325196850393,
+        "predicted_per_second": 16.13859776934081,
+        "draft_n": 194,
+        "draft_n_accepted": 78
+      }
+    }
+  ]
+}

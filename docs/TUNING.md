@@ -1,5 +1,10 @@
 # Tuning cookbook and roadmap
 
+**2026-11-05 priority update:** follow the [dense-prefill investigation](PREFILL-RETURN-2026-11-05.md)
+and [handoff](../handoff.md). Dense matrix work is the first measured target.
+The sections below preserve earlier tuning and evidence; decode sweeps are not
+the current workstream.
+
 Change one factor at a time, warm the model before recording results, and keep
 the prompt, token limit, seed and sampler fixed. Record both throughput and
 draft acceptance; neither metric is sufficient alone.
@@ -39,9 +44,9 @@ cold request took 9m32s; ten prefix-cached turns had a 47.5-second median and
 all completed within two minutes. See
 [OPENCLAW-LIVE-TRACE.md](OPENCLAW-LIVE-TRACE.md).
 
-The next evaluation must reduce cold input below 30K tokens by measuring prompt
-components, deferring non-core tool schemas and avoiding bulk memory hydration.
-Then compare Q4 and Q5 at temperatures 0.1, 0.2 and 0.3. Continue to record:
+The current evaluation retains tools and useful context. Measure actual stable
+prefix reuse and backend prefill instead of requiring a sub-30K prompt. Earlier
+Q4/Q5 sampling comparisons remain optional, not a prerequisite. Continue to record:
 
 - Correct tool selection and valid arguments
 - Unnecessary tool calls

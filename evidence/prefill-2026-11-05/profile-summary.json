@@ -1,0 +1,370 @@
+{
+  "scope": "One instrumented cold 64K run; shader timing adds synchronization; not an uninstrumented speed benchmark or proof of hardware saturation. Live model remained resident but idle; diagnostic aborted if live traffic arrived.",
+  "target": {
+    "graphs": 32,
+    "gpu_operator_seconds": 171.3941073109998,
+    "category_seconds": {
+      "quantized_dense_matmul": 107.20803192099979,
+      "attention_compute": 34.8023244,
+      "other": 13.299660299,
+      "gated_delta_net": 8.466152,
+      "activation_conversion": 4.084861999999999,
+      "fused_convolution": 1.5405593,
+      "attention_preparation": 1.2693964910000002,
+      "f32_matmul": 0.7231209000000001
+    },
+    "category_percent": {
+      "quantized_dense_matmul": 62.55059383486712,
+      "attention_compute": 20.305438119205657,
+      "other": 7.759695188859301,
+      "gated_delta_net": 4.939581723564108,
+      "activation_conversion": 2.3833153100111506,
+      "fused_convolution": 0.8988402951360565,
+      "attention_preparation": 0.7406301832166504,
+      "f32_matmul": 0.42190534513994427
+    },
+    "matmul_by_type_seconds": {
+      "q5_K": 52.14284914999999,
+      "iq4_xs": 22.907487399999987,
+      "q4_K": 16.886294450999998,
+      "q6_K": 9.22692812,
+      "iq4_nl": 3.0534760099999994,
+      "q3_K": 1.5267611999999993,
+      "q8_0": 0.8136141899999997,
+      "f32": 0.7231209000000001,
+      "iq3_s": 0.6506213999999998
+    },
+    "top_operators": {
+      "MUL_MAT q5_K m=17408 n=2048 k=5120": 21.583389000000004,
+      "MUL_MAT iq4_xs m=17408 n=2048 k=5120": 16.335998000000004,
+      "MUL_MAT q5_K m=5120 n=2048 k=17408": 12.586331000000001,
+      "GATED_DELTA_NET": 8.466152,
+      "MUL_MAT q4_K m=17408 n=2048 k=5120": 6.8812380000000015,
+      "MUL_MAT q5_K m=10240 n=2048 k=5120": 5.341309999999999,
+      "MUL_MAT q5_K m=5120 n=2048 k=6144": 5.258164,
+      "MUL_MAT iq4_xs m=5120 n=2048 k=17408": 5.136573,
+      "MUL_MAT q4_K m=10240 n=2048 k=5120": 4.940407000000001,
+      "MUL_MAT q5_K m=6144 n=2048 k=5120": 4.525081999999999,
+      "MM_B_TO_F16 (sub-op)": 4.084861999999999,
+      "GLU": 3.902898000000001,
+      "MUL_MAT q6_K m=17408 n=2048 k=5120": 3.2249657999999997,
+      "MUL_MAT q6_K m=5120 n=2048 k=6144": 3.0444584,
+      "MUL_MAT q5_K m=12288 n=2048 k=5120": 2.7123439
+    }
+  },
+  "draft_prefill": {
+    "graphs": 32,
+    "gpu_operator_seconds": 0.8560684249999999,
+    "category_seconds": {
+      "quantized_dense_matmul": 0.7008477999999999,
+      "activation_conversion": 0.08866291999999999,
+      "other": 0.066557705
+    },
+    "category_percent": {
+      "quantized_dense_matmul": 81.86819879497367,
+      "activation_conversion": 10.35698986328108,
+      "other": 7.7748113417452585
+    },
+    "matmul_by_type_seconds": {
+      "q4_K": 0.6528542,
+      "q6_K": 0.047993600000000004
+    },
+    "top_operators": {
+      "MUL_MAT q4_K m=5120 n=2048 k=25600": 0.46052650000000006,
+      "MUL_MAT q4_K m=1024 n=2048 k=5120": 0.1923277,
+      "MM_B_TO_F16 (sub-op)": 0.08866291999999999,
+      "MUL_MAT q6_K m=1024 n=2048 k=5120": 0.047993600000000004,
+      "RMS_NORM_MUL_ROPE_VIEW_SET_ROWS RMS_NORM(128,8,2048,1)": 0.03766412,
+      "SET_ROWS(1024,4096,1,1)": 0.017990924,
+      "RMS_NORM_MUL RMS_NORM(5120,2048,1,1)": 0.010902661
+    }
+  },
+  "combined_prefill": {
+    "graphs": 64,
+    "gpu_operator_seconds": 172.2501757359998,
+    "category_seconds": {
+      "quantized_dense_matmul": 107.90887972099979,
+      "attention_compute": 34.8023244,
+      "other": 13.366218004,
+      "gated_delta_net": 8.466152,
+      "activation_conversion": 4.173524920000001,
+      "fused_convolution": 1.5405593,
+      "attention_preparation": 1.2693964910000002,
+      "f32_matmul": 0.7231209000000001
+    },
+    "category_percent": {
+      "quantized_dense_matmul": 62.6466006550768,
+      "attention_compute": 20.204521853922508,
+      "other": 7.7597703148273185,
+      "gated_delta_net": 4.915032431070315,
+      "activation_conversion": 2.4229437805605363,
+      "fused_convolution": 0.8943731368733968,
+      "attention_preparation": 0.7369493154802629,
+      "f32_matmul": 0.41980851218886156
+    },
+    "matmul_by_type_seconds": {
+      "q5_K": 52.14284914999999,
+      "iq4_xs": 22.907487399999987,
+      "q4_K": 17.53914865099997,
+      "q6_K": 9.27492172,
+      "iq4_nl": 3.0534760099999994,
+      "q3_K": 1.5267611999999993,
+      "q8_0": 0.8136141899999997,
+      "f32": 0.7231209000000001,
+      "iq3_s": 0.6506213999999998
+    },
+    "top_operators": {
+      "MUL_MAT q5_K m=17408 n=2048 k=5120": 21.583389000000004,
+      "MUL_MAT iq4_xs m=17408 n=2048 k=5120": 16.335998000000004,
+      "MUL_MAT q5_K m=5120 n=2048 k=17408": 12.586331000000001,
+      "GATED_DELTA_NET": 8.466152,
+      "MUL_MAT q4_K m=17408 n=2048 k=5120": 6.8812380000000015,
+      "MUL_MAT q5_K m=10240 n=2048 k=5120": 5.341309999999999,
+      "MUL_MAT q5_K m=5120 n=2048 k=6144": 5.258164,
+      "MUL_MAT iq4_xs m=5120 n=2048 k=17408": 5.136573,
+      "MUL_MAT q4_K m=10240 n=2048 k=5120": 4.940407000000001,
+      "MUL_MAT q5_K m=6144 n=2048 k=5120": 4.525081999999999,
+      "MM_B_TO_F16 (sub-op)": 4.173524920000001,
+      "GLU": 3.902898000000001,
+      "MUL_MAT q6_K m=17408 n=2048 k=5120": 3.2249657999999997,
+      "MUL_MAT q6_K m=5120 n=2048 k=6144": 3.0444584,
+      "MUL_MAT q5_K m=12288 n=2048 k=5120": 2.7123439
+    }
+  },
+  "target_context_bands": [
+    {
+      "from": 0,
+      "to": 16384,
+      "graphs": 8,
+      "gpu_operator_seconds": 35.54048790900001,
+      "category_seconds": {
+        "quantized_dense_matmul": 26.26961192900001,
+        "other": 3.3187927289999988,
+        "attention_compute": 2.2329584000000002,
+        "gated_delta_net": 2.084506,
+        "activation_conversion": 1.015275,
+        "fused_convolution": 0.369238,
+        "f32_matmul": 0.17720089,
+        "attention_preparation": 0.07290496099999999
+      },
+      "category_percent": {
+        "quantized_dense_matmul": 73.91460690202763,
+        "other": 9.338061811356205,
+        "attention_compute": 6.282858034243651,
+        "gated_delta_net": 5.865158647617034,
+        "activation_conversion": 2.856671530789253,
+        "fused_convolution": 1.0389221468917902,
+        "f32_matmul": 0.49858879386719673,
+        "attention_preparation": 0.20513213320725987
+      },
+      "matmul_by_type_seconds": {
+        "q5_K": 12.776966700000001,
+        "iq4_xs": 5.604606079999998,
+        "q4_K": 4.1217765790000005,
+        "q6_K": 2.27606924,
+        "iq4_nl": 0.7493104499999999,
+        "q3_K": 0.37630539999999996,
+        "q8_0": 0.19863548000000003,
+        "f32": 0.17720089,
+        "iq3_s": 0.16594199999999998
+      },
+      "top_operators": {
+        "MUL_MAT q5_K m=17408 n=2048 k=5120": 5.3101769999999995,
+        "MUL_MAT iq4_xs m=17408 n=2048 k=5120": 4.000144000000001,
+        "MUL_MAT q5_K m=5120 n=2048 k=17408": 3.0843300000000005,
+        "GATED_DELTA_NET": 2.084506,
+        "MUL_MAT q4_K m=17408 n=2048 k=5120": 1.6908909999999997,
+        "MUL_MAT q5_K m=10240 n=2048 k=5120": 1.299859,
+        "MUL_MAT q5_K m=5120 n=2048 k=6144": 1.2926609999999998,
+        "MUL_MAT iq4_xs m=5120 n=2048 k=17408": 1.258127,
+        "MUL_MAT q4_K m=10240 n=2048 k=5120": 1.199048,
+        "MUL_MAT q5_K m=6144 n=2048 k=5120": 1.094191,
+        "MM_B_TO_F16 (sub-op)": 1.015275,
+        "GLU": 0.974636,
+        "MUL_MAT q6_K m=17408 n=2048 k=5120": 0.7940541999999999,
+        "MUL_MAT q6_K m=5120 n=2048 k=6144": 0.7522979,
+        "MUL_MAT q5_K m=12288 n=2048 k=5120": 0.6618435
+      }
+    },
+    {
+      "from": 16384,
+      "to": 32768,
+      "graphs": 8,
+      "gpu_operator_seconds": 40.60251875099999,
+      "category_seconds": {
+        "quantized_dense_matmul": 26.801980767999993,
+        "attention_compute": 6.508006,
+        "other": 3.3638207529999993,
+        "gated_delta_net": 2.100724,
+        "activation_conversion": 1.036213,
+        "fused_convolution": 0.3852489,
+        "attention_preparation": 0.21994763,
+        "f32_matmul": 0.18657770000000004
+      },
+      "category_percent": {
+        "quantized_dense_matmul": 66.01063577451065,
+        "attention_compute": 16.02857704447145,
+        "other": 8.2847588190995,
+        "gated_delta_net": 5.173876066366602,
+        "activation_conversion": 2.5520904413706584,
+        "fused_convolution": 0.9488300525457224,
+        "attention_preparation": 0.5417093243620088,
+        "f32_matmul": 0.45952247727342
+      },
+      "matmul_by_type_seconds": {
+        "q5_K": 13.050152850000002,
+        "iq4_xs": 5.724767460000001,
+        "q4_K": 4.219150657999999,
+        "q6_K": 2.289086220000001,
+        "iq4_nl": 0.7652524400000001,
+        "q3_K": 0.3876712,
+        "q8_0": 0.20202833999999997,
+        "f32": 0.18657770000000004,
+        "iq3_s": 0.1638716
+      },
+      "top_operators": {
+        "MUL_MAT q5_K m=17408 n=2048 k=5120": 5.377148,
+        "MUL_MAT iq4_xs m=17408 n=2048 k=5120": 4.0732669999999995,
+        "MUL_MAT q5_K m=5120 n=2048 k=17408": 3.160423,
+        "GATED_DELTA_NET": 2.100724,
+        "MUL_MAT q4_K m=17408 n=2048 k=5120": 1.712135,
+        "MUL_MAT q5_K m=10240 n=2048 k=5120": 1.3478630000000003,
+        "MUL_MAT q5_K m=5120 n=2048 k=6144": 1.3086380000000002,
+        "MUL_MAT iq4_xs m=5120 n=2048 k=17408": 1.290025,
+        "MUL_MAT q4_K m=10240 n=2048 k=5120": 1.244425,
+        "MUL_MAT q5_K m=6144 n=2048 k=5120": 1.138434,
+        "FLASH_ATTN_EXT dst(256,24,2048,1),  q(256,2048,24,1),  k(256,30720,4,1),  v(256,30720,4,1),  m(30720,2048,1,1)": 1.05092,
+        "FLASH_ATTN_EXT dst(256,24,2048,1),  q(256,2048,24,1),  k(256,32768,4,1),  v(256,32768,4,1),  m(32768,2048,1,1)": 1.03701,
+        "MM_B_TO_F16 (sub-op)": 1.036213,
+        "GLU": 0.9707389999999999,
+        "FLASH_ATTN_EXT dst(256,24,2048,1),  q(256,2048,24,1),  k(256,28672,4,1),  v(256,28672,4,1),  m(28672,2048,1,1)": 0.912364
+      }
+    },
+    {
+      "from": 32768,
+      "to": 49152,
+      "graphs": 8,
+      "gpu_operator_seconds": 45.40477479200001,
+      "category_seconds": {
+        "quantized_dense_matmul": 26.952833122000012,
+        "attention_compute": 10.900760000000002,
+        "other": 3.310405410000001,
+        "gated_delta_net": 2.137888,
+        "activation_conversion": 1.012619,
+        "attention_preparation": 0.513308,
+        "fused_convolution": 0.391838,
+        "f32_matmul": 0.18512326000000004
+      },
+      "category_percent": {
+        "quantized_dense_matmul": 59.36123071961344,
+        "attention_compute": 24.00795962525209,
+        "other": 7.290875079030829,
+        "gated_delta_net": 4.708509203698727,
+        "activation_conversion": 2.230203771825372,
+        "attention_preparation": 1.1305154630795373,
+        "fused_convolution": 0.8629885332435104,
+        "f32_matmul": 0.4077176042564964
+      },
+      "matmul_by_type_seconds": {
+        "q5_K": 13.110277830000001,
+        "iq4_xs": 5.775847399999998,
+        "q4_K": 4.2553939519999995,
+        "q6_K": 2.30609466,
+        "iq4_nl": 0.7552293700000001,
+        "q3_K": 0.38202840000000005,
+        "q8_0": 0.20537311000000003,
+        "f32": 0.18512326000000004,
+        "iq3_s": 0.16258840000000002
+      },
+      "top_operators": {
+        "MUL_MAT q5_K m=17408 n=2048 k=5120": 5.406013999999999,
+        "MUL_MAT iq4_xs m=17408 n=2048 k=5120": 4.121651999999999,
+        "MUL_MAT q5_K m=5120 n=2048 k=17408": 3.167719,
+        "GATED_DELTA_NET": 2.137888,
+        "MUL_MAT q4_K m=17408 n=2048 k=5120": 1.7279959999999999,
+        "FLASH_ATTN_EXT dst(256,24,2048,1),  q(256,2048,24,1),  k(256,49152,4,1),  v(256,49152,4,1),  m(49152,2048,1,1)": 1.58605,
+        "FLASH_ATTN_EXT dst(256,24,2048,1),  q(256,2048,24,1),  k(256,47104,4,1),  v(256,47104,4,1),  m(47104,2048,1,1)": 1.51276,
+        "FLASH_ATTN_EXT dst(256,24,2048,1),  q(256,2048,24,1),  k(256,45056,4,1),  v(256,45056,4,1),  m(45056,2048,1,1)": 1.44515,
+        "FLASH_ATTN_EXT dst(256,24,2048,1),  q(256,2048,24,1),  k(256,40960,4,1),  v(256,40960,4,1),  m(40960,2048,1,1)": 1.38394,
+        "FLASH_ATTN_EXT dst(256,24,2048,1),  q(256,2048,24,1),  k(256,43008,4,1),  v(256,43008,4,1),  m(43008,2048,1,1)": 1.37868,
+        "MUL_MAT q5_K m=10240 n=2048 k=5120": 1.3440050000000001,
+        "MUL_MAT q5_K m=5120 n=2048 k=6144": 1.3195489999999999,
+        "MUL_MAT iq4_xs m=5120 n=2048 k=17408": 1.290507,
+        "MUL_MAT q4_K m=10240 n=2048 k=5120": 1.2507609999999998,
+        "FLASH_ATTN_EXT dst(256,24,2048,1),  q(256,2048,24,1),  k(256,38912,4,1),  v(256,38912,4,1),  m(38912,2048,1,1)": 1.24666
+      }
+    },
+    {
+      "from": 49152,
+      "to": 65536,
+      "graphs": 8,
+      "gpu_operator_seconds": 49.846325859000004,
+      "category_seconds": {
+        "quantized_dense_matmul": 27.183606102000002,
+        "attention_compute": 15.160600000000002,
+        "other": 3.3066414070000008,
+        "gated_delta_net": 2.143034,
+        "activation_conversion": 1.020755,
+        "attention_preparation": 0.46323590000000003,
+        "fused_convolution": 0.3942344,
+        "f32_matmul": 0.17421904999999996
+      },
+      "category_percent": {
+        "quantized_dense_matmul": 54.53482404880573,
+        "attention_compute": 30.414678993361914,
+        "other": 6.633671288739469,
+        "gated_delta_net": 4.299281768654298,
+        "activation_conversion": 2.0478038900748743,
+        "attention_preparation": 0.9293280738691806,
+        "fused_convolution": 0.7908996163832985,
+        "f32_matmul": 0.3495123201112401
+      },
+      "matmul_by_type_seconds": {
+        "q5_K": 13.205451770000002,
+        "iq4_xs": 5.802266459999999,
+        "q4_K": 4.289973261999999,
+        "q6_K": 2.3556779999999997,
+        "iq4_nl": 0.7836837499999999,
+        "q3_K": 0.3807562,
+        "q8_0": 0.20757726,
+        "f32": 0.17421904999999996,
+        "iq3_s": 0.15821939999999998
+      },
+      "top_operators": {
+        "MUL_MAT q5_K m=17408 n=2048 k=5120": 5.49005,
+        "MUL_MAT iq4_xs m=17408 n=2048 k=5120": 4.140935,
+        "MUL_MAT q5_K m=5120 n=2048 k=17408": 3.1738589999999998,
+        "GATED_DELTA_NET": 2.143034,
+        "FLASH_ATTN_EXT dst(256,24,2048,1),  q(256,2048,24,1),  k(256,65536,4,1),  v(256,65536,4,1),  m(65536,2048,1,1)": 2.12512,
+        "FLASH_ATTN_EXT dst(256,24,2048,1),  q(256,2048,24,1),  k(256,63488,4,1),  v(256,63488,4,1),  m(63488,2048,1,1)": 2.04949,
+        "FLASH_ATTN_EXT dst(256,24,2048,1),  q(256,2048,24,1),  k(256,61440,4,1),  v(256,61440,4,1),  m(61440,2048,1,1)": 2.01851,
+        "FLASH_ATTN_EXT dst(256,24,2048,1),  q(256,2048,24,1),  k(256,59392,4,1),  v(256,59392,4,1),  m(59392,2048,1,1)": 1.93516,
+        "FLASH_ATTN_EXT dst(256,24,2048,1),  q(256,2048,24,1),  k(256,57344,4,1),  v(256,57344,4,1),  m(57344,2048,1,1)": 1.85753,
+        "FLASH_ATTN_EXT dst(256,24,2048,1),  q(256,2048,24,1),  k(256,55296,4,1),  v(256,55296,4,1),  m(55296,2048,1,1)": 1.79128,
+        "MUL_MAT q4_K m=17408 n=2048 k=5120": 1.750216,
+        "FLASH_ATTN_EXT dst(256,24,2048,1),  q(256,2048,24,1),  k(256,53248,4,1),  v(256,53248,4,1),  m(53248,2048,1,1)": 1.73359,
+        "FLASH_ATTN_EXT dst(256,24,2048,1),  q(256,2048,24,1),  k(256,51200,4,1),  v(256,51200,4,1),  m(51200,2048,1,1)": 1.64992,
+        "MUL_MAT q5_K m=10240 n=2048 k=5120": 1.349583,
+        "MUL_MAT q5_K m=5120 n=2048 k=6144": 1.337316
+      }
+    }
+  ],
+  "profile_response": {
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 65536,
+      "prompt_ms": 176458.143,
+      "prompt_per_token_ms": 2.692537582397461,
+      "prompt_per_second": 371.39685868733187,
+      "predicted_n": 8,
+      "predicted_ms": 514.344,
+      "predicted_per_token_ms": 73.4777142857143,
+      "predicted_per_second": 13.609568693325865,
+      "draft_n": 9,
+      "draft_n_accepted": 4
+    },
+    "wall_seconds": 176.98678238299908,
+    "instrumented": true,
+    "live_activity_abort": []
+  }
+}
