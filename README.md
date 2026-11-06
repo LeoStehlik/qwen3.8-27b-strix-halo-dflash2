@@ -34,7 +34,8 @@ and [handoff](handoff.md). Published Halo speeds are upstream evidence, not yet
 measurements from this host. This is a packaged-engine trial, not an engine fork.
 The [complete pre-reboot record and recovery runbook](docs/STRATA-RECOVERY-2026-11-06.md)
 includes the failed driver reload, archived host changes and resume steps.
-Reboot is awaiting an explicit user go after this documentation is published.
+The user authorized the Linux-host reboot at 18:31 UTC after documentation was
+published; post-reboot GPU and endpoint verification remains pending.
 
 ## Previous direction — 2026-11-05
 

@@ -7,8 +7,8 @@ kernel fault, so the dense 27B service is now stopped pending a Linux-host reboo
 These scripts are preparation for a separate backend; this
 repository's existing llama.cpp deployment remains available for rollback.
 
-The user has requested complete GitHub documentation before giving reboot
-approval. **Wait for the explicit go; no reboot is authorized or scheduled.**
+Complete GitHub documentation was published and verified before reboot approval.
+**The user gave go for the Linux-host reboot at 18:31 UTC; recovery is pending.**
 The [full chronological record, host-file archive and recovery runbook](STRATA-RECOVERY-2026-11-06.md)
 cover all actions so far, including the latest download/service snapshot.
 

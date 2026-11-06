@@ -1,8 +1,11 @@
 # Flash-Next deployment record and recovery handoff
 
-**Recorded 2026-11-06, before reboot. Reboot is not authorized yet.** The user
-requested that everything be documented on GitHub first and will give a separate
-go. Wait for that go. Do not restart the Mac mini or its OpenClaw gateway.
+**Historical checkpoint: 2026-11-06 before reboot, originally awaiting go.**
+The complete record was pushed and verified in commit `3a4cba4`. The user then
+authorized the Linux-host reboot at 18:31 UTC. Acquisition was stopped gracefully
+and the remaining shard workers exited after SIGINT. Recovery remains unverified.
+The snapshot/table below retain the earlier checkpoint state, not live status.
+Do not restart the Mac mini or its OpenClaw gateway.
 
 This is the operational record for the Linux Strix Halo host. The
 [deployment guide](STRATA-FLASH-NEXT.md) contains installation commands, the

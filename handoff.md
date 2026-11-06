@@ -1,7 +1,9 @@
 # Handoff for Francis — Flash-Next staging, 2026-11-06
 
-**Reboot is not authorized yet.** The user's latest instruction is to document
-everything on GitHub first, then wait for a separate go. No reboot is scheduled.
+**Linux-host reboot authorized at 18:31 UTC on 2026-11-06.** The requested
+documentation was pushed and verified first. Acquisition was stopped gracefully
+and both remaining shard workers exited after SIGINT. Reboot recovery has not
+yet been verified. The Mac/OpenClaw gateway remains out of scope for restart.
 Start with the [complete pre-reboot record and recovery sequence](docs/STRATA-RECOVERY-2026-11-06.md)
 and its [timestamped state snapshot](evidence/strata-2026-11-06/pre-reboot-snapshot.json).
 
