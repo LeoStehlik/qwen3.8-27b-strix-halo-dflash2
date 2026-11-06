@@ -1,0 +1,13 @@
+[Unit]
+Description=Resume pinned Strata Flash-Next acquisition and preparation
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /home/less/.cache/strata-evaluation-20261106/finish-preparation.py
+TimeoutStartSec=infinity
+RemainAfterExit=yes
+Restart=on-failure
+RestartSec=60
+
+[Install]
+WantedBy=default.target

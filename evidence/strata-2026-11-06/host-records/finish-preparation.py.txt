@@ -1,0 +1,48 @@
+"""Finish pinned acquisition after the already-running shard transfers.
+
+Never stops a model, loads weights onto the GPU, or changes the live endpoint.
+"""
+import json
+import os
+from pathlib import Path
+import subprocess
+import time
+
+root = Path('/home/less/.cache/strata-evaluation-20261106')
+status = root / 'preparation-status.json'
+wait_for = json.loads((root / 'preparation-wait-pids.json').read_text())
+repo = Path('/home/less/worktrees/qwen38-strata-20261106')
+
+
+def record(phase, **extra):
+    obj = {'phase': phase, 'updated_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+           'serving': False, **extra}
+    temporary = status.with_suffix('.tmp')
+    temporary.write_text(json.dumps(obj, indent=2) + '\n')
+    temporary.replace(status)
+
+
+def alive(item):
+    try:
+        fields = Path(f"/proc/{item['pid']}/stat").read_text().rsplit(')', 1)[1].split()
+        return fields[0] != 'Z' and fields[19] == item['starttime']
+    except FileNotFoundError:
+        return False
+
+
+try:
+    while any(alive(item) for item in wait_for):
+        record('downloading', owned_downloads_running=[p['pid'] for p in wait_for if alive(p)])
+        time.sleep(30)
+    record('preparing')
+    env = dict(os.environ, STRATA_INSTALL_DIR='/home/less/.local/share/strata/flash-next')
+    with (root / 'finish-preparation.log').open('a') as log:
+        subprocess.run(['bash', str(repo / 'scripts/install-strata-flash-next.sh')],
+                       env=env, stdout=log, stderr=subprocess.STDOUT, check=True)
+        subprocess.run(['bash', str(repo / 'scripts/launch-strata-flash-next.sh'), '--plan'],
+                       env=env, stdout=log, stderr=subprocess.STDOUT, check=True)
+    record('prepared-awaiting-validation', remaining=['GPU memory preflight', 'actual generation',
+           'tools and state checks', 'cold 64K/128K benchmark', 'private endpoint promotion'])
+except Exception as exc:
+    record('failed', error=str(exc), log=str(root / 'finish-preparation.log'))
+    raise

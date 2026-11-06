@@ -1,0 +1,16 @@
+"""Fetch one pinned shard using Strata's resumable, checksum-verifying downloader."""
+import importlib.util
+from pathlib import Path
+import sys
+
+root = Path('/home/less/.local/share/strata/terminal/0.1.57')
+sys.path.insert(0, str(root))
+spec = importlib.util.spec_from_file_location('strata_setup', root / 'setup.py')
+setup = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = setup
+spec.loader.exec_module(setup)
+index = int(sys.argv[1])
+assert 1 <= index <= 4
+name = f'Qwen3.8-Flash-Next-UD-Q4_K_XL-0000{index}-of-00004.gguf'
+dest = Path('/home/less/models/strata-flash-next/models/unsloth-UD-Q4_K_XL') / name
+setup.download(setup.hf(setup.UNSLOTH_REPO) + 'UD-Q4_K_XL/' + name, dest)

@@ -1,0 +1,77 @@
+{
+  "recorded_utc": "2026-11-06T18:21:41.165297+00:00",
+  "files": [
+    {
+      "archive": "fetch-shard.py.txt",
+      "source_path": "/home/less/.cache/strata-evaluation-20261106/fetch-shard.py",
+      "bytes": 698,
+      "sha256": "3e8dcad46f335870a66eaf3aa1a1cab737aaebc179a45e7c97ec5a3d716c153a"
+    },
+    {
+      "archive": "finish-preparation.py.txt",
+      "source_path": "/home/less/.cache/strata-evaluation-20261106/finish-preparation.py",
+      "bytes": 2000,
+      "sha256": "d516bbdbe9bff679d25104e122de6b10ec07e62cc936c04db87d545a1878cdb0"
+    },
+    {
+      "archive": "raise-gtt-failed-attempt.py.txt",
+      "source_path": "/home/less/.cache/strata-evaluation-20261106/raise-gtt.py",
+      "bytes": 3105,
+      "sha256": "17bad0ace456326e5c6f9e49fd50c5c0a35af31bbe800de90f935e29f1e9e655"
+    },
+    {
+      "archive": "strata-flash-next-acquire.service.txt",
+      "source_path": "/home/less/.config/systemd/user/strata-flash-next-acquire.service",
+      "bytes": 310,
+      "sha256": "b4abcbfa9b8efe0c27fcb66211014ed1bc8d0ecf5c0be5414717f2abf3086306"
+    },
+    {
+      "archive": "70-strata-halo-ttm.conf.txt",
+      "source_path": "/etc/modprobe.d/70-strata-halo-ttm.conf",
+      "bytes": 139,
+      "sha256": "3f656f7b4d0eb39967375923d25c5e009b57495fa9ff3707f8a86f79d511eed5"
+    },
+    {
+      "archive": "gtt-before.json",
+      "source_path": "/home/less/.cache/strata-evaluation-20261106/gtt-before.json",
+      "bytes": 171,
+      "sha256": "61539b89d499b9ec583b6f49981df14a53032e539463abc62bd8eb3c90498387"
+    },
+    {
+      "archive": "gtt-maintenance.log.txt",
+      "source_path": "/home/less/.cache/strata-evaluation-20261106/gtt-maintenance.log",
+      "bytes": 1821,
+      "sha256": "8c69700116e799acdf4cbc8e1ff55a0dd639844b27e2898d4ef71b41adad8bcd"
+    },
+    {
+      "archive": "initramfs-update.log.txt",
+      "source_path": "/home/less/.cache/strata-evaluation-20261106/initramfs-update.log",
+      "bytes": 63,
+      "sha256": "f7cc42466ea9da8a7a252b97eedafd2e1e2c9d30066ad3c100e622a3e05dfec3"
+    },
+    {
+      "archive": "install-engine.json",
+      "source_path": "/home/less/.cache/strata-evaluation-20261106/install-engine.json",
+      "bytes": 821,
+      "sha256": "2252ca056c1923fe387d121d7a90fbbfedc23685bdc3132adaf617965b44e158"
+    },
+    {
+      "archive": "engine-component.json",
+      "source_path": "/home/less/.local/share/strata/components/engine/0.1.57-linux-x86_64-hip-halo/engine-component.json",
+      "bytes": 64016,
+      "sha256": "c6137b6c70f376dbaaa7cc5fd102ead1f0f71d81a73423b0a198028b8c6cbfa7"
+    },
+    {
+      "archive": "preparation-wait-pids.json",
+      "source_path": "/home/less/.cache/strata-evaluation-20261106/preparation-wait-pids.json",
+      "bytes": 227,
+      "sha256": "0762e09baae22a118226068f354f3653f979048a0e8df8ab72c7c9abd5174574"
+    },
+    {
+      "archive": "kfd-acl-before.txt",
+      "source_path": "/home/less/.cache/strata-evaluation-20261106/kfd-acl-before.txt",
+      "bytes": 80,
+      "sha256": "df097ea41e98ee25ddd732c41e4f2e4fceb2df18e470d380655e5bc36fb11b3d"
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+"""One-time headless GPU maintenance with restoration of the existing server."""
+import json
+from pathlib import Path
+import subprocess
+import time
+import urllib.request
+
+root = Path('/home/less/.cache/strata-evaluation-20261106')
+config = Path('/etc/modprobe.d/70-strata-halo-ttm.conf')
+unit = 'qwen38-dflash2.service'
+pages = 29360128
+
+
+def cmd(*words):
+    return subprocess.run(words, check=True, capture_output=True, text=True, timeout=120)
+
+
+def root_cmd(*words):
+    return cmd('sudo', '-n', *words)
+
+
+def state():
+    return {'ttm': {n: Path('/sys/module/ttm/parameters', n).read_text().strip()
+                    for n in ('pages_limit', 'page_pool_size')},
+            'gtt_bytes': {str(p): int(p.read_text()) for p in
+                          Path('/sys/class/drm').glob('card*/device/mem_info_gtt_total')}}
+
+
+before = state()
+if config.exists():
+    raise RuntimeError('Refusing to overwrite an existing host configuration')
+with urllib.request.urlopen('http://127.0.0.1:50557/slots', timeout=5) as response:
+    if any(s.get('is_processing') for s in json.load(response)):
+        raise RuntimeError('Existing model is processing a request')
+(root / 'gtt-before.json').write_text(json.dumps(before, indent=2) + '\n')
+text = '# Strata Flash-Next on the 128 GiB Strix Halo, 2026-11-06.\n' \
+       'options ttm pages_limit=29360128 page_pool_size=29360128\n'
+success = False
+stopped = False
+try:
+    cmd('systemctl', '--user', 'stop', unit)
+    stopped = True
+    root_cmd('python3', '-c',
+             'from pathlib import Path; import sys; p=Path(sys.argv[1]); '
+             'p.write_text(sys.argv[2]); p.chmod(0o644)', str(config), text)
+    root_cmd('modprobe', '-r', 'amdgpu')
+    root_cmd('modprobe', 'amdgpu')
+    root_cmd('udevadm', 'settle')
+    after = state()
+    if not after['gtt_bytes'] or min(after['gtt_bytes'].values()) < pages * 4096:
+        raise RuntimeError(f'GTT limit did not increase: {after}')
+    # This running login predates the render-group change. Keep its access on
+    # the newly-created nodes; new logins already obtain the render group.
+    root_cmd('setfacl', '-m', 'u:less:rw', '/dev/kfd', '/dev/dri/renderD128')
+    success = True
+    (root / 'gtt-after.json').write_text(json.dumps(after, indent=2) + '\n')
+except Exception:
+    if config.exists():
+        root_cmd('rm', '--', str(config))
+    # A failed reload may have left the module absent. Loading it is safe if
+    # already present and restores the previous service's prerequisite.
+    root_cmd('modprobe', 'amdgpu')
+    raise
+finally:
+    if stopped:
+        cmd('systemctl', '--user', 'start', unit)
+
+deadline = time.monotonic() + 180
+while time.monotonic() < deadline:
+    try:
+        with urllib.request.urlopen('http://100.96.8.54:8080/health', timeout=3) as response:
+            if json.load(response).get('status') == 'ok':
+                break
+    except Exception:
+        time.sleep(2)
+else:
+    raise RuntimeError('Previous endpoint did not become healthy in 180 seconds')
+print(json.dumps({'memory_limit_applied': success, 'previous_endpoint_healthy': True, 'after': state()}))

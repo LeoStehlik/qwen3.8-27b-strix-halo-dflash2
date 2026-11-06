@@ -1,0 +1,29 @@
+Traceback (most recent call last):
+  File "/home/less/.cache/strata-evaluation-20261106/raise-gtt.py", line 46, in <module>
+    root_cmd('modprobe', '-r', 'amdgpu')
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/less/.cache/strata-evaluation-20261106/raise-gtt.py", line 19, in root_cmd
+    return cmd('sudo', '-n', *words)
+  File "/home/less/.cache/strata-evaluation-20261106/raise-gtt.py", line 15, in cmd
+    return subprocess.run(words, check=True, capture_output=True, text=True, timeout=120)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 578, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '('sudo', '-n', 'modprobe', '-r', 'amdgpu')' died with <Signals.SIGKILL: 9>.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/less/.cache/strata-evaluation-20261106/raise-gtt.py", line 62, in <module>
+    root_cmd('modprobe', 'amdgpu')
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/less/.cache/strata-evaluation-20261106/raise-gtt.py", line 19, in root_cmd
+    return cmd('sudo', '-n', *words)
+  File "/home/less/.cache/strata-evaluation-20261106/raise-gtt.py", line 15, in cmd
+    return subprocess.run(words, check=True, capture_output=True, text=True, timeout=120)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/subprocess.py", line 578, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '('sudo', '-n', 'modprobe', 'amdgpu')' returned non-zero exit status 1.

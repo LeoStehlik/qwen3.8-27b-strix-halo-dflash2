@@ -1,0 +1,7 @@
+# file: /dev/kfd
+# owner: root
+# group: render
+user::rw-
+group::rw-
+other::---
+

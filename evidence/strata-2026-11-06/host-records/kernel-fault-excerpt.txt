@@ -1,0 +1,60 @@
+[Fri Nov  6 16:50:29 2026] amdgpu 0000:c7:00.0: finishing device.
+[Fri Nov  6 16:50:29 2026] BUG: unable to handle page fault for address: ffffffffffffffb8
+[Fri Nov  6 16:50:29 2026] #PF: supervisor read access in kernel mode
+[Fri Nov  6 16:50:29 2026] #PF: error_code(0x0000) - not-present page
+[Fri Nov  6 16:50:29 2026] PGD 91ba47067 P4D 91ba47067 PUD 91ba49067 PMD 0 
+[Fri Nov  6 16:50:29 2026] Oops: Oops: 0000 [#1] SMP NOPTI
+[Fri Nov  6 16:50:29 2026] CPU: 10 UID: 0 PID: 344126 Comm: modprobe Not tainted 7.0.0-42-generic #42-Ubuntu PREEMPT(lazy) 
+[Fri Nov  6 16:50:29 2026] Hardware name: Default string Default string/Default string, BIOS STXP10_F11_23_V02_IEC0010_BI0019_ACE_120W 09/10/2026
+[Fri Nov  6 16:50:29 2026] RIP: 0010:isp_genpd_remove_device+0x1d/0xd0 [amdgpu]
+[Fri Nov  6 16:50:29 2026] Code: 90 90 90 90 90 90 90 90 90 90 90 90 90 0f 1f 44 00 00 48 83 ff 10 0f 84 ac 00 00 00 55 48 89 e5 41 54 53 48 8b 47 58 48 89 fb <4c> 8b 66 b8 48 85 c0 74 72 48 8b 38 48 85 ff 74 6a 48 c7 c6 93 36
+[Fri Nov  6 16:50:29 2026] RSP: 0018:ffffd43034527ab0 EFLAGS: 00010286
+[Fri Nov  6 16:50:29 2026] RAX: 0000000000000000 RBX: ffff8f0b03366400 RCX: 0000000000000000
+[Fri Nov  6 16:50:29 2026] RDX: 0000000000000000 RSI: 0000000000000000 RDI: ffff8f0b03366400
+[Fri Nov  6 16:50:29 2026] RBP: ffffd43034527ac0 R08: 0000000000000000 R09: 0000000000000000
+[Fri Nov  6 16:50:29 2026] R10: 0000000000000000 R11: 0000000000000000 R12: ffffffffc1e58940
+[Fri Nov  6 16:50:29 2026] R13: ffff8f0b30454518 R14: 000000000000000c R15: 0000000000000001
+[Fri Nov  6 16:50:29 2026] FS:  000071f8570303c0(0000) GS:ffff8f27eacf9000(0000) knlGS:0000000000000000
+[Fri Nov  6 16:50:29 2026] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[Fri Nov  6 16:50:29 2026] CR2: ffffffffffffffb8 CR3: 0000000113763000 CR4: 0000000000f50ef0
+[Fri Nov  6 16:50:29 2026] PKRU: 55555554
+[Fri Nov  6 16:50:29 2026] Call Trace:
+[Fri Nov  6 16:50:29 2026]  <TASK>
+[Fri Nov  6 16:50:29 2026]  ? __pfx_isp_genpd_remove_device+0x10/0x10 [amdgpu]
+[Fri Nov  6 16:50:29 2026]  device_for_each_child+0x6e/0xb0
+[Fri Nov  6 16:50:29 2026]  ? stop_cpsch+0x128/0x1c0 [amdgpu]
+[Fri Nov  6 16:50:29 2026]  isp_v4_1_1_hw_fini+0x1e/0x70 [amdgpu]
+[Fri Nov  6 16:50:29 2026]  isp_hw_fini+0x29/0x40 [amdgpu]
+[Fri Nov  6 16:50:29 2026]  amdgpu_ip_block_hw_fini+0x3e/0x93 [amdgpu]
+[Fri Nov  6 16:50:29 2026]  amdgpu_device_ip_fini_early.isra.0+0x25b/0x30e [amdgpu]
+[Fri Nov  6 16:50:29 2026]  amdgpu_device_fini_hw+0x1bd/0x224 [amdgpu]
+[Fri Nov  6 16:50:29 2026]  amdgpu_driver_unload_kms+0x68/0x80 [amdgpu]
+[Fri Nov  6 16:50:29 2026]  amdgpu_pci_remove+0x4d/0xa0 [amdgpu]
+[Fri Nov  6 16:50:29 2026]  pci_device_remove+0x4b/0xb0
+[Fri Nov  6 16:50:29 2026]  device_remove+0x43/0x80
+[Fri Nov  6 16:50:29 2026]  device_release_driver_internal+0x1fb/0x260
+[Fri Nov  6 16:50:29 2026]  driver_detach+0x4a/0xa0
+[Fri Nov  6 16:50:29 2026]  bus_remove_driver+0x78/0x110
+[Fri Nov  6 16:50:29 2026]  driver_unregister+0x2f/0x60
+[Fri Nov  6 16:50:29 2026]  pci_unregister_driver+0x31/0xc0
+[Fri Nov  6 16:50:29 2026]  ? kfd_chardev_exit+0x43/0x60 [amdgpu]
+[Fri Nov  6 16:50:29 2026]  amdgpu_exit+0x15/0x3dc [amdgpu]
+[Fri Nov  6 16:50:29 2026]  __do_sys_delete_module.isra.0+0x1bd/0x2f0
+[Fri Nov  6 16:50:29 2026]  __x64_sys_delete_module+0x12/0x20
+[Fri Nov  6 16:50:29 2026]  x64_sys_call+0x20c3/0x2390
+[Fri Nov  6 16:50:29 2026]  do_syscall_64+0x105/0x580
+[Fri Nov  6 16:50:29 2026]  ? count_memcg_events+0x103/0x250
+[Fri Nov  6 16:50:29 2026]  ? handle_mm_fault+0x1be/0x2e0
+[Fri Nov  6 16:50:29 2026]  ? arch_exit_to_user_mode_prepare.isra.0+0xd/0x100
+[Fri Nov  6 16:50:29 2026]  ? irqentry_exit+0x97/0x6f0
+[Fri Nov  6 16:50:29 2026]  ? exc_page_fault+0x94/0x1e0
+[Fri Nov  6 16:50:29 2026]  entry_SYSCALL_64_after_hwframe+0x76/0x7e
+[Fri Nov  6 16:50:29 2026] RIP: 0033:0x71f8567383ab
+[Fri Nov  6 16:50:29 2026] Code: 73 01 c3 48 8b 0d 5d 9a 0d 00 f7 d8 64 89 01 48 83 c8 ff c3 66 2e 0f 1f 84 00 00 00 00 00 90 f3 0f 1e fa b8 b0 00 00 00 0f 05 <48> 3d 01 f0 ff ff 73 01 c3 48 8b 0d 2d 9a 0d 00 f7 d8 64 89 01 48
+[Fri Nov  6 16:50:29 2026] RSP: 002b:00007fff08313808 EFLAGS: 00000202 ORIG_RAX: 00000000000000b0
+[Fri Nov  6 16:50:29 2026] RAX: ffffffffffffffda RBX: 000060c13ddc0a90 RCX: 000071f8567383ab
+[Fri Nov  6 16:50:29 2026] RDX: 0000000000000000 RSI: 0000000000000800 RDI: 000060c13ddc0af0
+[Fri Nov  6 16:50:29 2026] RBP: 00007fff08313830 R08: 0000000000000000 R09: 0000000000000000
+[Fri Nov  6 16:50:29 2026] R10: 0000000000000000 R11: 0000000000000202 R12: 0000000000000000
+[Fri Nov  6 16:50:29 2026] R13: 0000000000000000 R14: 0000000000000000 R15: 0000000000000000
+[Fri Nov  6 16:50:29 2026]  </TASK>

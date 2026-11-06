@@ -1,0 +1,82 @@
+{
+  "recorded_utc": "2026-11-06T18:21:41.166057+00:00",
+  "reboot_authorized": false,
+  "user_instruction": "Document everything to GitHub first; wait for explicit go before reboot.",
+  "reboot_performed": false,
+  "boot_id": "d069e22e-08f7-4ff7-90c6-cd9d7f1280bd",
+  "uptime_seconds": 164019.87,
+  "kernel": "7.0.0-42-generic",
+  "gpu": {
+    "module_state": "going",
+    "kernel_tainted": 128,
+    "dri_exists": false,
+    "kfd_exists": false
+  },
+  "services": {
+    "exit_code": 0,
+    "stdout": "Id=qwen38-dflash2.service\nActiveState=failed\nSubState=failed\nUnitFileState=enabled\nMainPID=0\nResult=exit-code\n\nId=strata-flash-next-acquire.service\nActiveState=activating\nSubState=start\nUnitFileState=enabled\nMainPID=344340\nResult=success\n\nId=qwen36-rocmfpx.service\nActiveState=inactive\nSubState=dead\nUnitFileState=disabled\nMainPID=0\nResult=success"
+  },
+  "acquisition": {
+    "phase": "downloading",
+    "updated_utc": "2026-11-06T18:21:39Z",
+    "serving": false,
+    "owned_downloads_running": [
+      343338,
+      343340
+    ]
+  },
+  "target_shards": [
+    {
+      "name": "Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+      "bytes": 10946624,
+      "sha256": "4448186216b3af4cc558bbce2c3213f01608f8f8b2e5267a9767971dd3ec8082",
+      "state": "complete; installer verification mark present",
+      "verified_sha256": "4448186216b3af4cc558bbce2c3213f01608f8f8b2e5267a9767971dd3ec8082",
+      "file_bytes": 10946624
+    },
+    {
+      "name": "Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf",
+      "bytes": 49859583136,
+      "sha256": "3f342f1c1580473f1ee94ddd5b28206e8c07a70fa1a366f59d1d6c922919a6c9",
+      "state": "partial; whole-file hash pending",
+      "durably_recorded_piece_bytes": 16475226112,
+      "chunk_bytes": 33554432,
+      "completed_piece_count": 491
+    },
+    {
+      "name": "Qwen3.8-Flash-Next-UD-Q4_K_XL-00003-of-00004.gguf",
+      "bytes": 49376141504,
+      "sha256": "56758f40269cad5cd9b0d3d6fbae0f40f6d5be6de49e4ab392dbe83157d9cbd3",
+      "state": "partial; whole-file hash pending",
+      "durably_recorded_piece_bytes": 15401484288,
+      "chunk_bytes": 33554432,
+      "completed_piece_count": 459
+    },
+    {
+      "name": "Qwen3.8-Flash-Next-UD-Q4_K_XL-00004-of-00004.gguf",
+      "bytes": 12087983520,
+      "sha256": "753bda48b98ba4f1636134a90a967de1b2d3908a236c026e464777342e53510a",
+      "state": "complete; installer verification mark present",
+      "verified_sha256": "753bda48b98ba4f1636134a90a967de1b2d3908a236c026e464777342e53510a",
+      "file_bytes": 12087983520
+    }
+  ],
+  "pending_auxiliary_downloads": [
+    "MTP companion approximately 5.2 GB",
+    "image projector approximately 0.9 GB"
+  ],
+  "download_accounting": "Completed files match installer SHA-256 marks; partial bytes count only fsynced pieces recorded in sidecars, not in-flight bytes or sparse file sizes. Whole-file hashing is still required.",
+  "initramfs_sha256": "538b098c14b648119accd5c11564767d93d8aa9edbe191ef859a47755e9d6b1a",
+  "network_boot_enablement": {
+    "exit_code": 0,
+    "stdout": "enabled\nenabled\nenabled\nenabled\nenabled"
+  },
+  "linger": {
+    "exit_code": 0,
+    "stdout": "Linger=yes"
+  },
+  "existing_deployment_dirty_files": "M models.ini\n M run-router.sh\n?? runtime-candidate/",
+  "qwen36_head": "fc06ab712eb6a89e49d5c935ae47dba190c1a0a5",
+  "qwen36_frozen_commit": "e0bb26c66c9637b8d8f6042947414610a280bffe",
+  "llama_candidate_commit": "a82001bd382ea54481603be113ced229a21db8d2"
+}

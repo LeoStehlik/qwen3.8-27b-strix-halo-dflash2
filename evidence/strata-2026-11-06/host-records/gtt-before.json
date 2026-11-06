@@ -1,0 +1,9 @@
+{
+  "ttm": {
+    "pages_limit": "15113689",
+    "page_pool_size": "15113689"
+  },
+  "gtt_bytes": {
+    "/sys/class/drm/card0/device/mem_info_gtt_total": 61905670144
+  }
+}

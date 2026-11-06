@@ -7,6 +7,11 @@ kernel fault, so the dense 27B service is now stopped pending a Linux-host reboo
 These scripts are preparation for a separate backend; this
 repository's existing llama.cpp deployment remains available for rollback.
 
+The user has requested complete GitHub documentation before giving reboot
+approval. **Wait for the explicit go; no reboot is authorized or scheduled.**
+The [full chronological record, host-file archive and recovery runbook](STRATA-RECOVERY-2026-11-06.md)
+cover all actions so far, including the latest download/service snapshot.
+
 ## Host incident — 16:50 UTC
 
 A headless live reload of `amdgpu`, attempted after stopping the only GPU client,
@@ -115,7 +120,7 @@ do not present a difference between those results as an isolated speedup.
 ## Deployment checks still required
 
 1. Finish and verify every model/component download; prepare the model pack.
-2. Resolve the GPU memory limit. This host reports 61,905,670,144 bytes of GTT
+2. Resolve the GPU memory limit. Before the fault this host reported 61,905,670,144 bytes of GTT
    (about 57.7 GiB), plus an 8 GiB BIOS carve-out. The published benchmark host
    used a 112 GiB GTT. Linux initializes the AMD GTT manager and KFD limits from
    TTM at driver initialization; writing a larger sysfs TTM number alone does
