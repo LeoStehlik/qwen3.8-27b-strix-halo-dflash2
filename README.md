@@ -26,8 +26,8 @@ retries without caching completed responses.
 
 ## Current direction — 2026-11-06
 
-The Flash-Next download was paused at the user's request at 19:59 UTC, with
-partial files preserved and automatic acquisition disabled until resumed.
+The user resumed the Flash-Next download at 23:03 UTC after an earlier pause.
+Acquisition/preparation is running overnight from the saved partial files.
 
 Flash-Next UD-Q4_K_XL on packaged Strata is being staged as the next local
 OpenClaw backend. The model download and deployment checks are still in progress;

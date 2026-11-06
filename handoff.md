@@ -1,11 +1,10 @@
 # Handoff for Francis — Flash-Next staging, 2026-11-06
 
-**Download paused by the user at 19:59 UTC.** Partial files were preserved and
-`strata-flash-next-acquire.service` is stopped and disabled, so it cannot resume
-on boot while paused. The 27B endpoint remains active. No overnight resume time
-was specified; await the user's resume instruction. Resume with
-`systemctl --user enable --now --no-block strata-flash-next-acquire.service`.
-The acquisition/recovery details below describe the preceding running state.
+**Download resumed by the user at 23:03 UTC.** The 19:59 pause preserved the
+partial files; `strata-flash-next-acquire.service` is now enabled and running
+again for overnight acquisition/preparation. It resumed shard 2 from about
+38.46 GB, with approximately 67.93 GB of target data already durably recorded
+across all shards. The 27B endpoint remains active; Flash-Next is not serving.
 
 **Linux reboot and GPU recovery verified at 19:04–19:08 UTC on 2026-11-06.**
 The driver is live, kernel taint is zero, GPU nodes are accessible and the
