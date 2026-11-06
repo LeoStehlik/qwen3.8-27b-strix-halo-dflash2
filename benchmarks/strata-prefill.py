@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+"""Measure isolated, approximately 64K/128K cold prefill over Strata's HTTP API.
+
+Use a public text fixture. Exact prompt and uncached counts come from each
+response; do not substitute the requested size for the actual token count.
+This is a custom performance probe, not Strata's standard benchmark suite.
+"""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import time
+import urllib.request
+import uuid
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument('--url', default='http://127.0.0.1:8083')
+    ap.add_argument('--fixture', type=Path, required=True)
+    ap.add_argument('--out', type=Path, required=True)
+    ap.add_argument('--sizes', type=int, nargs='+', default=[65536, 131072])
+    ap.add_argument('--repeat', type=int, default=2)
+    ap.add_argument('--model', default='qwen3.8-flash-next-unsloth')
+    args = ap.parse_args()
+    if args.repeat < 1 or any(n < 1024 for n in args.sizes):
+        ap.error('Use positive repeats and sizes of at least 1024 tokens')
+    raw = args.fixture.read_bytes()
+    source = raw.decode('utf-8')
+    if not source.strip():
+        ap.error('The fixture must contain text')
+    headers = {'Content-Type': 'application/json'}
+    if os.environ.get('STRATA_API_KEY'):
+        headers['Authorization'] = 'Bearer ' + os.environ['STRATA_API_KEY']
+    report = {'protocol': 'strata-cold-prefill-custom-v1',
+              'fixture_sha256': hashlib.sha256(raw).hexdigest(),
+              'sampling': {'temperature': 0, 'enable_thinking': False, 'max_tokens': 128},
+              'runs': [], 'completed': False}
+
+    def request(path, body, timeout=1800):
+        req = urllib.request.Request(args.url.rstrip('/') + path,
+                                     json.dumps(body).encode(), headers)
+        return urllib.request.urlopen(req, timeout=timeout)
+
+    def persist():
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(json.dumps(report, indent=2) + '\n')
+
+    def messages(text, nonce):
+        return [{'role': 'user', 'content': f'{nonce}\nRead this reference material:\n{text}\n'
+                 'List the main technical themes with a brief explanation of each.'}]
+
+    def count(text):
+        # This performs no inference. API templates can differ by a few tokens;
+        # the completion's actual usage is the measurement, not this estimate.
+        with request('/v1/messages/count_tokens', {'model': args.model,
+                     'messages': messages(text, '0123456789abcdef' * 2),
+                     'thinking': {'type': 'disabled'}, 'max_tokens': 128}) as r:
+            return int(json.load(r)['input_tokens'])
+
+    def run(text, target, repetition, warmup=False):
+        nonce = uuid.uuid4().hex
+        msg = messages(text, nonce)
+        body = {'model': args.model, 'messages': msg, 'stream': True,
+                'stream_options': {'include_usage': True}, 'temperature': 0,
+                'reasoning_effort': 'none', 'chat_template_kwargs': {'enable_thinking': False},
+                'max_tokens': 128 if not warmup else 16}
+        start = time.monotonic()
+        first = None
+        usage = timings = None
+        output = []
+        finish = None
+        saw_done = False
+        with request('/v1/chat/completions', body) as response:
+            for line in response:
+                if not line.startswith(b'data:'):
+                    continue
+                data = line[5:].strip()
+                if data == b'[DONE]':
+                    saw_done = True
+                    break
+                event = json.loads(data)
+                if event.get('error'):
+                    raise RuntimeError(event['error'])
+                usage = event.get('usage') or usage
+                timings = event.get('timings') or timings
+                for choice in event.get('choices', []):
+                    delta = choice.get('delta') or {}
+                    piece = (delta.get('reasoning_content') or '') + (delta.get('content') or '')
+                    if piece:
+                        if first is None:
+                            first = time.monotonic() - start
+                        output.append(piece)
+                    finish = choice.get('finish_reason') or finish
+        row = {'target_tokens': target, 'repeat': repetition, 'warmup': warmup,
+               'nonce': nonce, 'messages_sha256': hashlib.sha256(json.dumps(msg).encode()).hexdigest(),
+               'usage': usage, 'timings': timings, 'first_token_s': first,
+               'elapsed_s': time.monotonic() - start, 'finish_reason': finish,
+               'complete_stream': saw_done,
+               'output_sha256': hashlib.sha256(''.join(output).encode()).hexdigest()}
+        report['runs'].append(row)
+        persist()
+        if first is None or not usage or not timings or not saw_done:
+            raise RuntimeError('Incomplete response or missing measurements')
+        if not warmup and int(timings.get('cache_n', -1)) not in range(65):
+            raise RuntimeError('Cache accounting absent or >64 tokens reused; not a cold result')
+        print(json.dumps(row), flush=True)
+
+    try:
+        run('Explain what a compiler does.', 0, 0, warmup=True)
+        for size in args.sizes:
+            # Repetition changes expert distributions; record the fixture and
+            # construction method, and also judge separate real OpenClaw traffic.
+            expanded = (source + '\n') * max(1, (size * 8 // (len(source) + 1)) + 1)
+            lo, hi = 1, len(expanded)
+            if count(expanded) < size:
+                raise RuntimeError('Fixture has too few tokens; provide a denser public text')
+            best = expanded
+            for _ in range(18):
+                mid = (lo + hi) // 2
+                best = expanded[:mid]
+                n = count(best)
+                if abs(n - size) <= 8:
+                    break
+                if n < size:
+                    lo = mid + 1
+                else:
+                    hi = mid - 1
+            for repetition in range(args.repeat):
+                run(best, size, repetition)
+        report['completed'] = True
+    except Exception as exc:
+        report['error'] = str(exc)
+        raise
+    finally:
+        persist()
+
+
+if __name__ == '__main__':
+    main()

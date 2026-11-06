@@ -67,6 +67,28 @@ The smoke check verifies exact typed tool arguments and result continuation
 using synthetic data. It does not execute tools, send OpenClaw messages, or
 establish broad agent quality. Real OpenClaw requests follow the technical checks.
 
+The custom long-prefill probe accepts a public text fixture and reports actual
+prompt/cache counts, native timings, client first-token latency, and output hashes.
+It uses fresh prompt prefixes and rejects runs with more than 64 reused tokens.
+Thinking is disabled and generation capped at 128 tokens only for this performance
+probe; tool/quality evaluation is separate. The script has passed syntax checks;
+its actual-model runs are pending the download.
+
+```bash
+curl --fail --location \
+  https://raw.githubusercontent.com/LeoStehlik/qwen3.6-35b-a3b-strix-halo/e0bb26c66c9637b8d8f6042947414610a280bffe/benchmarks/fixtures/prompt.txt \
+  -o /tmp/strata-public-prompt.txt
+printf '%s  %s\n' \
+  6efd5cb8693d5c7fc9fa826da0e454895172071c7d30283f6eb6c04978875346 \
+  /tmp/strata-public-prompt.txt | sha256sum --check
+python3 benchmarks/strata-prefill.py --fixture /tmp/strata-public-prompt.txt \
+  --sizes 65536 131072 --repeat 2 --out /tmp/strata-prefill.json
+```
+
+This repeats/truncates the frozen public source text and token-counts it through
+the server. It does not reproduce the maintainers' historical benchmark workload;
+do not present a difference between those results as an isolated speedup.
+
 ## Deployment checks still required
 
 1. Finish and verify every model/component download; prepare the model pack.
