@@ -1,0 +1,73 @@
+{
+  "verified_utc": "2026-11-06T19:07:30.484303+00:00",
+  "boot_id_before": "d069e22e-08f7-4ff7-90c6-cd9d7f1280bd",
+  "boot_id_after": "b63330d2-0ce3-4787-853f-302276070fe6",
+  "kernel": "7.0.0-42-generic",
+  "kernel_tainted": 0,
+  "amdgpu_state": "live",
+  "ttm_pages_limit": 29360128,
+  "ttm_page_pool_size": 29360128,
+  "gtt_total_bytes": [
+    120259084288
+  ],
+  "device_access": {
+    "/dev/kfd": {
+      "read": true,
+      "write": true
+    },
+    "/dev/dri/renderD128": {
+      "read": true,
+      "write": true
+    }
+  },
+  "restored_27b": {
+    "model": "qwen3.8-27b-q4-fast",
+    "prompt": "Reply with exactly READY.",
+    "response": "READY",
+    "finish_reason": "stop",
+    "elapsed_s": 0.6979446529999223,
+    "gpu_evidence": "llama-server PID 2665 holds /dev/dri/renderD128; GTT used 34,497,822,720 bytes before the direct completion; kernel has initialized gfx1151; existing model configured for all layers on GPU",
+    "scope": "readiness verification; not a throughput benchmark"
+  },
+  "acquisition": {
+    "phase": "preparing",
+    "updated_utc": "2026-11-06T19:05:15Z",
+    "serving": false
+  },
+  "target_progress": [
+    {
+      "name": "Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+      "total_bytes": 10946624,
+      "state": "completed",
+      "recorded_bytes": 10946624,
+      "verification_mark": "sha256 4448186216b3af4cc558bbce2c3213f01608f8f8b2e5267a9767971dd3ec8082"
+    },
+    {
+      "name": "Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf",
+      "total_bytes": 49859583136,
+      "state": "partial",
+      "recorded_bytes": 18857590784
+    },
+    {
+      "name": "Qwen3.8-Flash-Next-UD-Q4_K_XL-00003-of-00004.gguf",
+      "total_bytes": 49376141504,
+      "state": "partial",
+      "recorded_bytes": 17381195776
+    },
+    {
+      "name": "Qwen3.8-Flash-Next-UD-Q4_K_XL-00004-of-00004.gguf",
+      "total_bytes": 12087983520,
+      "state": "completed",
+      "recorded_bytes": 12087983520,
+      "verification_mark": "sha256 753bda48b98ba4f1636134a90a967de1b2d3908a236c026e464777342e53510a"
+    }
+  ],
+  "download_progress_check": {
+    "elapsed_s": 20.001594266999973,
+    "additional_recorded_bytes": 134217728,
+    "scope": "fsynced chunk counters, not instantaneous network throughput"
+  },
+  "wrapper_fix": "Call bundled setup.py with bundled Python and STRATA_CONTROL_INSTALL=1; retain STRATA_INSTALL_DIR as destination. Original CLI call treated it as source and returned exit 5.",
+  "flash_next_serving": false,
+  "mac_openclaw_restarted": false
+}

@@ -3,16 +3,21 @@
 Status on 2026-11-06: the packaged Terminal and HIP-Halo engine are installed and the pinned model
 download is underway. **Flash-Next is not yet serving. No local performance or
 tool-quality result has been established.** A live GPU-driver reload hit an AMD
-kernel fault, so the dense 27B service is now stopped pending a Linux-host reboot.
+kernel fault; the authorized reboot has now restored the GPU and dense 27B endpoint.
 These scripts are preparation for a separate backend; this
 repository's existing llama.cpp deployment remains available for rollback.
 
 Complete GitHub documentation was published and verified before reboot approval.
-**The user gave go for the Linux-host reboot at 18:31 UTC; recovery is pending.**
+**The user gave go at 18:31 UTC; GPU recovery and a direct completion are verified.**
+The [recovery result](STRATA-RECOVERY-RESULT-2026-11-06.md) records the active
+112 GiB GTT limit and the corrected acquisition wrapper. Downloading has resumed.
 The [full chronological record, host-file archive and recovery runbook](STRATA-RECOVERY-2026-11-06.md)
 cover all actions so far, including the latest download/service snapshot.
 
 ## Host incident — 16:50 UTC
+
+This section records the pre-reboot failure. The host subsequently recovered;
+the current state is in the recovery result linked above.
 
 A headless live reload of `amdgpu`, attempted after stopping the only GPU client,
 crashed in `isp_genpd_remove_device` / `isp_v4_1_1_hw_fini` on Ubuntu kernel
@@ -73,8 +78,11 @@ bash scripts/install-strata-flash-next.sh
 The installer verifies the signed component feed and the model's pinned hashes.
 It uses the packaged engine; no driver, ROCm toolchain, or llama.cpp fork is built.
 Model preparation may acquire the upstream preparation sources when required.
-`STRATA_MODEL_DIR`, `STRATA_INSTALL_DIR`, and `STRATA_BIN` can override the local
+`STRATA_MODEL_DIR`, `STRATA_INSTALL_DIR`, `STRATA_BUNDLE_DIR`, and `STRATA_BIN` can override the local
 paths. Preserve the generated config and the component manifest with results.
+The script invokes the pinned bundle's setup.py with its Python in Control mode;
+in 0.1.57, passing the destination via `STRATA_INSTALL_DIR` to `strata install`
+itself makes that CLI look for the installer in the wrong directory.
 
 On the current host, `strata-flash-next-acquire.service` finishes acquisition and
 preparation in the background after the active shard downloads. It writes
@@ -120,12 +128,12 @@ do not present a difference between those results as an isolated speedup.
 ## Deployment checks still required
 
 1. Finish and verify every model/component download; prepare the model pack.
-2. Resolve the GPU memory limit. Before the fault this host reported 61,905,670,144 bytes of GTT
+2. GPU recovery and limit change are complete. Before the fault this host reported 61,905,670,144 bytes of GTT
    (about 57.7 GiB), plus an 8 GiB BIOS carve-out. The published benchmark host
    used a 112 GiB GTT. Linux initializes the AMD GTT manager and KFD limits from
    TTM at driver initialization; writing a larger sysfs TTM number alone does
-   not prove that the active GPU limit increased. No driver reload or reboot
-   has completed successfully for this deployment; see the failed reload above.
+   not prove that the active GPU limit increased. The authorized reboot applied
+   the new limit: 120,259,084,288 GTT bytes and live GPU access are now verified.
 3. Review the effective memory plan, expert residency, image encoder and native
    context. A small GPU cache with pinned host experts can count memory twice;
    do not force a large cache/budget merely to match a headline.

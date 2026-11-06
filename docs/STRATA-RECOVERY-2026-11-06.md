@@ -7,6 +7,11 @@ and the remaining shard workers exited after SIGINT. Recovery remains unverified
 The snapshot/table below retain the earlier checkpoint state, not live status.
 Do not restart the Mac mini or its OpenClaw gateway.
 
+**Later update:** the authorized reboot completed and GPU/27B endpoint recovery
+was verified. Acquisition needed a wrapper correction before resuming. See the
+[post-reboot result](STRATA-RECOVERY-RESULT-2026-11-06.md); the evidence below
+remains the original pre-reboot record.
+
 This is the operational record for the Linux Strix Halo host. The
 [deployment guide](STRATA-FLASH-NEXT.md) contains installation commands, the
 planned serving settings and benchmark protocol. The

@@ -28,14 +28,14 @@ retries without caching completed responses.
 
 Flash-Next UD-Q4_K_XL on packaged Strata is being staged as the next local
 OpenClaw backend. The model download and deployment checks are still in progress;
-the host currently needs GPU recovery after a failed driver reload, and the dense
-27B service is stopped. See the [Strata deployment notes](docs/STRATA-FLASH-NEXT.md)
+the GPU has recovered after the authorized reboot, and the dense 27B endpoint is
+active during acquisition. See the [Strata deployment notes](docs/STRATA-FLASH-NEXT.md)
 and [handoff](handoff.md). Published Halo speeds are upstream evidence, not yet
 measurements from this host. This is a packaged-engine trial, not an engine fork.
 The [complete pre-reboot record and recovery runbook](docs/STRATA-RECOVERY-2026-11-06.md)
 includes the failed driver reload, archived host changes and resume steps.
-The user authorized the Linux-host reboot at 18:31 UTC after documentation was
-published; post-reboot GPU and endpoint verification remains pending.
+The [recovery result](docs/STRATA-RECOVERY-RESULT-2026-11-06.md) records the active
+112 GiB GTT limit, successful completion check and acquisition-wrapper correction.
 
 ## Previous direction — 2026-11-05
 

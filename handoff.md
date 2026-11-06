@@ -1,22 +1,20 @@
 # Handoff for Francis — Flash-Next staging, 2026-11-06
 
-**Linux-host reboot authorized at 18:31 UTC on 2026-11-06.** The requested
-documentation was pushed and verified first. Acquisition was stopped gracefully
-and both remaining shard workers exited after SIGINT. Reboot recovery has not
-yet been verified. The Mac/OpenClaw gateway remains out of scope for restart.
-Start with the [complete pre-reboot record and recovery sequence](docs/STRATA-RECOVERY-2026-11-06.md)
-and its [timestamped state snapshot](evidence/strata-2026-11-06/pre-reboot-snapshot.json).
+**Linux reboot and GPU recovery verified at 19:04–19:08 UTC on 2026-11-06.**
+The driver is live, kernel taint is zero, GPU nodes are accessible and the
+112 GiB GTT limit is active. The 27B endpoint is back on the GPU and answered a
+direct completion. The Mac/OpenClaw gateway remains out of scope for restart.
+Start with the [recovery result and corrected acquisition wrapper](docs/STRATA-RECOVERY-RESULT-2026-11-06.md).
+The [pre-reboot record](docs/STRATA-RECOVERY-2026-11-06.md) and
+[pre-reboot snapshot](evidence/strata-2026-11-06/pre-reboot-snapshot.json) are historical.
 
 The next backend is Qwen3.8-Flash-Next UD-Q4_K_XL on packaged Strata v0.2.11
 (engine/control 0.1.57). The user has already tested Flash-Next successfully on
 Ollama Cloud; focus this work on local deployment, cold prefill and real tool use.
 The model download is in progress. **Flash-Next is not serving or validated yet.**
-The 27B endpoint is now stopped pending Linux GPU recovery; no Mac/OpenClaw
-restart is authorized. At 16:50 UTC the attempted headless `amdgpu` reload crashed
-in the kernel's ISP teardown. The module is stuck `going`, and GPU device nodes
-are gone. The brief automatic 27B restart used CPU fallback; it was stopped.
-Do not repeat the hot reload. See the incident/recovery section in the deployment
-notes. No host reboot has been performed.
+At 16:50 UTC the attempted headless `amdgpu` reload crashed in the kernel's ISP
+teardown and stopped GPU service. The authorized reboot recovered it. Do not
+repeat that hot reload; preserve the recorded failure and recovery evidence.
 The signed HIP-Halo engine is installed, auto-detected and fully hash-verified;
 only its version probe has executed, not inference.
 
@@ -24,8 +22,8 @@ only its version probe has executed, not inference.
 The published 1,211 tok/s at 128K is an upstream 0.1.40 result, not our result.
 The pre-fault GPU had a 57.7 GiB GTT limit; the upstream benchmark used 112 GiB.
 Do not treat a writable TTM sysfs parameter as proof that
-the already-initialized GTT/KFD limits changed. A 112 GiB TTM boot configuration
-has been prepared; verify the actual limit after recovery.
+the already-initialized GTT/KFD limits changed. The prepared boot configuration
+has now taken effect, with 120,259,084,288 GTT bytes verified after reboot.
 
 Implementation worktree: `/home/less/worktrees/qwen38-strata-20261106`, branch
 `deploy/strata-flash-next-20261106`. Acquisition logs are under
@@ -35,22 +33,23 @@ the launch script is a separate, explicit action on loopback port 8083.
 The enabled user service `strata-flash-next-acquire.service` completes acquisition and
 preparation after the active transfers. Inspect `preparation-status.json` and
 `finish-preparation.log` in the acquisition log folder; it does not switch models.
-Linger is enabled, so acquisition is configured to resume after reboot; that has
-not been boot-tested. The old 27B unit is still enabled and should return on the
-GPU after a clean boot, but that must be verified. At 18:21 UTC approximately
-43.98 GB of target data was durably recorded; shards 1 and 4 were complete and
-verified by the installer, with shards 2 and 3 still partial. MTP and the image
-projector remain pending. Progress will change while waiting for approval.
+Linger and the unit's boot startup worked. The install wrapper initially failed
+because `strata install` interpreted `STRATA_INSTALL_DIR` as a source directory.
+It now calls the pinned bundled setup.py in Control mode, with that variable as
+the destination. Acquisition has demonstrably resumed. At about 19:08 UTC,
+48.34 GB of target data was durably recorded; shards 1 and 4 were complete and
+verified, with shards 2 and 3 partial. MTP and the image projector remain pending.
+The supervisor phase `preparing` includes downloading; inspect the actual log.
 
 The dense-kernel investigation below is deferred. The frozen Qwen3.6 evidence
 and operational setback remain intact; that model stays stopped and disabled.
 Do not publish private OpenClaw transcripts as validation evidence.
 
-## Previous endpoint to recover — currently offline
+## Current restored endpoint — dense 27B during acquisition
 
 - Base URL: `http://100.96.8.54:8080/v1`
 - Model: `qwen3.8-27b-q4-fast`; Q5 remains available on demand.
-- Unit: `qwen38-dflash2.service`, failed with no main process; enabled for boot.
+- Unit: `qwen38-dflash2.service`, active and enabled; boot startup verified.
 - Deployment: `/home/less/qwen38-dflash2`; preserve its pre-existing uncommitted
   `models.ini`, `run-router.sh` and `runtime-candidate/` work.
 - Runtime: `runtime-candidate/vulkan`, source `a82001bd3`, bundled Mesa 26.2.4.
@@ -60,9 +59,10 @@ Do not publish private OpenClaw transcripts as validation evidence.
   checkpoint support remain enabled. Existing 27B weights are retained for reuse.
 
 Completion, tool arguments, continuation and Mac reachability passed on November
-5, before this incident. They must be rechecked after recovery. OpenClaw gateway
-and routing were not changed. Do not reboot/restart the Mac or send synthetic
-channel/agent turns; the user supplies real OpenClaw prompts.
+5. GPU access and a direct completion were rechecked after reboot; no new broad
+tool/remote-reachability test is claimed. OpenClaw gateway and routing were not
+changed. Do not reboot/restart the Mac or send synthetic channel/agent turns;
+the user supplies real OpenClaw prompts.
 
 ## Deferred dense-model investigation
 
