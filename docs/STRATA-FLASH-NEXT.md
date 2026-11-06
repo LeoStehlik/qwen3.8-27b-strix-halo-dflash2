@@ -2,9 +2,32 @@
 
 Status on 2026-11-06: the packaged Terminal and HIP-Halo engine are installed and the pinned model
 download is underway. **Flash-Next is not yet serving. No local performance or
-tool-quality result has been established.** The dense 27B service remains the
-active endpoint. These scripts are preparation for a separate backend; this
+tool-quality result has been established.** A live GPU-driver reload hit an AMD
+kernel fault, so the dense 27B service is now stopped pending a Linux-host reboot.
+These scripts are preparation for a separate backend; this
 repository's existing llama.cpp deployment remains available for rollback.
+
+## Host incident — 16:50 UTC
+
+A headless live reload of `amdgpu`, attempted after stopping the only GPU client,
+crashed in `isp_genpd_remove_device` / `isp_v4_1_1_hw_fini` on Ubuntu kernel
+`7.0.0-42-generic`. The module remains in `going` state and `/dev/dri` and
+`/dev/kfd` disappeared. Reloading it fails. **Do not repeat this hot-reload path
+on this kernel; a clean host reboot is required for recovery.**
+
+The 27B unit briefly restarted with CPU fallback and returned healthy HTTP status;
+that was not restored GPU service. It was stopped explicitly. Its enabled boot
+configuration and model files remain intact. The Mac/OpenClaw gateway was untouched.
+
+Recovery is prepared, not yet executed: `/etc/modprobe.d/70-strata-halo-ttm.conf`
+sets `ttm.pages_limit=29360128` and `ttm.page_pool_size=29360128` for the next
+driver initialization (112 GiB at 4 KiB/page). The updated initramfs contains this
+configuration. [Incident evidence](../evidence/strata-2026-11-06/gpu-reload-incident.json).
+Networking, Tailscale and SSH socket activation are enabled; the existing 27B
+unit remains enabled. Model acquisition has its own enabled user service and
+resumes from verified download pieces after boot. Confirm the actual GTT size,
+GPU devices, offloaded layers and a completion after recovery; HTTP health alone
+is insufficient. A reboot of the local workspace host needs a coordinated interruption.
 
 ## Why this direction
 
@@ -48,7 +71,7 @@ Model preparation may acquire the upstream preparation sources when required.
 `STRATA_MODEL_DIR`, `STRATA_INSTALL_DIR`, and `STRATA_BIN` can override the local
 paths. Preserve the generated config and the component manifest with results.
 
-On the current host, `strata-flash-next-prepare.service` finishes acquisition and
+On the current host, `strata-flash-next-acquire.service` finishes acquisition and
 preparation in the background after the active shard downloads. It writes
 `~/.cache/strata-evaluation-20261106/preparation-status.json` and
 `finish-preparation.log`. It does not load the new model, stop the old service,
@@ -97,7 +120,7 @@ do not present a difference between those results as an isolated speedup.
    used a 112 GiB GTT. Linux initializes the AMD GTT manager and KFD limits from
    TTM at driver initialization; writing a larger sysfs TTM number alone does
    not prove that the active GPU limit increased. No driver reload or reboot
-   has been performed for this deployment.
+   has completed successfully for this deployment; see the failed reload above.
 3. Review the effective memory plan, expert residency, image encoder and native
    context. A small GPU cache with pinned host experts can count memory twice;
    do not force a large cache/budget merely to match a headline.

@@ -1,0 +1,31 @@
+{
+  "timestamp_utc": "2026-11-06T16:50:00Z",
+  "timestamp_precision": "minute",
+  "kernel": "7.0.0-42-generic",
+  "attempted_action": "headless amdgpu unload/reload after stopping the only GPU client",
+  "failure": "kernel page fault during module removal",
+  "fault_site": "isp_genpd_remove_device+0x1d/0xd0",
+  "call_path": [
+    "isp_v4_1_1_hw_fini",
+    "isp_hw_fini",
+    "amdgpu_device_fini_hw",
+    "amdgpu_pci_remove",
+    "amdgpu_exit"
+  ],
+  "result": {
+    "module_initstate": "going",
+    "kernel_tainted": 128,
+    "gpu_device_nodes_present": false,
+    "qwen27b_service": "stopped after detecting CPU fallback",
+    "downloads": "continuing; enabled preparation service resumes after reboot"
+  },
+  "recovery": {
+    "reboot_performed": false,
+    "ttm_pages_limit_next_boot": 29360128,
+    "ttm_page_pool_size_next_boot": 29360128,
+    "initramfs_updated": true,
+    "network_and_ssh_boot_enabled": true,
+    "qwen27b_boot_enabled": true
+  },
+  "inference_validation": "pending recovery and completed model download"
+}

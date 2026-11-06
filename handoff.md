@@ -4,7 +4,12 @@ The next backend is Qwen3.8-Flash-Next UD-Q4_K_XL on packaged Strata v0.2.11
 (engine/control 0.1.57). The user has already tested Flash-Next successfully on
 Ollama Cloud; focus this work on local deployment, cold prefill and real tool use.
 The model download is in progress. **Flash-Next is not serving or validated yet.**
-The 27B endpoint below remains active; no Mac/OpenClaw restart is authorized.
+The 27B endpoint is now stopped pending Linux GPU recovery; no Mac/OpenClaw
+restart is authorized. At 16:50 UTC the attempted headless `amdgpu` reload crashed
+in the kernel's ISP teardown. The module is stuck `going`, and GPU device nodes
+are gone. The brief automatic 27B restart used CPU fallback; it was stopped.
+Do not repeat the hot reload. See the incident/recovery section in the deployment
+notes. No host reboot has been performed.
 The signed HIP-Halo engine is installed, auto-detected and fully hash-verified;
 only its version probe has executed, not inference.
 
@@ -12,17 +17,19 @@ only its version probe has executed, not inference.
 The published 1,211 tok/s at 128K is an upstream 0.1.40 result, not our result.
 Check the GPU's current 57.7 GiB GTT limit before a large model load; the upstream
 benchmark used 112 GiB. Do not treat a writable TTM sysfs parameter as proof that
-the already-initialized GTT/KFD limits changed. No reboot or GPU reload has been
-done for this deployment.
+the already-initialized GTT/KFD limits changed. A 112 GiB TTM boot configuration
+has been prepared; verify the actual limit after recovery.
 
 Implementation worktree: `/home/less/worktrees/qwen38-strata-20261106`, branch
 `deploy/strata-flash-next-20261106`. Acquisition logs are under
 `~/.cache/strata-evaluation-20261106/`. Model data is under
 `~/models/strata-flash-next/`. Installation scripts acquire and prepare only;
 the launch script is a separate, explicit action on loopback port 8083.
-The user service `strata-flash-next-prepare.service` completes acquisition and
+The enabled user service `strata-flash-next-acquire.service` completes acquisition and
 preparation after the active transfers. Inspect `preparation-status.json` and
 `finish-preparation.log` in the acquisition log folder; it does not switch models.
+Linger is enabled, so it resumes after a reboot. The old 27B unit is still enabled
+and should return on the GPU after a clean boot, but that must be verified.
 
 The dense-kernel investigation below is deferred. The frozen Qwen3.6 evidence
 and operational setback remain intact; that model stays stopped and disabled.
