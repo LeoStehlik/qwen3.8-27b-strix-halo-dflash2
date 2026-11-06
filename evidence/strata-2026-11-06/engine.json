@@ -1,0 +1,44 @@
+{
+  "status": "all packaged files verified; model generation not yet tested",
+  "verified": true,
+  "usable": true,
+  "engine": {
+    "id": "strata-engine",
+    "version": "0.1.57",
+    "platform": "linux-x86_64",
+    "backend": "hip",
+    "entrypoint": "strata",
+    "min_runtime": null,
+    "archs": [
+      "gfx1151"
+    ],
+    "min_driver": {},
+    "build_id": "0bdcef4682c5+rocm",
+    "variant": "halo",
+    "signed": true,
+    "file_count": 282,
+    "bytes": 1107091765
+  },
+  "build": {
+    "version": "0.1.57",
+    "source": "f-amd-vision 0bdcef4682c5",
+    "variant": "halo",
+    "archs": [
+      "gfx1151"
+    ],
+    "portable": true,
+    "vision": "gpu",
+    "vision_cpu": "strata-vision",
+    "vision_gpu": "strata-vision-hip",
+    "vision_archs": [
+      "gfx1151"
+    ],
+    "dsv41": false,
+    "hipblaslt_version": 100401
+  },
+  "sha256": {
+    "strata": "bce2f61ca0f970a1640aafa77925c0908f060243cffcd1ad10e3843b35eed476",
+    "engine-component.json": "c6137b6c70f376dbaaa7cc5fd102ead1f0f71d81a73423b0a198028b8c6cbfa7",
+    "tuning/gfx1151-hipblaslt-100401.txt": "7e9e4e81b2306cab0906936e1e836fdf7f2f4e0805d17ab7596ea398a0946ac9"
+  }
+}

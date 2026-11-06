@@ -1,4 +1,34 @@
-# Handoff for Francis — Qwen3.8 return, 2026-11-05
+# Handoff for Francis — Flash-Next staging, 2026-11-06
+
+The next backend is Qwen3.8-Flash-Next UD-Q4_K_XL on packaged Strata v0.2.11
+(engine/control 0.1.57). The user has already tested Flash-Next successfully on
+Ollama Cloud; focus this work on local deployment, cold prefill and real tool use.
+The model download is in progress. **Flash-Next is not serving or validated yet.**
+The 27B endpoint below remains active; no Mac/OpenClaw restart is authorized.
+The signed HIP-Halo engine is installed, auto-detected and fully hash-verified;
+only its version probe has executed, not inference.
+
+[Deployment procedure, exact pins, pending checks and performance attribution](docs/STRATA-FLASH-NEXT.md).
+The published 1,211 tok/s at 128K is an upstream 0.1.40 result, not our result.
+Check the GPU's current 57.7 GiB GTT limit before a large model load; the upstream
+benchmark used 112 GiB. Do not treat a writable TTM sysfs parameter as proof that
+the already-initialized GTT/KFD limits changed. No reboot or GPU reload has been
+done for this deployment.
+
+Implementation worktree: `/home/less/worktrees/qwen38-strata-20261106`, branch
+`deploy/strata-flash-next-20261106`. Acquisition logs are under
+`~/.cache/strata-evaluation-20261106/`. Model data is under
+`~/models/strata-flash-next/`. Installation scripts acquire and prepare only;
+the launch script is a separate, explicit action on loopback port 8083.
+The user service `strata-flash-next-prepare.service` completes acquisition and
+preparation after the active transfers. Inspect `preparation-status.json` and
+`finish-preparation.log` in the acquisition log folder; it does not switch models.
+
+The dense-kernel investigation below is deferred. The frozen Qwen3.6 evidence
+and operational setback remain intact; that model stays stopped and disabled.
+Do not publish private OpenClaw transcripts as validation evidence.
+
+## Previous handoff — 27B return, 2026-11-05
 
 Qwen3.8-27B Q4 + DFlash2 is running on the Strix Halo GPU again. Qwen3.6 is stopped
 and disabled at boot, with its weights, code, builds and frozen performance tag

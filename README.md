@@ -24,7 +24,15 @@ demand. A streaming front proxy collapses concurrent byte-identical inference
 requests into one upstream generation, which avoids duplicate work from client
 retries without caching completed responses.
 
-## Current direction — 2026-11-05
+## Current direction — 2026-11-06
+
+Flash-Next UD-Q4_K_XL on packaged Strata is being staged as the next local
+OpenClaw backend. The model download and deployment checks are still in progress;
+the dense 27B service remains active. See the [Strata deployment notes](docs/STRATA-FLASH-NEXT.md)
+and [handoff](handoff.md). Published Halo speeds are upstream evidence, not yet
+measurements from this host. This is a packaged-engine trial, not an engine fork.
+
+## Previous direction — 2026-11-05
 
 Qwen3.8 GPU serving is restored after Qwen3.6 was retired from daily OpenClaw use.
 The new focus is faster long-context prefill while retaining this model's observed
