@@ -1,0 +1,13 @@
+{
+  "utc": "2026-11-07T14:49:49.212281+00:00",
+  "reason": "User requested stopping experiments to reboot the host. 128K F16 request cancelled deliberately; not an engine failure.",
+  "goal_status_requested": "paused",
+  "strata_service": "inactive, disabled pending clean-boot testing",
+  "old_model_services": "both inactive and disabled",
+  "runtime_override_removed": true,
+  "compaction_proactiveness": 20,
+  "numa_balancing": 0,
+  "sysctl_change_performed": false,
+  "production_config_changed": false,
+  "reboot_executed_by_agent": false
+}

@@ -1,5 +1,27 @@
 # Handoff for Francis — Flash-Next performance investigation, 2026-11-07
 
+**PAUSED FOR USER REBOOT, approximately 14:49 UTC.** All three inference services
+are stopped and disabled; ports 8080, 8083 and 8084 are closed. The user will
+reboot. The agent has not rebooted or changed sysctls. The runtime benchmark
+override is removed. OpenClaw on the Mac was not restarted.
+
+Last completed F16 results: cold 16K **1,390.5 / 41.8 tok/s** prefill/generation;
+cold 64K **1,411.7 / 37.9**. The 128K run was cancelled for this pause. Some
+first requests suffer multi-second GPU queue evictions coinciding with Linux
+memory compaction. `kernel.numa_balancing=0`, `vm.compaction_proactiveness=20`.
+The early PLE flag did not fix all pauses. Generation target remains unmet.
+
+After the user confirms reboot completion, resume the goal and first repeat
+the same F16 configuration under the original host policy. Local runner:
+`python3 ~/.cache/strata-evaluation-20261107/performance/run-arm.py gpu-mmap-f16-cleanboot --sizes 16384 65536 131072`.
+It starts an isolated 8084 service without enabling boot startup. Then consider
+the reversible compaction experiment documented in the performance record.
+The 8083 production config is still the original installer layout. Do not
+blindly enable it; select and validate the intended configuration before
+restoring the private listener and boot startup. No winning config is promoted.
+
+The following paragraphs summarize the investigation before the pause.
+
 **Performance work is active; Tiercel is temporarily offline for isolated
 configuration comparisons at loopback port 8084.** The user set a target of
 1,100 tok/s prefill and 50–60 tok/s generation and explicitly parked tool-call
@@ -36,8 +58,8 @@ See the [policy check evidence](evidence/strata-2026-11-07/openclaw-picker-polic
 
 - API: `http://100.96.8.54:8083/v1`, Tailscale address only, existing provider credential required.
 - Model: `qwen3.8-flash-next-unsloth-ud-q4_k_xl`.
-- Unit: `strata-flash-next.service`, enabled at boot, currently using an isolated
-  runtime benchmark override; automatic systemd restart
+- Unit: `strata-flash-next.service`, stopped and disabled for the user reboot;
+  runtime benchmark override removed. Automatic systemd restart
   after failure remains off. Boot validation for this unit is pending.
 - Strata v0.2.11, engine/control 0.1.57, signed HIP-Halo build `0bdcef4682c5+rocm`.
 - Context 262,144, INT8 KV, one slot, MTP depth 4, prefill 16,384, GPU vision.

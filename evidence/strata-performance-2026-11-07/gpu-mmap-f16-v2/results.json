@@ -1,0 +1,113 @@
+{
+  "protocol": "strata-cold-prefill-custom-v2",
+  "fixture_sha256": "6efd5cb8693d5c7fc9fa826da0e454895172071c7d30283f6eb6c04978875346",
+  "sampling": {
+    "temperature": 0,
+    "enable_thinking": false,
+    "max_tokens": 512
+  },
+  "strata_tune": {},
+  "runs": [
+    {
+      "target_tokens": 0,
+      "repeat": 0,
+      "warmup": true,
+      "nonce": "0123456789abcdef0123456789abcdef",
+      "messages_sha256": "cb5dcf4eb40a4691bba53a26ef206b46d147ba56b0664a57c83899453e5c51ca",
+      "usage": {
+        "prompt_tokens": 151,
+        "completion_tokens": 16,
+        "total_tokens": 167,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 151,
+        "prompt_ms": 8772.0,
+        "prompt_per_token_ms": 58.093,
+        "prompt_per_second": 17.2,
+        "predicted_n": 16,
+        "predicted_ms": 337.0,
+        "predicted_per_token_ms": 21.062,
+        "predicted_per_second": 47.5,
+        "draft_n": 12,
+        "draft_n_accepted": 10
+      },
+      "first_token_s": 8.858187213001656,
+      "elapsed_s": 9.155772528989473,
+      "finish_reason": "length",
+      "complete_stream": true,
+      "output_sha256": "d779c0a457fe737984fd9d436ecb1a3551c2f5cfb1db96875b950867d007d6cf"
+    },
+    {
+      "target_tokens": 16384,
+      "repeat": 0,
+      "warmup": false,
+      "nonce": "51b0e56beedf47519101a984836475cb",
+      "messages_sha256": "f7e72094ee03c2a39780a0d074e5ddc745423b1ac41d6f9008174c9aa124a668",
+      "usage": {
+        "prompt_tokens": 16394,
+        "completion_tokens": 512,
+        "total_tokens": 16906,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 16394,
+        "prompt_ms": 11790.4,
+        "prompt_per_token_ms": 0.719,
+        "prompt_per_second": 1390.5,
+        "predicted_n": 512,
+        "predicted_ms": 12247.3,
+        "predicted_per_token_ms": 23.921,
+        "predicted_per_second": 41.8,
+        "draft_n": 440,
+        "draft_n_accepted": 289
+      },
+      "first_token_s": 11.841548012991552,
+      "elapsed_s": 24.056123229995137,
+      "finish_reason": "length",
+      "complete_stream": true,
+      "output_sha256": "11bf6fb2622e62e40e81a93480901fc3f66dc1b43fcfb8b9581ed614907a4dc2"
+    },
+    {
+      "target_tokens": 65536,
+      "repeat": 0,
+      "warmup": false,
+      "nonce": "8bf7e02cb2964ad395dc278ca0885845",
+      "messages_sha256": "dffd5ab75bc6d767919a31f5208868233cc3f523dbf615cf8ee7ec75935ee2e3",
+      "usage": {
+        "prompt_tokens": 65547,
+        "completion_tokens": 512,
+        "total_tokens": 66059,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 65547,
+        "prompt_ms": 46432.6,
+        "prompt_per_token_ms": 0.708,
+        "prompt_per_second": 1411.7,
+        "predicted_n": 512,
+        "predicted_ms": 13492.7,
+        "predicted_per_token_ms": 26.353,
+        "predicted_per_second": 37.9,
+        "draft_n": 459,
+        "draft_n_accepted": 274
+      },
+      "first_token_s": 46.50489784099045,
+      "elapsed_s": 59.96439987399208,
+      "finish_reason": "length",
+      "complete_stream": true,
+      "output_sha256": "3bab0b3af18fd083d46343252a7afea7e240007bee5aeaecb35971634cb8dd0d"
+    }
+  ],
+  "completed": false,
+  "interruption": "User requested stopping experiments to reboot the host. 128K F16 request cancelled deliberately; not an engine failure."
+}

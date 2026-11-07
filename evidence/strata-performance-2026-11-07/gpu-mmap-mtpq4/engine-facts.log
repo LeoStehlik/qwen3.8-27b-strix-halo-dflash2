@@ -1,0 +1,58 @@
+[strata] 2026-11-07 14:24:18 engine started: /home/less/.local/share/strata/components/engine/0.1.57-linux-x86_64-hip-halo/strata --serve --pack /home/less/models/strata-flash-next/packs/unsloth-ud-q4_k_xl --native /home/less/models/strata-flash-next/models/unsloth-UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf --expert-profile /home/less/.local/share/strata/terminal/0.1.57/data/expert-profile.bin --expert-cache auto --prefill 16384 --spec 4 --spec-min-p 0.5 --mtp /home/less/models/strata-flash-next/mtp/rt --max-context 262144 --kv int8 --ple-io mmap --kv-resident 32768 --vision --vram-reserve-mib 700 --mmap-experts --no-prefill-borrow --mtp-q4 all
+strata: gfx1151 (Strix Halo): 19 exact speed switches on by default (STRATA_GFX1151_DEFAULTS=0 turns them off; a switch you set is kept): GDN_HEAD GDN_PP GDN_CONVL2 GDN_NOY CVEC_FUSE HCD_EXACT PF_PAD TOPK_REG_MIN_BLOCKS Q8_PACKED Q6_PACKED MMVF_ROWS ATTN_LANECELL EXPERT_V2 TSUM LFUSE GDN_SPLIT QFUSE PLE_BATCH SH_STREAM
+strata: Strix Halo (gfx1151): 8-bit hyper-connection weights are on (decode about 9% faster, answers can differ in near-tie tokens); STRATA_HC_Q8=0 keeps the bf16 read
+strata generate: KV streaming: 32768 of 262144 cells per QSA layer in VRAM, the K/V in 3.09 GiB of pinned RAM
+strata generate: PLE on, table 320001536 rows of /home/less/models/strata-flash-next/models/unsloth-UD-Q4_K_XL/Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf
+strata mtp: --mtp-q4: 10 projections as Q4_0 (37.3 MiB)
+strata generate: GPU 0: AMD Radeon 8060S Graphics (gfx1151)
+strata generate: WARNING: STRATA_IO_PREFETCH=1 with the adaptive tier on an AMD iGPU (gfx1151): GPU resets were seen with this combination under memory pressure (Radeon 780M); --adapt-every 100000 avoided them. Continuing as asked.
+strata generate: expert cache auto: this GPU shares system RAM: 97.89 GiB free on the GPU, but the OS has 98.82 GiB available; 9.22 GiB stay for the desktop, so the cache is sized from 89.60 GiB (STRATA_UMA_RESERVE_GIB changes the reserve, --expert-cache N sets the cache)
+strata generate: expert cache auto: 89.60 GiB free, 700 MiB reserved (+281 MiB for the draft head, +256 MiB for what is allocated after the cache) -> 20866 slots
+strata generate: expert cache 24576 slots, 71.73 GiB of VRAM; policy is
+prefill gemm: hipBLASLt tuning enabled (90 rows, gfx1151, version 100401)
+strata generate: the profile fill asks for 256 pairs ahead (STRATA_FILL_AHEAD)
+strata generate: R4 hit path ON - resident experts are computed on the GPU
+strata generate: token graph hit path: 24576 resident experts, decided on the device
+strata serve: the prompt path allocates its own buffers (too few cache slots to borrow)
+strata: STRATA_HIP_WMMA: the prompt attention on matrix cores on (gfx1151)
+prefill gemm: hipBLASLt tuning enabled (90 rows, gfx1151, version 100401)
+strata verify: window up to 6 tokens, 96.2 MiB of device buffers (100% VRAM resident: zero-doorbell graph)
+strata mtp: --mtp-q4: draft head over 106299 tokens as Q4_0 (146.0 MiB read per step, was 275.7)
+strata serve: 19295 MiB of VRAM free with everything loaded
+strata verify: capturing the 6-token window (19295 MiB of VRAM free)
+strata verify: capturing the 3-token window (19253 MiB of VRAM free)
+strata verify: capturing the 1-token window (19120 MiB of VRAM free)
+strata verify: capturing the 4-token window (19108 MiB of VRAM free)
+strata verify: capturing the 2-token window (19099 MiB of VRAM free)
+strata serve: prompt 70 tokens = 0 reused + 70 read in 1248 ms (56.1 tok/s), 16 generated in 331 ms (48.3 tok/s), drafts accepted 10 of 13, 1 checkpoints
+strata serve: expert tiers: GPU 0 hits this request; since the start RAM 0 blobs, files 0 blobs 77021.0 MB read (the GGUF in place)
+strata serve: file tier I/O this request: the OS read 123410.1 MB from storage (924 major faults) for 77021.0 MB of expert reads; page cache held 36378.7 MB at the read, not 40642.3 MB; io prefetch: 0 read ahead (40934.9 MB by pread), 0 used, 0 unused, 0 skipped (cached), 0 dropped; decode waited 49790.3 ms in 24577 fetches; decode gate: cache room -1.00 of the experts, read-ahead used 100%, page cache held 0% of the decode's reads (EWMA), open, closed in 0 windows so far, 0 flips; read ahead 0.0 MB, 0.0 MB of it used; 0 late, 0 not admitted (confidence), 0 (budget 0 MB/window)
+strata serve: KV streaming: 97.82% of 12108 block reads hit VRAM, 1.1 MiB read from RAM
+strata serve: prompt 16391 tokens = 0 reused + 16391 read in 14553 ms (1126.3 tok/s), 512 generated in 21098 ms (24.3 tok/s), drafts accepted 280 of 467, 1 checkpoints
+strata serve: expert tiers: GPU 0 hits this request; since the start RAM 0 blobs, files 0 blobs 77021.0 MB read (the GGUF in place)
+strata serve: file tier I/O this request: the OS read 390.3 MB from storage (211 major faults) for 0.0 MB of expert reads; page cache held 0.0 MB at the read, not 0.0 MB; io prefetch: 0 read ahead (0.0 MB by pread), 0 used, 0 unused, 0 skipped (cached), 0 dropped; decode waited 0.0 ms in 0 fetches; decode gate: cache room -1.00 of the experts, read-ahead used 100%, page cache held 0% of the decode's reads (EWMA), open, closed in 0 windows so far, 0 flips; read ahead 0.0 MB, 0.0 MB of it used; 0 late, 0 not admitted (confidence), 0 (budget 0 MB/window)
+strata serve: KV streaming: 99.06% of 4344252 block reads hit VRAM, 164.1 MiB read from RAM
+strata serve: prompt 67 tokens = 0 reused + 67 read in 857 ms (78.2 tok/s), 16 generated in 330 ms (48.6 tok/s), drafts accepted 9 of 11, 1 checkpoints
+strata serve: expert tiers: GPU 0 hits this request; since the start RAM 0 blobs, files 0 blobs 77021.0 MB read (the GGUF in place)
+strata serve: file tier I/O this request: the OS read 1.6 MB from storage (0 major faults) for 0.0 MB of expert reads; page cache held 0.0 MB at the read, not 0.0 MB; io prefetch: 0 read ahead (0.0 MB by pread), 0 used, 0 unused, 0 skipped (cached), 0 dropped; decode waited 0.0 ms in 0 fetches; decode gate: cache room -1.00 of the experts, read-ahead used 100%, page cache held 0% of the decode's reads (EWMA), open, closed in 0 windows so far, 0 flips; read ahead 0.0 MB, 0.0 MB of it used; 0 late, 0 not admitted (confidence), 0 (budget 0 MB/window)
+strata serve: KV streaming: 97.72% of 11052 block reads hit VRAM, 1.0 MiB read from RAM
+strata serve: prompt 16394 tokens = 0 reused + 16394 read in 13121 ms (1249.4 tok/s), 512 generated in 12356 ms (41.4 tok/s), drafts accepted 278 of 444, 2 checkpoints
+strata serve: expert tiers: GPU 0 hits this request; since the start RAM 0 blobs, files 0 blobs 77021.0 MB read (the GGUF in place)
+strata serve: file tier I/O this request: the OS read 24.1 MB from storage (82 major faults) for 0.0 MB of expert reads; page cache held 0.0 MB at the read, not 0.0 MB; io prefetch: 0 read ahead (0.0 MB by pread), 0 used, 0 unused, 0 skipped (cached), 0 dropped; decode waited 0.0 ms in 0 fetches; decode gate: cache room -1.00 of the experts, read-ahead used 100%, page cache held 0% of the decode's reads (EWMA), open, closed in 0 windows so far, 0 flips; read ahead 0.0 MB, 0.0 MB of it used; 0 late, 0 not admitted (confidence), 0 (budget 0 MB/window)
+strata serve: KV streaming: 99.06% of 4214820 block reads hit VRAM, 159.6 MiB read from RAM
+strata serve: prompt 67 tokens = 0 reused + 67 read in 866 ms (77.4 tok/s), 16 generated in 353 ms (45.3 tok/s), drafts accepted 8 of 9, 1 checkpoints
+strata serve: expert tiers: GPU 0 hits this request; since the start RAM 0 blobs, files 0 blobs 77021.0 MB read (the GGUF in place)
+strata serve: file tier I/O this request: the OS read 1.5 MB from storage (0 major faults) for 0.0 MB of expert reads; page cache held 0.0 MB at the read, not 0.0 MB; io prefetch: 0 read ahead (0.0 MB by pread), 0 used, 0 unused, 0 skipped (cached), 0 dropped; decode waited 0.0 ms in 0 fetches; decode gate: cache room -1.00 of the experts, read-ahead used 100%, page cache held 0% of the decode's reads (EWMA), open, closed in 0 windows so far, 0 flips; read ahead 0.0 MB, 0.0 MB of it used; 0 late, 0 not admitted (confidence), 0 (budget 0 MB/window)
+strata serve: KV streaming: 97.67% of 10836 block reads hit VRAM, 1.0 MiB read from RAM
+strata serve: prompt 16394 tokens = 0 reused + 16394 read in 13128 ms (1248.7 tok/s), 512 generated in 12494 ms (41.0 tok/s), drafts accepted 257 of 349, 2 checkpoints
+strata serve: expert tiers: GPU 0 hits this request; since the start RAM 0 blobs, files 0 blobs 77021.0 MB read (the GGUF in place)
+strata serve: file tier I/O this request: the OS read 15.5 MB from storage (0 major faults) for 0.0 MB of expert reads; page cache held 0.0 MB at the read, not 0.0 MB; io prefetch: 0 read ahead (0.0 MB by pread), 0 used, 0 unused, 0 skipped (cached), 0 dropped; decode waited 0.0 ms in 0 fetches; decode gate: cache room -1.00 of the experts, read-ahead used 100%, page cache held 0% of the decode's reads (EWMA), open, closed in 0 windows so far, 0 flips; read ahead 0.0 MB, 0.0 MB of it used; 0 late, 0 not admitted (confidence), 0 (budget 0 MB/window)
+strata serve: KV streaming: 98.97% of 3758796 block reads hit VRAM, 156.1 MiB read from RAM
+strata serve: prompt 68 tokens = 0 reused + 68 read in 895 ms (76.0 tok/s), 16 generated in 262 ms (61.0 tok/s), drafts accepted 11 of 12, 1 checkpoints
+strata serve: expert tiers: GPU 0 hits this request; since the start RAM 0 blobs, files 0 blobs 77021.0 MB read (the GGUF in place)
+strata serve: file tier I/O this request: the OS read 1.3 MB from storage (0 major faults) for 0.0 MB of expert reads; page cache held 0.0 MB at the read, not 0.0 MB; io prefetch: 0 read ahead (0.0 MB by pread), 0 used, 0 unused, 0 skipped (cached), 0 dropped; decode waited 0.0 ms in 0 fetches; decode gate: cache room -1.00 of the experts, read-ahead used 100%, page cache held 0% of the decode's reads (EWMA), open, closed in 0 windows so far, 0 flips; read ahead 0.0 MB, 0.0 MB of it used; 0 late, 0 not admitted (confidence), 0 (budget 0 MB/window)
+strata serve: KV streaming: 97.73% of 11088 block reads hit VRAM, 1.0 MiB read from RAM
+strata serve: prompt 16393 tokens = 0 reused + 16393 read in 13107 ms (1250.7 tok/s), 512 generated in 12583 ms (40.7 tok/s), drafts accepted 294 of 554, 2 checkpoints
+strata serve: expert tiers: GPU 0 hits this request; since the start RAM 0 blobs, files 0 blobs 77021.0 MB read (the GGUF in place)
+strata serve: file tier I/O this request: the OS read 16.3 MB from storage (0 major faults) for 0.0 MB of expert reads; page cache held 0.0 MB at the read, not 0.0 MB; io prefetch: 0 read ahead (0.0 MB by pread), 0 used, 0 unused, 0 skipped (cached), 0 dropped; decode waited 0.0 ms in 0 fetches; decode gate: cache room -1.00 of the experts, read-ahead used 100%, page cache held 0% of the decode's reads (EWMA), open, closed in 0 windows so far, 0 flips; read ahead 0.0 MB, 0.0 MB of it used; 0 late, 0 not admitted (confidence), 0 (budget 0 MB/window)
+strata serve: KV streaming: 99.14% of 4794012 block reads hit VRAM, 165.6 MiB read from RAM

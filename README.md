@@ -26,18 +26,25 @@ retries without caching completed responses.
 
 ## Current direction — 2026-11-07
 
-**Performance investigation active:** the private Tiercel endpoint is temporarily
+**Paused for a user reboot:** all inference services are stopped and disabled,
+with configuration and models retained. The last F16 screen reached 1,412 tok/s
+cold prefill at 64K, but generation was 37.9 and intermittent GPU queue eviction
+remains under investigation. No optimized configuration has been promoted.
+See the [handoff](handoff.md) for the exact resume point.
+
+**Performance investigation paused:** the private Tiercel endpoint is temporarily
 offline while configurations are compared at loopback port 8084. Enabling the
 packaged opt-in Halo kernels raised cold prefill to 1,234 tok/s at 64K and
 1,211 at 128K; generation is still 31–33 tok/s. These are custom benchmark
 results, not broad agent validation. See the [performance record](docs/STRATA-PERFORMANCE-2026-11-07.md)
 and [handoff](handoff.md) for current state and restoration instructions.
 
-Flash-Next UD-Q4_K_XL is running on packaged Strata v0.2.11 / HIP-Halo 0.1.57
-and connected to OpenClaw's existing `tiercelmoe` provider. Select
+Flash-Next UD-Q4_K_XL was deployed on packaged Strata v0.2.11 / HIP-Halo 0.1.57
+and connected to OpenClaw's existing `tiercelmoe` provider. After service is restored, select
 `/model qwen-flash-next`. The authenticated private API is
 `http://100.96.8.54:8083/v1`, with 262,144 context, INT8 KV, MTP and vision enabled.
-The Strata unit is enabled; the old dense 27B service is stopped and disabled,
+The Strata unit is currently stopped and disabled for the reboot pause;
+the old dense 27B service is also stopped and disabled,
 with all files retained for rollback.
 
 Direct generation, exact tool/result continuation, streaming from the Mac mini

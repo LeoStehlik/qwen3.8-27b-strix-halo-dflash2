@@ -24,10 +24,14 @@ def main():
     ap.add_argument('--repeat', type=int, default=2)
     ap.add_argument('--max-tokens', type=int, default=128,
                     help='Output allowance for benchmark requests only')
+    ap.add_argument('--spec-min-p', type=float,
+                    help='Optional Strata draft-confidence override for these requests only')
     ap.add_argument('--model', default='qwen3.8-flash-next-unsloth')
     args = ap.parse_args()
     if args.repeat < 1 or args.max_tokens < 1 or any(n < 1024 for n in args.sizes):
         ap.error('Use positive repeats/output allowance and sizes of at least 1024 tokens')
+    if args.spec_min_p is not None and not 0 <= args.spec_min_p <= 1:
+        ap.error('--spec-min-p must be between zero and one')
     raw = args.fixture.read_bytes()
     source = raw.decode('utf-8')
     if not source.strip():
@@ -35,9 +39,10 @@ def main():
     headers = {'Content-Type': 'application/json'}
     if os.environ.get('STRATA_API_KEY'):
         headers['Authorization'] = 'Bearer ' + os.environ['STRATA_API_KEY']
-    report = {'protocol': 'strata-cold-prefill-custom-v1',
+    report = {'protocol': 'strata-cold-prefill-custom-v2',
               'fixture_sha256': hashlib.sha256(raw).hexdigest(),
               'sampling': {'temperature': 0, 'enable_thinking': False, 'max_tokens': args.max_tokens},
+              'strata_tune': {} if args.spec_min_p is None else {'spec_min_p': args.spec_min_p},
               'runs': [], 'completed': False}
 
     def request(path, body, timeout=1800):
@@ -62,12 +67,14 @@ def main():
             return int(json.load(r)['input_tokens'])
 
     def run(text, target, repetition, warmup=False):
-        nonce = uuid.uuid4().hex
+        nonce = '0123456789abcdef' * 2 if warmup else uuid.uuid4().hex
         msg = messages(text, nonce)
         body = {'model': args.model, 'messages': msg, 'stream': True,
                 'stream_options': {'include_usage': True}, 'temperature': 0,
                 'reasoning_effort': 'none', 'chat_template_kwargs': {'enable_thinking': False},
                 'max_tokens': args.max_tokens if not warmup else 16}
+        if report['strata_tune']:
+            body['strata_tune'] = report['strata_tune']
         start = time.monotonic()
         first = None
         usage = timings = None
@@ -110,7 +117,9 @@ def main():
         print(json.dumps(row), flush=True)
 
     try:
-        run('Explain what a compiler does.', 0, 0, warmup=True)
+        # Stay above the engine's 64-token short-read boundary. A random nonce
+        # and a tiny warm-up could select different paths between fresh loads.
+        run('Explain what a compiler does. ' * 16, 0, 0, warmup=True)
         for size in args.sizes:
             # Repetition changes expert distributions; record the fixture and
             # construction method, and also judge separate real OpenClaw traffic.

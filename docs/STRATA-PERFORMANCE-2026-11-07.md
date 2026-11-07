@@ -1,6 +1,11 @@
 # Flash-Next performance investigation — November 7, 2026
 
-Investigation in progress. Target: at least 1,100 tokens/s cold prefill and
+**Paused for a user-performed reboot, approximately 14:49 UTC.** Strata and both
+old model services are stopped and disabled. No inference listener remains.
+The runtime benchmark override was removed. No reboot was executed by the
+agent, and no compaction/sysctl change has been made.
+
+Target: at least 1,100 tokens/s cold prefill and
 50–60 tokens/s generation on the existing UD-Q4_K_XL model. Tool-call debugging
 is explicitly deferred. Do not substitute a smaller quant or context to meet
 the target.
@@ -55,6 +60,8 @@ promising screening result.
 | Fast prompt kernels, 128K | 131,078 | 1,211.3 | 32.2 | 512 |
 | All GPU experts, direct PLE, own prompt buffers | 16,393 | 990.2 | 28.4 | 512 |
 | All GPU experts, mmap PLE, own prompt buffers | 16,392 | 1,223.6 | 42.2 | 512 |
+| Same layout, full GPU KV | 65,548 | 1,240.1 | 39.3 | 512 |
+| Same layout, full GPU KV | 131,073 | 1,202.1 | 37.9 | 512 |
 
 The fast prompt set is opt-in on Linux Halo in this release. It was absent
 from the generated installation. The benchmark changes only these environment
@@ -126,14 +133,111 @@ Do not simply increase the pinned host budget: driver accounting and duplicate
 storage can exhaust the shared pool. The PLE table is still used in every arm;
 `--no-ple` is not a performance option for a real deployment.
 
+## Generation profile and rejected experiments
+
+With the all-expert GPU / mmap PLE layout, `STRATA_DECODE_TIMING=1` and
+`STRATA_VERIFY_PROFILE=1` measured 229 generation windows after a cold 16K
+prompt, averaging 2.24 emitted tokens/window:
+
+| Wall-time component | ms/window | Share |
+|---|---:|---:|
+| Main-model verification | 49.80 | 84.8% |
+| Drafting | 8.94 | 15.2% |
+| Other, commit/emission, adaptation | about 0.02 | below 0.1% |
+
+CPU expert work, PCIe expert work and adaptive swaps were zero in this layout.
+The GPU event profile reported 49.62 ms/window (cumulative over 230 windows),
+with expert matrix operations at 17.70 ms: about 35.7% of profiled GPU work.
+This is not the same denominator as total request wall time. The profiler
+slows generation: this instrumented run reached 38.0 tok/s, versus 42.2 in the
+earlier uninstrumented screen. Do not quote the instrumented result as a new
+speed baseline.
+
+Adding `--mtp-q4 all` quantizes only the draft projections/head. Its first
+16K run stalled for several seconds around output token 238, resumed without
+an engine restart, and averaged 24.3 tok/s. An SVM restore workqueue warning
+appeared around the same time; this is correlation, not an established cause.
+A repeat without the stall reached 41.4 tok/s. Request-local draft confidence
+floors 0.7 and 0.3 reached 41.0 and 40.7 respectively, versus 0.5's 41.4. These
+single screens show no benefit over the original drafter's 42.2; neither the
+smaller drafter nor a new confidence floor is selected.
+
+The telemetry and unsuccessful arms are retained alongside successful ones.
+The main-model quant, context and user-facing sampling settings were unchanged.
+`--spec-min-p` in the benchmark sets only a request-local proposal-confidence
+threshold; it does not change the request's sampling temperature.
+
+Full GPU KV residency completed 64K and 128K requests as recorded above.
+Its first 16K request also stalled
+and measured 1,092.7 prefill / 27.1 generation. The new layout is therefore
+not yet a stable deployment recommendation. A relevant existing safeguard is
+`STRATA_VERIFY_EARLY_PLE_FLAG=1`: the release-pinned verifier documents raising
+the lookup-table-ready flag before *every* graph launch, whereas HIP normally
+does so only for each graph's first launch. Testing it may distinguish the
+lookup/GPU wait interaction from ordinary compute cost; no fix is claimed yet.
+
+With that safeguard, the first 16K request completed at 1,224.7 / 40.6 tok/s
+without a generation stall, although the tiny warm-up still took 7.35 seconds
+in prefill. Adding the existing `STRATA_EXPERT_V2K=1` kernel gave 1,020.2 / 41.8;
+the small generation difference is insufficient to select it from one run.
+The initial stall is not proven fixed.
+
+### Protocol correction for subsequent comparisons
+
+Version 1's tiny warm-up plus a random hexadecimal nonce ranged across the
+engine's 64-token short-read boundary. In particular the V2K arm warmed with
+64 input tokens, taking a different prompt path from the preceding arm's 67.
+This confounds small first-request prefill differences. The source-text probe
+itself still used fresh nonces and reported zero prompt reuse.
+
+Protocol version 2 uses the same fixed 151-token warm-up for each fresh load,
+above that threshold. The measured request retains its fresh nonce. A new
+control and F16 prompt-kernel comparison use this corrected protocol; old
+results are preserved under version 1, not silently rewritten.
+
+### Last results before the reboot pause
+
+| Protocol v2 configuration | Actual input | Prefill tok/s | Generation tok/s |
+|---|---:|---:|---:|
+| All experts + KV on GPU, mmap PLE, early PLE flag | 16,395 | 815.4 | 41.4 |
+| Same, `STRATA_PF_F16=1` | 16,394 | 1,390.5 | 41.8 |
+| Same F16, 64K | 65,547 | 1,411.7 | 37.9 |
+
+All three generated 512 tokens and reused zero prompt tokens. The control
+contained a several-second pause during prefill; do not attribute its entire
+gap to F16. F16's 151-token warm-up also paused (8.772 seconds). The F16 128K
+request was deliberately cancelled for the user's reboot; it is incomplete,
+not a failed correctness or throughput result. F16 changes rounding and has
+not received model-quality validation here. No candidate was promoted.
+
+The new kernel-memory sampler records a stronger explanation for the pauses:
+the inference process's KFD `evicted_ms` reached 12,433 ms while background
+compaction scanned about 25.8 million pages and successful page migrations
+rose sharply. The vision process was also evicted. This establishes actual
+GPU queue eviction overlapping memory compaction, but does not yet prove
+which migration policy triggered it. NUMA balancing is already zero on this
+single-node machine. `vm.compaction_proactiveness` is still its original 20.
+
+After reboot, repeat the same F16 configuration with the original host policy
+first. If pauses recur, compare a fresh load with
+`sudo sysctl -w vm.compaction_proactiveness=0`, recording/restoring the original
+20 as appropriate. This is a proposed reversible experiment, not a change
+already made. [Kernel documentation](https://docs.kernel.org/admin-guide/sysctl/vm.html#compaction-proactiveness)
+describes both the background migration and the potential latency spikes.
+
+Generation's 50–60 tok/s target remains unmet. The public workload subset in
+`benchmarks/strata-generation.py` is prepared and syntax-checked but has **not
+been run**. Tool-call investigation remains parked.
+
 ## Operational state during measurements
 
-The production private listener at `100.96.8.54:8083` is temporarily unavailable.
-The same service is running isolated arms at `127.0.0.1:8084`, using a runtime
+The production private listener at `100.96.8.54:8083` is unavailable.
+During the comparisons the service ran isolated arms at `127.0.0.1:8084`, using a runtime
 drop-in at `$XDG_RUNTIME_DIR/systemd/user/strata-flash-next.service.d/90-benchmark.conf`.
-Persistent production configuration is preserved. Remove that specific override
-and reload/start the service to restore the original deployment, or first
-install the measured winning configuration. Do not remove unrelated drop-ins.
+That override has now been removed and the service stopped and disabled for
+the reboot pause. Persistent production configuration is preserved, but it is
+the original slow installer layout. Do not enable it blindly on boot; finish
+the clean-boot comparison and select a validated configuration first.
 
 No OpenClaw restart, Mac reboot, GPU driver reload, model download or engine
 source patch was performed for these comparisons. Old 27B and Qwen3.6 remain
