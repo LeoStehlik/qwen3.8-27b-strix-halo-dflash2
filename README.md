@@ -26,12 +26,14 @@ retries without caching completed responses.
 
 ## Current direction — 2026-11-07
 
-**Experiments paused for the user's real OpenClaw test.** The selected packaged
+**Optimization resumed: target 1,700–2,000 tok/s prefill, then 50–70 tok/s generation.** The selected packaged
 configuration reached 1,416 tok/s cold prefill at 64K, 1,363 at 128K and 1,301
 at 192K, retaining the same model quantization and 262,144 context capacity.
 Generation on that fixture is about 37–41 tok/s, below the 50–60 target.
-The private Tiercel preview is loaded and reachable from the Mac mini;
-benchmarks are stopped. The user is testing real OpenClaw traffic.
+The private Tiercel preview is loaded and reachable from the Mac mini.
+The user approved the result of a real beta-release/co-authored-PR research
+task; the first 13 live calls averaged 1,327 prefill / 47.2 generation.
+Read the [updated objective](docs/STRATA-NEXT-TARGETS-2026-11-07.md).
 
 The expert-dispatch experiment was slower and is rejected with
 [code and evidence](experiments/strata-f16-persistent-dispatch/README.md).

@@ -1,14 +1,18 @@
 # Handoff for Francis — Flash-Next performance investigation, 2026-11-07
 
-**Performance investigation paused at the user's request for real OpenClaw testing.**
-Benchmarks are stopped. The best measured packaged F16 configuration loaded
-on private 8083 at 16:08:49 UTC; authenticated access from the Mac mini passed.
-OpenClaw PID 369 remains unchanged. The first real user request was observed
-at 15,388 prompt tokens, about 1,284 tok/s prefill and 45 tok/s generation
-while thinking; this is not a completed agent-quality verdict.
-The new 64K control reached **1,416.0 tok/s prefill / 39.3 generation**.
-The thinking-enabled benchmark was interrupted; spec-6/spec-8 were not run.
-No kernel experiment or tuning-table change is promoted.
+**Performance investigation resumed with higher targets: 1,700–2,000 tok/s
+prefill first, then 50–70 tok/s sustained generation.** These supersede the old
+goal wording. Read the [updated objective and experiment order](docs/STRATA-NEXT-TARGETS-2026-11-07.md).
+
+The user reviewed Francis's real GitHub beta-release/co-authored-PR investigation
+and was pleased with the result. The first 13 completed live calls averaged
+**1,327 tok/s prefill / 47.2 generation**, excluding reused prompt tokens.
+This validates that task by the user's assessment; broader quality is not proven.
+The measured packaged configuration remains the baseline and serves private
+8083. No losing kernel experiment or partial tuning table is deployed.
+The thinking-enabled synthetic probe was interrupted for that live test;
+spec-6/spec-8 were not run. The next prefill experiment separates expert-kernel
+costs and captures row distributions before changing the kernel pipeline.
 
 The investigation resumed after the user's clean reboot at 14:51:52 UTC.
 The original-policy F16 comparison completed: cold 16K **1,074.3 / 40.3 tok/s**,
@@ -16,8 +20,8 @@ The original-policy F16 comparison completed: cold 16K **1,074.3 / 40.3 tok/s**,
 The first request overlapped GPU queue evictions; long requests were faster.
 Rebooting did not eliminate the memory-restore warnings or page migrations.
 
-**Prefill is the first priority, including gains beyond 1,400 tok/s.** The
-faster build has been profiled; use that profile to choose further changes. Generation's 50–60 tok/s target
+**Prefill is the first priority, now targeting 1,700–2,000 tok/s.** The
+faster build has been profiled; use that profile to choose further changes. Generation's revised 50–70 tok/s target
 remains active but comes second; tool-call debugging stays parked. Public
 probes reached 49.8 tok/s prose, 45.2 on a 16K document, and 57.7 code. These
 are workload-dependent results, not a broad 50–60 tok/s baseline.
@@ -46,8 +50,8 @@ are archived. Residual write/normalization measured 191–195 GB/s against
 213–233 GB/s for a simple GPU copy: modest remaining headroom, roughly 1.5%
 overall under a simple estimate. The matrix calibration selected solution 2390
 for all three large FP16 shapes, already in the packaged table. No kernel or
-table change was promoted. Generation comparisons are paused after the control; the user is testing
-real traffic before more tuning.
+table change was promoted. The user has now resumed optimization with the higher targets; prefill work
+comes before the remaining generation comparisons.
 
 The packaged engine is serving the optimized private-8083 preview for the
 user test; loopback benchmarks are stopped. Proactive compaction is back at the original **20**; no persistent

@@ -1,15 +1,16 @@
 # Flash-Next performance investigation — November 7, 2026
 
-**Paused at the user's request for live OpenClaw testing.** Benchmarks are
-stopped. The best measured packaged configuration is loaded on the existing
-authenticated Tiercel endpoint, verified from the Mac mini. Prefill priority remains first,
-including useful gains beyond 1,400 tok/s; generation's 50–60 goal is unmet.
-No losing source experiment or partial tuning table was deployed.
+**Resumed with higher objectives after a successful real OpenClaw test.** The
+user now targets **1,700–2,000 tok/s prefill**, then **50–70 tok/s generation**.
+The selected packaged baseline is serving the authenticated Tiercel endpoint.
+The initial 13 live calls averaged 1,327 prefill / 47.2 generation; the user
+reviewed the beta-release/PR research result and was pleased. No losing source
+experiment or partial tuning table is deployed.
 
-Target: at least 1,100 tokens/s cold prefill and
-50–60 tokens/s generation on the existing UD-Q4_K_XL model. Tool-call debugging
-is explicitly deferred. Do not substitute a smaller quant or context to meet
-the target.
+[Updated objective and next experiment order](STRATA-NEXT-TARGETS-2026-11-07.md).
+Keep the existing UD-Q4_K_XL model, full context capacity and useful agent
+behaviour. The earlier 1,100 / 50–60 target below is historical. Tool-call
+changes remain out of scope unless validation exposes a relevant regression.
 
 ## Initial deployment missed the target
 
