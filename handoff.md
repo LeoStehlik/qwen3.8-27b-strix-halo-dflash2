@@ -12,6 +12,13 @@ Read the [connection record and reproducible provider patch](docs/STRATA-OPENCLA
 [first-load evidence](docs/STRATA-FIRST-LOAD-2026-11-07.md) and
 [deployment checklist](docs/STRATA-FLASH-NEXT.md).
 
+**Picker correction:** the initial configured-catalog check did not catch the
+old Qwen3.6 references in agent allowlists. At 13:52 UTC those were replaced for
+Francis and discord-local, and the new reference added to the default policy.
+Both agents' live `models.list` **default/allowed** views now include Flash-Next.
+The gateway was not restarted. Reopen an already-sent chat model menu to refresh it.
+See the [policy check evidence](evidence/strata-2026-11-07/openclaw-picker-policy.json).
+
 ## Current listener and resources
 
 - API: `http://100.96.8.54:8083/v1`, Tailscale address only, existing provider credential required.

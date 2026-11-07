@@ -79,6 +79,38 @@ Qwen3.6 row; explicit catalog refresh published the Flash-Next row. Francis's li
 catalog then reported it available with the new alias. Configuration on disk
 alone was not treated as proof that the picker had updated.
 
+## Picker allowlist correction — 13:52 UTC
+
+The initial connection check missed a separate requirement: the agent model
+allowlists still named the retired Qwen3.6 model. The configured catalog reported
+Flash-Next as available, but that does not mean a user may select it. The user
+reported the missing picker entry, exposing this validation gap.
+
+The correction replaced `tiercelmoe/tiercel-qwen36-a3b-fast` with
+`tiercelmoe/qwen3.8-flash-next-unsloth-ud-q4_k_xl` in both
+`agents.entries.francis.modelPolicy.allow` and
+`agents.entries.discord-local.modelPolicy.allow`. The new exact reference was
+also added to `agents.defaults.modelPolicy.allow`; unrelated entries were retained.
+The patch passed validation and hot-applied without a gateway restart.
+
+For an installation with explicit model policies, update the applicable default
+and per-agent allowlists when replacing a model. Aliases and provider declarations
+do not update them automatically. Then verify the **default/allowed** picker view,
+not just the configured catalog:
+
+```bash
+openclaw gateway call models.list --params \
+  '{"agentId":"francis","provider":"tiercelmoe","view":"default"}' --json
+openclaw gateway call models.list --params \
+  '{"agentId":"discord-local","provider":"tiercelmoe","view":"default"}' --json
+```
+
+Both live views now return Flash-Next with the correct name and alias. The
+[policy and picker evidence](../evidence/strata-2026-11-07/openclaw-picker-policy.json)
+records that check. Previously sent chat menus do not update in place; reopen
+`/model` or `/models` to get the current list. This verifies the server's picker
+data, not a screenshot of the user's Discord or Telegram client.
+
 ## Validation and limits
 
 From the Mac mini, using the provider credential over Tailscale:

@@ -1,0 +1,97 @@
+{
+  "utc": "2026-11-07T13:53:10.452189+00:00",
+  "hot_reload": "2026-11-07T14:52:49.011+01:00 [reload] config hot reload applied (agents.defaults.modelPolicy.allow, agents.entries.francis.modelPolicy.allow, agents.entries.discord-local.modelPolicy.allow)",
+  "views": {
+    "francis": {
+      "view": "default",
+      "models": [
+        {
+          "id": "qwen3.8-flash-next-unsloth-ud-q4_k_xl",
+          "name": "Tiercel Qwen3.8 Flash-Next UD-Q4_K_XL (Strata)",
+          "provider": "tiercelmoe",
+          "alias": "qwen-flash-next",
+          "contextWindow": 262144,
+          "reasoning": true,
+          "tags": [
+            "configured"
+          ],
+          "thinkingLevels": [
+            {
+              "id": "off",
+              "label": "off"
+            },
+            {
+              "id": "minimal",
+              "label": "minimal"
+            },
+            {
+              "id": "low",
+              "label": "low"
+            },
+            {
+              "id": "medium",
+              "label": "medium"
+            },
+            {
+              "id": "high",
+              "label": "high"
+            },
+            {
+              "id": "ultra",
+              "label": "ultra"
+            }
+          ],
+          "thinkingDefault": "medium",
+          "available": true
+        }
+      ]
+    },
+    "discord-local": {
+      "view": "default",
+      "models": [
+        {
+          "id": "qwen3.8-flash-next-unsloth-ud-q4_k_xl",
+          "name": "Tiercel Qwen3.8 Flash-Next UD-Q4_K_XL (Strata)",
+          "provider": "tiercelmoe",
+          "alias": "qwen-flash-next",
+          "contextWindow": 262144,
+          "reasoning": true,
+          "tags": [
+            "configured"
+          ],
+          "thinkingLevels": [
+            {
+              "id": "off",
+              "label": "off"
+            },
+            {
+              "id": "minimal",
+              "label": "minimal"
+            },
+            {
+              "id": "low",
+              "label": "low"
+            },
+            {
+              "id": "medium",
+              "label": "medium"
+            },
+            {
+              "id": "high",
+              "label": "high"
+            },
+            {
+              "id": "ultra",
+              "label": "ultra"
+            }
+          ],
+          "thinkingDefault": "medium",
+          "available": true
+        }
+      ]
+    }
+  },
+  "gateway_pid": 369,
+  "gateway_process": "369 Wed Nov  4 16:53:56 2026",
+  "explicit_policy_allows_model": true
+}
