@@ -1,0 +1,56 @@
+{
+  "protocol": "strata-cold-prefill-custom-v3",
+  "fixture_sha256": "6efd5cb8693d5c7fc9fa826da0e454895172071c7d30283f6eb6c04978875346",
+  "sampling": {
+    "temperature": 0.3,
+    "enable_thinking": true,
+    "max_tokens": 512,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0.05,
+    "presence_penalty": 0.0,
+    "repeat_penalty": 1,
+    "seed": 1
+  },
+  "sampling_preset": "openclaw",
+  "nonce_seed": "generation-openclaw-v1",
+  "strata_tune": {},
+  "runs": [
+    {
+      "target_tokens": 0,
+      "repeat": 0,
+      "warmup": true,
+      "nonce": "0123456789abcdef0123456789abcdef",
+      "messages_sha256": "cb5dcf4eb40a4691bba53a26ef206b46d147ba56b0664a57c83899453e5c51ca",
+      "usage": {
+        "prompt_tokens": 149,
+        "completion_tokens": 16,
+        "total_tokens": 165,
+        "prompt_tokens_details": {
+          "cached_tokens": 144
+        }
+      },
+      "timings": {
+        "cache_n": 144,
+        "prompt_n": 5,
+        "prompt_ms": 788.9,
+        "prompt_per_token_ms": 157.78,
+        "prompt_per_second": 6.3,
+        "predicted_n": 16,
+        "predicted_ms": 360.4,
+        "predicted_per_token_ms": 22.525,
+        "predicted_per_second": 44.4,
+        "draft_n": 12,
+        "draft_n_accepted": 9
+      },
+      "first_token_s": 0.837944638999943,
+      "elapsed_s": 1.1604607850003958,
+      "finish_reason": "length",
+      "complete_stream": true,
+      "output_sha256": "3f357e944f297431e091548e7550e3ce92e971ec29a8a9d967f8219171cba46e"
+    }
+  ],
+  "completed": false,
+  "interrupted_by_user": true,
+  "interruption_reason": "Pause benchmarks and restore private endpoint for live OpenClaw testing"
+}

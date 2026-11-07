@@ -28,6 +28,10 @@ def main():
                     help='Optional Strata draft-confidence override for these requests only')
     ap.add_argument('--presence-penalty', type=float,
                     help='Explicit request penalty; omitted retains the server default (1.5 for non-thinking Flash-Next)')
+    ap.add_argument('--sampling-preset', choices=('greedy', 'openclaw'), default='greedy',
+                    help='OpenClaw preset uses thinking and the recorded tiercelmoe sampling values')
+    ap.add_argument('--nonce-seed',
+                    help='Reproducible prompt nonce for comparisons across fresh server starts')
     ap.add_argument('--model', default='qwen3.8-flash-next-unsloth')
     args = ap.parse_args()
     if args.repeat < 1 or args.max_tokens < 1 or any(n < 1024 for n in args.sizes):
@@ -43,14 +47,19 @@ def main():
     headers = {'Content-Type': 'application/json'}
     if os.environ.get('STRATA_API_KEY'):
         headers['Authorization'] = 'Bearer ' + os.environ['STRATA_API_KEY']
-    report = {'protocol': 'strata-cold-prefill-custom-v2',
+    sampling = {'temperature': 0, 'enable_thinking': False, 'max_tokens': args.max_tokens}
+    if args.sampling_preset == 'openclaw':
+        sampling.update(temperature=0.3, enable_thinking=True, top_p=0.95, top_k=20,
+                        min_p=0.05, presence_penalty=0, repeat_penalty=1, seed=1)
+    report = {'protocol': 'strata-cold-prefill-custom-v3',
               'fixture_sha256': hashlib.sha256(raw).hexdigest(),
-              'sampling': {'temperature': 0, 'enable_thinking': False, 'max_tokens': args.max_tokens},
+              'sampling': sampling, 'sampling_preset': args.sampling_preset,
+              'nonce_seed': args.nonce_seed,
               'strata_tune': {} if args.spec_min_p is None else {'spec_min_p': args.spec_min_p},
               'runs': [], 'completed': False}
     if args.presence_penalty is not None:
         report['sampling']['presence_penalty'] = args.presence_penalty
-    else:
+    elif 'presence_penalty' not in sampling:
         report['sampling']['presence_penalty_source'] = 'server default; not overridden'
 
     def request(path, body, timeout=1800):
@@ -76,13 +85,17 @@ def main():
 
     def run(text, target, repetition, warmup=False):
         nonce = '0123456789abcdef' * 2 if warmup else uuid.uuid4().hex
+        if not warmup and args.nonce_seed is not None:
+            nonce = hashlib.sha256(f'{args.nonce_seed}:{target}:{repetition}'.encode()).hexdigest()[:32]
         msg = messages(text, nonce)
         body = {'model': args.model, 'messages': msg, 'stream': True,
-                'stream_options': {'include_usage': True}, 'temperature': 0,
-                'reasoning_effort': 'none', 'chat_template_kwargs': {'enable_thinking': False},
+                'stream_options': {'include_usage': True},
+                'reasoning_effort': 'medium' if sampling['enable_thinking'] else 'none',
+                'chat_template_kwargs': {'enable_thinking': sampling['enable_thinking']},
                 'max_tokens': args.max_tokens if not warmup else 16}
-        if args.presence_penalty is not None:
-            body['presence_penalty'] = args.presence_penalty
+        for name in ('temperature', 'top_p', 'top_k', 'min_p', 'presence_penalty', 'repeat_penalty', 'seed'):
+            if name in sampling:
+                body[name] = sampling[name]
         if report['strata_tune']:
             body['strata_tune'] = report['strata_tune']
         start = time.monotonic()

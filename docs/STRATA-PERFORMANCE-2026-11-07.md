@@ -1,9 +1,10 @@
 # Flash-Next performance investigation — November 7, 2026
 
-**Resumed after the user's clean reboot at 14:51:52 UTC.** Packaged comparisons are complete; Strata is stopped while an isolated
-expert-kernel experiment is prepared. All inference boot startup remains
-disabled. The original compaction policy has been restored. The first clean-boot results are below. Prefill is the user's first
-priority, including gains beyond 1,400 tok/s; generation comes next.
+**Paused at the user's request for live OpenClaw testing.** Benchmarks are
+stopped. The best measured packaged configuration is loaded on the existing
+authenticated Tiercel endpoint, verified from the Mac mini. Prefill priority remains first,
+including useful gains beyond 1,400 tok/s; generation's 50–60 goal is unmet.
+No losing source experiment or partial tuning table was deployed.
 
 Target: at least 1,100 tokens/s cold prefill and
 50–60 tokens/s generation on the existing UD-Q4_K_XL model. Tool-call debugging
@@ -405,6 +406,75 @@ packaged settings are preserved. A separate pinned checkout and user-local
 compiler were used for the rejected expert-dispatch experiment. No model
 weights are changed or downloaded for that work.
 
+## Prefill follow-ups: bandwidth and matrix calibration
+
+The unmodified `hip_prefill_gr_write_bench` at the pinned source/SDK gave:
+
+| Tokens in operator | Best / mean ms | Estimated traffic | Best effective bandwidth |
+|---:|---:|---:|---:|
+| 4,096 | 2.361 / 2.391 | 0.46 GB | 195 GB/s |
+| 16,384 | 9.663 / 9.711 | 1.85 GB | 191 GB/s |
+
+The byte estimate counts residual read/write, one read of the shared output
+vector and the BF16 output. It does not count every hardware transaction or
+norm-weight reload. A separate validated float4 GPU copy of 671,088,640 bytes
+per buffer reached median 212.9–232.8 GB/s depending on dispatch size. This is
+an empirical comparison, not a hardware bandwidth-counter measurement.
+If residual write reached the fastest copy rate at the same estimated traffic,
+the 8.5%-of-prefill phase would save about 1.5% overall. Different read/write
+mixes and arithmetic mean this is only a rough headroom estimate. No residual
+kernel patch was promoted; this is not a promising standalone 10–20% target.
+[Source, checksums, build and run evidence](../evidence/strata-performance-2026-11-07/grwrite/).
+
+The existing `tune_hipblaslt` tool also screened the three large FP16 projection
+shapes at T=16,384 with 32 MiB workspace, two warm-ups and three measured calls
+per candidate, using its reference-error gate:
+
+| Output columns N | Reduction K | Best solution | Mean ms |
+|---:|---:|---:|---:|
+| 10,240 | 2,560 | 2390 | 30.306; repeated 30.187 |
+| 6,144 | 2,560 | 2390 | 18.679 |
+| 2,560 | 6,144 | 2390 | 25.659 |
+
+All winners are already in the packaged gfx1151 / hipBLASLt 100401 table.
+This searched the upstream tool's returned heuristic candidates, not every
+possible kernel implementation. No table replacement or performance gain is
+claimed. The emitted partial candidate table is evidence only; it must not
+replace the complete serving table.
+[Calibration arguments and raw results](../evidence/strata-performance-2026-11-07/lt-calibration/).
+
+The measured packaged prefill candidate remains selected. The next phase is
+generation: compare draft-window sizes with the same public prompt and then
+validate with the recorded OpenClaw sampling settings. Protocol v3 adds an
+explicit sampling preset and reproducible nonce seed; default greedy request
+behaviour is unchanged. Fresh server instances prevent prefix reuse between
+arms; each request still checks actual cache accounting. The 512-token output
+allowance applies only to the benchmark, not the provider's response limit.
+
+## Generation control and user-requested pause
+
+A fresh packaged control with `--spec 4` completed 65,548 uncached input tokens
+at **1,416.0 tok/s prefill**, followed by 512 output tokens at **39.3 tok/s**.
+Draft counts were 468 proposed / 287 accepted. The engine reports a maximum
+verification window of 6 because suffix lookup can extend the MTP window;
+`mtp_max=4` confirms the MTP cap. The comparison uses reproducible nonce seed
+`generation-screen-v1`, zero temperature, no thinking and zero presence penalty.
+Startup took 102.1 seconds and the first warm-up again had a multi-second pause.
+No claim is made that the earlier startup/eviction issue is solved.
+
+The user then requested pausing experiments to test real OpenClaw traffic.
+The thinking-enabled probe was interrupted after its warm-up; there is no
+completed thinking-enabled long-context result, and no spec-6/spec-8 comparison
+was run. No losing source patch or partial tuning table is deployed.
+[Control and interruption evidence](../evidence/strata-performance-2026-11-07/gpu-mmap-f16-spec4/).
+The selected packaged settings loaded at the existing authenticated Tiercel
+endpoint `100.96.8.54:8083` at 16:08:49 UTC (88.1-second startup). The Mac mini
+successfully read its authenticated model catalog; OpenClaw PID 369 is unchanged.
+The user's first real request was observed at 15,388 prompt tokens, about
+1,284 tok/s prefill and about 45 tok/s generation while thinking. These are
+in-progress observations, not a completed agent-quality evaluation.
+The source experiments remain offline. No benchmark is running.
+
 ## Reproduce the current packaged candidate
 
 This is the best performance candidate from these screens, not a claim that
@@ -451,14 +521,17 @@ Record the host policy and GPU eviction counters with any reproduction.
 
 ## Operational state during measurements
 
-The production private listener at `100.96.8.54:8083` is unavailable.
+The optimized preview is loaded at private `100.96.8.54:8083` for the user
+test. Local readiness, authenticated Mac-mini access and initial user traffic
+are recorded in the evidence above.
 During the comparisons the service ran isolated arms at `127.0.0.1:8084`, using a runtime
 drop-in at `$XDG_RUNTIME_DIR/systemd/user/strata-flash-next.service.d/90-benchmark.conf`.
 The override was removed for the reboot pause, then recreated for the resumed
-comparisons. It currently points at the completed long-check profile, with the
-service stopped for the isolated kernel work. Boot startup remains disabled. Persistent production configuration is preserved, but it is
-the original slow installer layout. Do not enable it blindly on boot; finish
-the clean-boot comparison and select a validated configuration first.
+comparisons. The benchmark override was removed for the user test. A separate runtime
+`90-live-preview.conf` selects the optimized preview on private 8083; the
+preview config retains the existing API credential. Boot startup remains disabled. Persistent production configuration is preserved, but it is
+the original slow installer layout. Do not enable it blindly on boot; the live
+preview is a runtime override pending real-user validation and boot promotion.
 
 No OpenClaw restart, Mac reboot, GPU driver reload or model download was
 performed for these comparisons. The source-only operator experiment is

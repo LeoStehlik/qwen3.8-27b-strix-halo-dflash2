@@ -1,0 +1,11 @@
+{
+  "checked_utc": "2026-11-07T16:09:22.833144+00:00",
+  "from": "Mac mini",
+  "base_url": "http://100.96.8.54:8083/v1",
+  "model_ids": [
+    "qwen3.8-flash-next-unsloth-ud-q4_k_xl"
+  ],
+  "status": "authenticated catalog read succeeded",
+  "openclaw_gateway_pid": 369,
+  "openclaw_process_started": "2026-11-04 16:53:56"
+}

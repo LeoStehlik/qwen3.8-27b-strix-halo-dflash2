@@ -1,0 +1,15 @@
+[
+  "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/tune_hipblaslt",
+  "--workspace-mib",
+  "32",
+  "--case",
+  "f16,16384,10240,2560,10240",
+  "--case",
+  "f16,16384,6144,2560,6144",
+  "--case",
+  "f16,16384,2560,6144,2560",
+  "--case",
+  "f16,16384,10240,2560,10240",
+  "--tuning-out",
+  "/home/less/.cache/strata-evaluation-20261107/lt-calibration/candidate.txt"
+]

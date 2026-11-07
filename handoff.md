@@ -1,6 +1,16 @@
 # Handoff for Francis — Flash-Next performance investigation, 2026-11-07
 
-**Performance investigation resumed after the user's clean reboot at 14:51:52 UTC.**
+**Performance investigation paused at the user's request for real OpenClaw testing.**
+Benchmarks are stopped. The best measured packaged F16 configuration loaded
+on private 8083 at 16:08:49 UTC; authenticated access from the Mac mini passed.
+OpenClaw PID 369 remains unchanged. The first real user request was observed
+at 15,388 prompt tokens, about 1,284 tok/s prefill and 45 tok/s generation
+while thinking; this is not a completed agent-quality verdict.
+The new 64K control reached **1,416.0 tok/s prefill / 39.3 generation**.
+The thinking-enabled benchmark was interrupted; spec-6/spec-8 were not run.
+No kernel experiment or tuning-table change is promoted.
+
+The investigation resumed after the user's clean reboot at 14:51:52 UTC.
 The original-policy F16 comparison completed: cold 16K **1,074.3 / 40.3 tok/s**,
 64K **1,417.5 / 40.9**, and 128K **1,363.2 / 38.9** (prefill/generation).
 The first request overlapped GPU queue evictions; long requests were faster.
@@ -32,21 +42,25 @@ Generation tuning follows the prioritized prefill work. The bounded expert
 persistent-dispatch experiment is **rejected**: every tested grid was slower
 (58.7–85.5 ms versus 54.0–54.3 ms), despite identical outputs and passing routing
 checks. [Patch, tests and reproduction](experiments/strata-f16-persistent-dispatch/README.md)
-are archived. The separate pinned source and SDK are ready; the next prefill
-measurement is residual write/normalization bandwidth. The packaged engine
-is preserved; no losing code change was promoted.
+are archived. Residual write/normalization measured 191–195 GB/s against
+213–233 GB/s for a simple GPU copy: modest remaining headroom, roughly 1.5%
+overall under a simple estimate. The matrix calibration selected solution 2390
+for all three large FP16 shapes, already in the packaged table. No kernel or
+table change was promoted. Generation comparisons are paused after the control; the user is testing
+real traffic before more tuning.
 
-The engine is now stopped. Proactive compaction was restored to **20** after
-stopping it; no persistent host-policy change remains.
+The packaged engine is serving the optimized private-8083 preview for the
+user test; loopback benchmarks are stopped. Proactive compaction is back at the original **20**; no persistent
+host-policy change remains.
 `kernel.numa_balancing` was already zero. Do not call the stall fixed until
 the eviction and migration counters support it.
 
-The production Tiercel listener at 8083 is offline. The Strata service is
-stopped for isolated kernel work and disabled at boot. Its runtime override
-points at the completed loopback-8084 long-check profile. The old 27B and Qwen3.6 units remain stopped/disabled. No
+The Tiercel listener at 8083 is loaded and serving user traffic. The Strata service remains
+disabled at boot. Its `90-live-preview.conf` runtime override selects the
+optimized preview; `90-benchmark.conf` was removed. The old 27B and Qwen3.6 units remain stopped/disabled. No
 OpenClaw gateway restart or Mac reboot was performed. Persistent 8083 config
-is still the original installer layout; do not enable it blindly. No optimized
-configuration has been promoted. Read the [performance record](docs/STRATA-PERFORMANCE-2026-11-07.md).
+is still the original installer layout; do not enable it blindly. The optimized
+preview is selected for live testing; boot promotion remains pending. Read the [performance record](docs/STRATA-PERFORMANCE-2026-11-07.md).
 
 **Flash-Next is connected to the existing `tiercelmoe` provider.** Select
 `/model qwen-flash-next`, or the full reference
@@ -69,10 +83,10 @@ See the [policy check evidence](evidence/strata-2026-11-07/openclaw-picker-polic
 
 ## Current listener and resources
 
-- Configured API (currently offline): `http://100.96.8.54:8083/v1`, Tailscale
+- API for the live preview (loaded, Mac access verified): `http://100.96.8.54:8083/v1`, Tailscale
   address only, existing provider credential required.
 - Model: `qwen3.8-flash-next-unsloth-ud-q4_k_xl`.
-- Unit: `strata-flash-next.service`, stopped for kernel work, disabled at boot. Automatic systemd restart
+- Unit: `strata-flash-next.service`, serving the live preview on 8083, disabled at boot. Automatic systemd restart
   after failure remains off. Boot validation for this unit is pending.
 - Strata v0.2.11, engine/control 0.1.57, signed HIP-Halo build `0bdcef4682c5+rocm`.
 - Context 262,144, INT8 KV, one slot, MTP depth 4, prefill 16,384, GPU vision.

@@ -1,0 +1,19 @@
+{
+  "utc": "2026-11-07T16:09:59.743943+00:00",
+  "kind": "in-progress user traffic; no prompt or output content retained",
+  "live": {
+    "state": "reading",
+    "queued": 0,
+    "phase": "reading the prompt",
+    "prompt_tokens": 16571,
+    "prompt_read": null,
+    "prompt_total": null,
+    "generated": 0,
+    "max_tokens": 32768,
+    "elapsed_s": 1.3,
+    "tok_s": null,
+    "tok_s_mean": null,
+    "prefill_tok_s_mean": null,
+    "tok_s_window_s": null
+  }
+}

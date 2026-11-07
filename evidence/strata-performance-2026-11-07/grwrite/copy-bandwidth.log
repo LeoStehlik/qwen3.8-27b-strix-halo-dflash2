@@ -1,0 +1,5 @@
+vector copy grid=768 bytes-per-buffer=671088640 median=6.304 ms min=6.258 ms median-bandwidth=212.9 GB/s (read+write)
+vector copy grid=3072 bytes-per-buffer=671088640 median=6.222 ms min=6.189 ms median-bandwidth=215.7 GB/s (read+write)
+vector copy grid=12288 bytes-per-buffer=671088640 median=6.223 ms min=6.199 ms median-bandwidth=215.7 GB/s (read+write)
+vector copy grid=163840 bytes-per-buffer=671088640 median=5.765 ms min=5.734 ms median-bandwidth=232.8 GB/s (read+write)
+copy validation passed

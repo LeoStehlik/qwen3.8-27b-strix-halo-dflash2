@@ -26,21 +26,25 @@ retries without caching completed responses.
 
 ## Current direction — 2026-11-07
 
-**Performance investigation resumed after a clean reboot.** Cold prefill reached
-1,418 tok/s at 64K and 1,363 at 128K; the later 192K cold check reached
-1,301 tok/s, with the existing model quantization and 262,144 context capacity.
-Generation on that fixture remains roughly 37–41 tok/s.
-The user prioritizes further prefill gains, then 50–60 tok/s generation.
-Intermittent GPU queue eviction remains under investigation; no optimized
-configuration has been promoted. Packaged-setting tests are complete; the service is stopped for an isolated
-expert-kernel experiment. The private Tiercel endpoint is offline. See the [performance record](docs/STRATA-PERFORMANCE-2026-11-07.md)
+**Experiments paused for the user's real OpenClaw test.** The selected packaged
+configuration reached 1,416 tok/s cold prefill at 64K, 1,363 at 128K and 1,301
+at 192K, retaining the same model quantization and 262,144 context capacity.
+Generation on that fixture is about 37–41 tok/s, below the 50–60 target.
+The private Tiercel preview is loaded and reachable from the Mac mini;
+benchmarks are stopped. The user is testing real OpenClaw traffic.
+
+The expert-dispatch experiment was slower and is rejected with
+[code and evidence](experiments/strata-f16-persistent-dispatch/README.md).
+Residual write has modest measured bandwidth headroom, and matrix calibration
+selected the kernels already shipped. Intermittent GPU queue eviction remains
+unresolved. See the [performance record](docs/STRATA-PERFORMANCE-2026-11-07.md)
 and [handoff](handoff.md).
 
 Flash-Next UD-Q4_K_XL was deployed on packaged Strata v0.2.11 / HIP-Halo 0.1.57
-and connected to OpenClaw's existing `tiercelmoe` provider. After service is restored, select
+and connected to OpenClaw's existing `tiercelmoe` provider. For the live preview, select
 `/model qwen-flash-next`. The authenticated private API is
 `http://100.96.8.54:8083/v1`, with 262,144 context, INT8 KV, MTP and vision enabled.
-The Strata unit is stopped for kernel work and disabled at boot;
+The Strata unit is serving the live preview and remains disabled at boot;
 the old dense 27B service is also stopped and disabled,
 with all files retained for rollback.
 

@@ -1,0 +1,5 @@
+{
+  "utc": "2026-11-07T16:06:55.222267+00:00",
+  "reason": "User requested stopping experiments to test real OpenClaw traffic",
+  "selected_config": "packaged F16, full expert/GPU KV residency, prefill 16384, MTP 4; no source patches"
+}

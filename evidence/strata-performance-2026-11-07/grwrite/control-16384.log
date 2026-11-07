@@ -1,0 +1,2 @@
+checksum R a236db5e3aa1e5cb rs 674daaa0bae29435 xn16 afbe194a8253d82e
+gr_write_norm_rs T=16384: best 9.663 ms, mean 9.711 ms, 191 GB/s at best (1.85 GB moved, bo counted once)

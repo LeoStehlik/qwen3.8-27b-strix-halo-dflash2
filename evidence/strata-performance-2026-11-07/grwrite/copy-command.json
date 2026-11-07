@@ -1,0 +1,14 @@
+[
+  "/home/less/.local/opt/rocm-7.14.1-strata-lab/lib/llvm/bin/clang++",
+  "-x",
+  "hip",
+  "--offload-arch=gfx1151",
+  "--rocm-path=/home/less/.local/opt/rocm-7.14.1-strata-lab",
+  "--rocm-device-lib-path=/home/less/.local/opt/rocm-7.14.1-strata-lab/lib/llvm/amdgcn/bitcode",
+  "-O3",
+  "/home/less/.cache/strata-evaluation-20261107/grwrite/copy-bandwidth.cpp",
+  "-L/home/less/.local/opt/rocm-7.14.1-strata-lab/lib",
+  "-lamdhip64",
+  "-o",
+  "/home/less/.cache/strata-evaluation-20261107/grwrite/copy-bandwidth"
+]
