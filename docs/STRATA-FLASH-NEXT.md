@@ -1,18 +1,17 @@
 # Flash-Next on packaged Strata — deployment in progress
 
-Status on 2026-11-06: the packaged Terminal and HIP-Halo engine are installed and the pinned model
-download is underway. **Flash-Next is not yet serving. No local performance or
-tool-quality result has been established.** A live GPU-driver reload hit an AMD
-kernel fault; the authorized reboot has now restored the GPU and dense 27B endpoint.
-These scripts are preparation for a separate backend; this
-repository's existing llama.cpp deployment remains available for rollback.
+Status on 2026-11-07: acquisition and preparation are complete. Flash-Next is
+loaded on the packaged HIP-Halo engine at `http://127.0.0.1:8083/v1`; a direct
+completion and exact tool/continuation checks passed. **Long-context performance,
+full deployment checks and private endpoint promotion remain pending.** The old
+27B service is stopped and disabled, with its files retained for rollback.
+See the [first-load record and service instructions](STRATA-FIRST-LOAD-2026-11-07.md).
 
-Complete GitHub documentation was published and verified before reboot approval.
-**The user gave go at 18:31 UTC; GPU recovery and a direct completion are verified.**
-The [recovery result](STRATA-RECOVERY-RESULT-2026-11-06.md) records the active
-112 GiB GTT limit and the corrected acquisition wrapper. Downloading has resumed.
-The [full chronological record, host-file archive and recovery runbook](STRATA-RECOVERY-2026-11-06.md)
-cover all actions so far, including the latest download/service snapshot.
+The November 6 authorized reboot recovered the GPU after a failed live driver
+reload. The [recovery result](STRATA-RECOVERY-RESULT-2026-11-06.md) records the
+active 112 GiB GTT and corrected installer wrapper; the
+[chronological incident record](STRATA-RECOVERY-2026-11-06.md) is historical.
+Do not repeat the GPU hot reload.
 
 ## Host incident — 16:50 UTC
 
@@ -127,7 +126,7 @@ do not present a difference between those results as an isolated speedup.
 
 ## Deployment checks still required
 
-1. Finish and verify every model/component download; prepare the model pack.
+1. Complete: acquire and verify the target shards, vision projector and signed engine; prepare the model pack and MTP. The local completion/tool smoke passed on November 7; the remaining checks below are still required.
 2. GPU recovery and limit change are complete. Before the fault this host reported 61,905,670,144 bytes of GTT
    (about 57.7 GiB), plus an 8 GiB BIOS carve-out. The published benchmark host
    used a 112 GiB GTT. Linux initializes the AMD GTT manager and KFD limits from

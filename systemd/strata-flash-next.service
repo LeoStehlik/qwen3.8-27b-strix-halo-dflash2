@@ -1,0 +1,17 @@
+[Unit]
+Description=Strata Flash-Next UD-Q4_K_XL HIP-Halo evaluation
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/.local/share/strata/flash-next
+Environment=STRATA_INSTALL_DIR=%h/.local/share/strata/flash-next
+Environment=STRATA_ROUTE_TAIL_SKIP=0
+ExecStart=%h/.local/bin/strata serve --profile %h/.local/share/strata/flash-next/strata-unsloth-ud-q4_k_xl.json --host 127.0.0.1 --port 8083
+Restart=no
+TimeoutStopSec=45
+KillMode=control-group
+LimitNOFILE=1048576
+
+[Install]
+WantedBy=default.target

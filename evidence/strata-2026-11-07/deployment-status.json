@@ -1,0 +1,19 @@
+{
+  "phase": "loaded-local-smoke-passed",
+  "updated_utc": "2026-11-07T13:25:19.568959+00:00",
+  "serving": true,
+  "url": "http://127.0.0.1:8083/v1",
+  "remote_serving": false,
+  "old_unit_stopped_and_disabled": true,
+  "old_model_files_retained": true,
+  "new_unit_boot_enabled": false,
+  "remaining": [
+    "cold 64K/128K performance",
+    "above-150K capacity",
+    "streaming tools",
+    "image request",
+    "disk state restoration",
+    "fresh-start reliability",
+    "private endpoint and real OpenClaw validation"
+  ]
+}

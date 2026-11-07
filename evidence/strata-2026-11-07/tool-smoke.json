@@ -1,0 +1,78 @@
+{
+  "protocol": "flash-next-tool-smoke-v1",
+  "checks": [
+    {
+      "elapsed_s": 10.83,
+      "finish_reason": "tool_calls",
+      "usage": {
+        "prompt_tokens": 394,
+        "completion_tokens": 147,
+        "total_tokens": 541,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 394,
+        "prompt_ms": 6364.9,
+        "prompt_per_token_ms": 16.155,
+        "prompt_per_second": 61.9,
+        "predicted_n": 147,
+        "predicted_ms": 4452.1,
+        "predicted_per_token_ms": 30.286,
+        "predicted_per_second": 33.0,
+        "draft_n": 134,
+        "draft_n_accepted": 105
+      },
+      "message": {
+        "role": "assistant",
+        "content": null,
+        "reasoning_content": "The user wants me to look up record TIER-042, exclude archived records, and request fields status and owner in that order. Then report the verification_code exactly from the tool result.\n\nLet me call the lookup_record tool with:\n- record_id: \"TIER-042\"\n- include_archived: false\n- fields: [\"status\", \"owner\"]\n",
+        "tool_calls": [
+          {
+            "id": "call_a5e6878bc6b54c7da27228fa",
+            "type": "function",
+            "function": {
+              "name": "lookup_record",
+              "arguments": "{\"record_id\":\"TIER-042\",\"include_archived\":false,\"fields\":[\"status\", \"owner\"]}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "elapsed_s": 2.351,
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 579,
+        "completion_tokens": 67,
+        "total_tokens": 646,
+        "prompt_tokens_details": {
+          "cached_tokens": 540
+        }
+      },
+      "timings": {
+        "cache_n": 540,
+        "prompt_n": 39,
+        "prompt_ms": 631.6,
+        "prompt_per_token_ms": 16.195,
+        "prompt_per_second": 61.7,
+        "predicted_n": 67,
+        "predicted_ms": 1713.1,
+        "predicted_per_token_ms": 25.569,
+        "predicted_per_second": 39.1,
+        "draft_n": 63,
+        "draft_n_accepted": 45
+      },
+      "message": {
+        "role": "assistant",
+        "content": "The lookup for record TIER-042 (excluding archived records, requesting fields `status` and `owner`) returned successfully.\n\nThe verification_code is: **R7P2**",
+        "reasoning_content": "The tool returned successfully. The verification_code is \"R7P2\". I need to report it exactly as returned.\n"
+      }
+    }
+  ],
+  "passed": true,
+  "exact_tool_arguments": true,
+  "tool_result_continuation": true
+}

@@ -24,21 +24,21 @@ demand. A streaming front proxy collapses concurrent byte-identical inference
 requests into one upstream generation, which avoids duplicate work from client
 retries without caching completed responses.
 
-## Current direction — 2026-11-06
+## Current direction — 2026-11-07
 
-The user resumed the Flash-Next download at 23:03 UTC after an earlier pause.
-Acquisition/preparation is running overnight from the saved partial files.
+Flash-Next UD-Q4_K_XL is loaded on packaged Strata v0.2.11 / HIP-Halo 0.1.57.
+A direct completion and exact tool-argument/result-continuation checks passed.
+The evaluation API is loopback-only at `http://127.0.0.1:8083/v1`, with 262,144
+context, INT8 KV, MTP and vision enabled. The old dense 27B service is stopped
+and disabled; all its files are retained for rollback.
 
-Flash-Next UD-Q4_K_XL on packaged Strata is being staged as the next local
-OpenClaw backend. The model download and deployment checks are still in progress;
-the GPU has recovered after the authorized reboot, and the dense 27B endpoint is
-active during acquisition. See the [Strata deployment notes](docs/STRATA-FLASH-NEXT.md)
-and [handoff](handoff.md). Published Halo speeds are upstream evidence, not yet
-measurements from this host. This is a packaged-engine trial, not an engine fork.
-The [complete pre-reboot record and recovery runbook](docs/STRATA-RECOVERY-2026-11-06.md)
-includes the failed driver reload, archived host changes and resume steps.
-The [recovery result](docs/STRATA-RECOVERY-RESULT-2026-11-06.md) records the active
-112 GiB GTT limit, successful completion check and acquisition-wrapper correction.
+Long-context benchmarks and private endpoint promotion remain pending. This is
+not yet the OpenClaw endpoint or a locally measured 1,211 tok/s result.
+See the [first-load record and reproducible service](docs/STRATA-FIRST-LOAD-2026-11-07.md),
+[deployment guide](docs/STRATA-FLASH-NEXT.md) and [handoff](handoff.md).
+The [pre-reboot record](docs/STRATA-RECOVERY-2026-11-06.md) and
+[successful GPU recovery](docs/STRATA-RECOVERY-RESULT-2026-11-06.md) preserve
+November 6's incident and the active 112 GiB GTT configuration.
 
 ## Previous direction — 2026-11-05
 

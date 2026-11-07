@@ -1,0 +1,11 @@
+{
+  "started_utc": "2026-11-07T13:23:00.248150+00:00",
+  "old_unit": "qwen38-dflash2.service",
+  "old_unit_stopped": true,
+  "old_unit_disabled": true,
+  "old_model_files_retained": true,
+  "available_memory_before_start": "113 GiB",
+  "new_unit": "strata-flash-next.service",
+  "new_unit_boot_enabled": false,
+  "phase": "loading"
+}
