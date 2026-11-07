@@ -1,8 +1,8 @@
 # Flash-Next performance investigation — November 7, 2026
 
-**Resumed after the user's clean reboot at 14:51:52 UTC.** Strata is active only
-on loopback 8084 for isolated comparisons; all inference boot startup remains
-disabled. The first clean-boot results are below. Prefill is the user's first
+**Resumed after the user's clean reboot at 14:51:52 UTC.** Packaged comparisons are complete; Strata is stopped while an isolated
+expert-kernel experiment is prepared. All inference boot startup remains
+disabled. The original compaction policy has been restored. The first clean-boot results are below. Prefill is the user's first
 priority, including gains beyond 1,400 tok/s; generation comes next.
 
 Target: at least 1,100 tokens/s cold prefill and
@@ -345,8 +345,102 @@ all experts, completed 65,547 uncached input tokens at **1,392.5 tok/s**, and
 left about 14.3 GiB OS memory available during prefill. This resolves the
 residency confounder and shows no useful advantage over 16K. The automatic
 conversation-cache budget also shrank from 6,912 to 4,864 MiB due to the larger
-scratch buffers. That cache was not reused in the cold request. Keep 16K unless
-the following 8K screen establishes a better tradeoff.
+scratch buffers. That cache was not reused in the cold request. The 8K screen retained all experts but reached only **1,350.1 tok/s** on
+65,549 uncached tokens. Keep 16K. A final packaged-kernel screen forces
+`STRATA_PF_F16_BN=64` instead of the automatic 128-row choice at this chunk
+size. The source chooses from average rows per expert, which may conceal
+uneven real routing. The measured 65,549-token request reached **1,376.8 tok/s**,
+so forcing the narrow layout is not selected either. The chosen packaged
+configuration remains 16K chunks, automatic F16 tile width, without chunked
+GDN. A longer 192K cold request now checks that path with an explicit zero
+presence penalty; it remains a temperature-zero/non-thinking performance
+probe, not a full match to OpenClaw's thinking/sampling settings.
+
+### Candidate for a code experiment, not a claimed gain
+
+The release-pinned F16 expert path in `moe_fused_iq.cu` constructs a launch
+bound from the whole layer's routed-row count plus the current expert batch.
+`moe_f16_kq.cu` launches that bound times the feature-block count. On device,
+`work_item` in `moe_f16_common.cuh` exits blocks past the batch's actual tile
+count; 128-row operation also skips every second 64-row tile entry. Thus some
+blocks perform no matrix work. Their cost is not measured by the phase profile,
+and the number of empty blocks is not the fraction of time that can be saved.
+
+A defensible next experiment is a standalone operator comparison of the current
+launch against a bounded persistent work loop, keeping arithmetic and row
+ownership unchanged. First measure actual row/tile distributions and empty-block
+cost; compare multiple grid sizes instead of assuming persistent scheduling wins.
+Cover empty and non-contiguous experts, boundaries, narrow/wide tiles, and all
+quant combinations used by this pack. Only a winner proceeds to a full 64K/192K
+run and model-state checks. No engine source patch or compiler installation has
+been performed yet. This is separate from the validated packaged configuration.
+
+## Long-context check of the selected packaged configuration
+
+The 16K / automatic-F16-tile candidate completed the following fresh requests
+with explicit `presence_penalty=0`, temperature zero, thinking disabled, and
+512 output tokens. Zero presence penalty matches that one OpenClaw setting;
+this remains a custom public fixture, not a live agent replay.
+
+| Actual uncached input | Prefill tok/s | Prefill seconds | Generation tok/s |
+|---:|---:|---:|---:|
+| 65,546 | 1,390.4 | 47.142 | 40.0 |
+| 196,609 | 1,300.9 | 151.129 | 37.3 |
+
+Both reused zero tokens and completed their streams. The inherited presence
+penalty was not the missing generation-speed explanation on this workload.
+The 50–60 tok/s generation target remains unmet; the prefill configuration
+meets the original target even at 192K, with further code work still active.
+
+After these tests, the engine was stopped and `vm.compaction_proactiveness`
+restored to its original **20**. No persistent sysctl file was changed. The
+packaged settings are preserved; the next phase prepares a separate source
+checkout and compiler for an expert-dispatch operator experiment. No model
+weights are changed or downloaded for that work.
+
+## Reproduce the current packaged candidate
+
+This is the best performance candidate from these screens, not a claim that
+agent quality or the intermittent queue-eviction issue is resolved. Use the
+same signed v0.2.11 / engine 0.1.57 HIP-Halo package and original UD-Q4_K_XL
+model revision. No engine fork is required for these settings.
+
+Keep the generated profile's pack, native GGUF, MTP, vision and credential
+fields. In both `args` and `args_written`, remove the pair
+`--resident-budget-gib 38`, and set/add:
+
+```text
+--expert-cache auto
+--prefill 16384
+--ple-io mmap
+--kv-resident 0
+--mmap-experts
+--no-prefill-borrow
+```
+
+Keep `--max-context 262144`, `--kv int8`, `--spec 4`, `--spec-min-p 0.5`,
+`--vision`, and the existing 700 MiB VRAM reserve. Launch with:
+
+```sh
+export STRATA_ROUTE_TAIL_SKIP=0
+export STRATA_PF_FUSED=1 STRATA_PF_FUSED_KQ=1 STRATA_PF_F16=1
+export STRATA_PF_GEMM=1 STRATA_HC_UPMIX=1 STRATA_PA_FAST=1
+export STRATA_HIP_WMMA=1 STRATA_SELECT_WMMA=1
+export STRATA_PF_SWITCH_MIN_T=4096 STRATA_PREFILL_STREAM_MIN=128
+export STRATA_VERIFY_EARLY_PLE_FLAG=1
+```
+
+Do not carry `STRATA_GDN_CHUNKED`, `STRATA_PF_F16_BN`, profiling switches,
+or `--mtp-q4 all` into this candidate. Verify the loaded metrics show all
+24,576 expert slots (73,450 MiB), `kv_resident=0`, and `prefill_cap=16384`.
+Automatic sizing can change with host memory use; a smaller actual cache is a
+different residency configuration. The sanitized exact configs and environment
+changes are under `evidence/strata-performance-2026-11-07/`.
+
+The temporary host-policy experiment is separate: the tests recorded here
+used both the original proactive-compaction value 20 and experimental 0.
+Zero did not eliminate stalls and is not a permanent tuning recommendation.
+Record the host policy and GPU eviction counters with any reproduction.
 
 ## Operational state during measurements
 
@@ -354,7 +448,8 @@ The production private listener at `100.96.8.54:8083` is unavailable.
 During the comparisons the service ran isolated arms at `127.0.0.1:8084`, using a runtime
 drop-in at `$XDG_RUNTIME_DIR/systemd/user/strata-flash-next.service.d/90-benchmark.conf`.
 The override was removed for the reboot pause, then recreated for the resumed
-comparisons. Boot startup remains disabled. Persistent production configuration is preserved, but it is
+comparisons. It currently points at the completed long-check profile, with the
+service stopped for the isolated kernel work. Boot startup remains disabled. Persistent production configuration is preserved, but it is
 the original slow installer layout. Do not enable it blindly on boot; finish
 the clean-boot comparison and select a validated configuration first.
 

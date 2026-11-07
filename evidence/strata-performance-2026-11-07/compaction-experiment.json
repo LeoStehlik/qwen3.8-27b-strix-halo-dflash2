@@ -4,5 +4,8 @@
   "original": "20",
   "temporary": "0",
   "persistent": false,
-  "reason": "Same-config A/B of KFD queue evictions and page migrations"
+  "reason": "Same-config A/B of KFD queue evictions and page migrations",
+  "restored_utc": "2026-11-07T15:35:12.021018+00:00",
+  "restored_value": 20,
+  "conclusion": "Zero reduced one run\u2019s pauses but did not eliminate queue evictions in later fresh loads; reverted with engine stopped."
 }

@@ -6,8 +6,8 @@ The original-policy F16 comparison completed: cold 16K **1,074.3 / 40.3 tok/s**,
 The first request overlapped GPU queue evictions; long requests were faster.
 Rebooting did not eliminate the memory-restore warnings or page migrations.
 
-**Prefill is the first priority, including gains beyond 1,400 tok/s.** Profile
-this faster build before selecting more changes. Generation's 50–60 tok/s target
+**Prefill is the first priority, including gains beyond 1,400 tok/s.** The
+faster build has been profiled; use that profile to choose further changes. Generation's 50–60 tok/s target
 remains active but comes second; tool-call debugging stays parked. Public
 probes reached 49.8 tok/s prose, 45.2 on a 16K document, and 57.7 code. These
 are workload-dependent results, not a broad 50–60 tok/s baseline.
@@ -16,22 +16,30 @@ A reversible `vm.compaction_proactiveness=0` comparison completed with identical
 engine configuration: 1,389 / 1,398 / 1,350 tok/s cold prefill at 16K / 64K / 128K.
 Its first run reduced eviction after readiness from 4,339 ms to 130 ms, but
 a later GDN-arm warm-up paused for seconds with the policy still zero. This
-setting alone is NOT a fix; retain the counterexample and keep it temporary.
+setting alone is NOT a fix; it has been reverted to the original 20.
 The 64K prefill profile is complete: routed experts 24.9%, GDN 23.9%,
 hyper-connections 20.9%, attention-related work 20.1%. Host grouping is negligible.
 The 32K/automatic-cache screen gave 1,375 tok/s but shrank the expert cache to
 23,083 slots, so it is not selected. The independent 16K chunked-GDN test gave 1,405 / 1,363 tok/s at 64K / 128K,
 within control spread, so it is not selected. The 32K arm with all 24,576 experts
 explicitly resident reached 1,393 tok/s with greater memory use; not selected.
-The 8K screen is running. Current best remains the 16K F16 configuration. Original value: 20; no persistent sysctl file
-was changed. `kernel.numa_balancing` was already zero. Do not call the stall
-fixed until the eviction and migration counters support it. Restoring a
-nonzero proactive-compaction value can immediately start compaction; do it
-with the engine stopped if reverting the experiment.
+The 8K screen reached 1,350 tok/s, also slower. Current best remains the
+16K F16 configuration. The narrower 64-row F16 expert-kernel screen reached 1,377 tok/s; not selected.
+The chosen 16K configuration completed a 64K / 192K cold check at
+1,390.4 / 1,300.9 tok/s prefill and 40.0 / 37.3 generation, with zero presence
+penalty and 512 output tokens. Other sampling remained greedy/non-thinking.
+Generation tuning follows the prioritized prefill work. The next code experiment
+is bounded expert dispatch; its cost is still unmeasured. A separate compiler
+and pinned source checkout are being prepared; the packaged engine is preserved.
+
+The engine is now stopped. Proactive compaction was restored to **20** after
+stopping it; no persistent host-policy change remains.
+`kernel.numa_balancing` was already zero. Do not call the stall fixed until
+the eviction and migration counters support it.
 
 The production Tiercel listener at 8083 is offline. The Strata service is
-active only on loopback 8084 through a runtime benchmark override, and remains
-disabled at boot. The old 27B and Qwen3.6 units remain stopped/disabled. No
+stopped for isolated kernel work and disabled at boot. Its runtime override
+points at the completed loopback-8084 long-check profile. The old 27B and Qwen3.6 units remain stopped/disabled. No
 OpenClaw gateway restart or Mac reboot was performed. Persistent 8083 config
 is still the original installer layout; do not enable it blindly. No optimized
 configuration has been promoted. Read the [performance record](docs/STRATA-PERFORMANCE-2026-11-07.md).
@@ -57,10 +65,10 @@ See the [policy check evidence](evidence/strata-2026-11-07/openclaw-picker-polic
 
 ## Current listener and resources
 
-- API: `http://100.96.8.54:8083/v1`, Tailscale address only, existing provider credential required.
+- Configured API (currently offline): `http://100.96.8.54:8083/v1`, Tailscale
+  address only, existing provider credential required.
 - Model: `qwen3.8-flash-next-unsloth-ud-q4_k_xl`.
-- Unit: `strata-flash-next.service`, active only on loopback 8084 for benchmarks,
-  disabled at boot. Automatic systemd restart
+- Unit: `strata-flash-next.service`, stopped for kernel work, disabled at boot. Automatic systemd restart
   after failure remains off. Boot validation for this unit is pending.
 - Strata v0.2.11, engine/control 0.1.57, signed HIP-Halo build `0bdcef4682c5+rocm`.
 - Context 262,144, INT8 KV, one slot, MTP depth 4, prefill 16,384, GPU vision.
