@@ -1,0 +1,11 @@
+  reference routing: permuted expert IDs, holes 7/34/44/61, first/final active
+Q4_K / Q5_1 - reference part: 256 tokens, 64 experts, rows per expert: max 232, experts without rows 4
+  reference output bits hash e413bc5b2b1237bc
+  fused vs the int8-rounded model (same activation / H rounding, double sums): rel RMS 3.355e-04  worst 1.065e-02
+  fused vs FP32 reference: rel RMS 1.312e-02  worst row max rel 1.868e-01
+  reference routing: permuted expert IDs, holes 7/34/44/61, first/final active
+Q4_K / Q8_0 - reference part: 256 tokens, 64 experts, rows per expert: max 230, experts without rows 4
+  reference output bits hash 0c5a341059d9479c
+  fused vs the int8-rounded model (same activation / H rounding, double sums): rel RMS 2.549e-03  worst 9.872e-03
+  fused vs FP32 reference: rel RMS 1.445e-02  worst row max rel 6.310e-02
+prefill fused MoE (native formats) parity passed

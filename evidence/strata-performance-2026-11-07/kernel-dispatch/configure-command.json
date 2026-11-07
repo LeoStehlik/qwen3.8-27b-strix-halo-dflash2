@@ -1,0 +1,29 @@
+{
+  "argv": [
+    "cmake",
+    "-S",
+    "/home/less/src/strata-f16-dispatch-20261107",
+    "-B",
+    "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab",
+    "-G",
+    "Ninja",
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DSTRATA_ENABLE_HIP=ON",
+    "-DSTRATA_ENABLE_CUDA=OFF",
+    "-DSTRATA_PREFILL_MMQ=ON",
+    "-DSTRATA_MMQ_TQ_OVERLAY=OFF",
+    "-DSTRATA_GGML_DIR=/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "-DCMAKE_HIP_ARCHITECTURES=gfx1151",
+    "-DCMAKE_HIP_COMPILER=/home/less/.local/opt/rocm-7.14.1-strata-lab/lib/llvm/bin/clang++",
+    "-DCMAKE_HIP_COMPILER_ROCM_ROOT=/home/less/.local/opt/rocm-7.14.1-strata-lab",
+    "-DCMAKE_PREFIX_PATH=/home/less/.local/opt/rocm-7.14.1-strata-lab;/home/less/.local/opt/rocm-7.14.1-strata-lab/lib/rocm_sysdeps;/home/less/.local/opt/rocm-7.14.1-strata-lab/lib/llvm",
+    "-DCMAKE_HIP_FLAGS=--rocm-path=/home/less/.local/opt/rocm-7.14.1-strata-lab --rocm-device-lib-path=/home/less/.local/opt/rocm-7.14.1-strata-lab/lib/llvm/amdgcn/bitcode"
+  ],
+  "env": {
+    "ROCM_PATH": "/home/less/.local/opt/rocm-7.14.1-strata-lab",
+    "HIP_PATH": "/home/less/.local/opt/rocm-7.14.1-strata-lab",
+    "HIP_PLATFORM": "amd",
+    "LD_LIBRARY_PATH": "/home/less/.local/opt/rocm-7.14.1-strata-lab/lib:/home/less/.local/opt/rocm-7.14.1-strata-lab/lib/rocm_sysdeps/lib:/home/less/.local/opt/rocm-7.14.1-strata-lab/lib/llvm/lib"
+  },
+  "source_commit": "c3b3f5035506f3e966f1b4b7b188aeaabae92f1d"
+}

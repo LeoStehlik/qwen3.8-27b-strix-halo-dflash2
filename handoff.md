@@ -28,9 +28,13 @@ The 8K screen reached 1,350 tok/s, also slower. Current best remains the
 The chosen 16K configuration completed a 64K / 192K cold check at
 1,390.4 / 1,300.9 tok/s prefill and 40.0 / 37.3 generation, with zero presence
 penalty and 512 output tokens. Other sampling remained greedy/non-thinking.
-Generation tuning follows the prioritized prefill work. The next code experiment
-is bounded expert dispatch; its cost is still unmeasured. A separate compiler
-and pinned source checkout are being prepared; the packaged engine is preserved.
+Generation tuning follows the prioritized prefill work. The bounded expert
+persistent-dispatch experiment is **rejected**: every tested grid was slower
+(58.7–85.5 ms versus 54.0–54.3 ms), despite identical outputs and passing routing
+checks. [Patch, tests and reproduction](experiments/strata-f16-persistent-dispatch/README.md)
+are archived. The separate pinned source and SDK are ready; the next prefill
+measurement is residual write/normalization bandwidth. The packaged engine
+is preserved; no losing code change was promoted.
 
 The engine is now stopped. Proactive compaction was restored to **20** after
 stopping it; no persistent host-policy change remains.

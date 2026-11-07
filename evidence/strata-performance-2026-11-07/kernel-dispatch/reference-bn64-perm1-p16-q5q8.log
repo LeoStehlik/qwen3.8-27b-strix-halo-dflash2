@@ -1,0 +1,7 @@
+strata: F16 K-quant persistent dispatch: 16 blocks/CU, GPU 0, 20 CUs (opt-in)
+  reference routing: permuted expert IDs, holes 7/34/44/61, first/final active
+Q5_K / Q8_0 - reference part: 256 tokens, 64 experts, rows per expert: max 234, experts without rows 4
+  reference output bits hash d4233949f1d6d045
+  fused vs the int8-rounded model (same activation / H rounding, double sums): rel RMS 2.579e-03  worst 7.372e-03
+  fused vs FP32 reference: rel RMS 1.419e-02  worst row max rel 7.472e-02
+prefill fused MoE (native formats) parity passed

@@ -356,7 +356,7 @@ GDN. A longer 192K cold request now checks that path with an explicit zero
 presence penalty; it remains a temperature-zero/non-thinking performance
 probe, not a full match to OpenClaw's thinking/sampling settings.
 
-### Candidate for a code experiment, not a claimed gain
+### Expert-dispatch code experiment: rejected
 
 The release-pinned F16 expert path in `moe_fused_iq.cu` constructs a launch
 bound from the whole layer's routed-row count plus the current expert batch.
@@ -366,14 +366,21 @@ count; 128-row operation also skips every second 64-row tile entry. Thus some
 blocks perform no matrix work. Their cost is not measured by the phase profile,
 and the number of empty blocks is not the fraction of time that can be saved.
 
-A defensible next experiment is a standalone operator comparison of the current
-launch against a bounded persistent work loop, keeping arithmetic and row
-ownership unchanged. First measure actual row/tile distributions and empty-block
-cost; compare multiple grid sizes instead of assuming persistent scheduling wins.
-Cover empty and non-contiguous experts, boundaries, narrow/wide tiles, and all
-quant combinations used by this pack. Only a winner proceeds to a full 64K/192K
-run and model-state checks. No engine source patch or compiler installation has
-been performed yet. This is separate from the validated packaged configuration.
+The bounded persistent-dispatch experiment is now complete and **rejected**.
+At a 16K chunk on the dominant Q4_K/Q5_1 format, the original operator took
+54.000 / 54.326 ms before/after the screen. Grid sizes of 1, 2, 4, 8 and 16
+blocks per compute unit took 85.467, 62.468, 65.332, 58.897 and 58.651 ms.
+Even the best opt-in case was about 8% slower. All output hashes matched.
+The patched default-off path took 54.148 / 54.261 ms and matched the original
+binary's outputs. CPU-reference, empty-range, non-contiguous routing and boundary
+checks passed for all three model quant pairs and both tile sizes.
+
+[Archived patch, reproduction and limitations](../experiments/strata-f16-persistent-dispatch/README.md)
+include the pinned source, isolated SDK, raw logs and output-bit comparisons.
+The isolated SDK did not change the driver or packaged runtime. No full-model
+run or deployment of this losing patch was warranted. The next measured target
+is the hyper-connection residual write/normalization (4.026 seconds / 8.5% of
+64K prefill), beginning with an operator bandwidth measurement.
 
 ## Long-context check of the selected packaged configuration
 
@@ -394,8 +401,8 @@ meets the original target even at 192K, with further code work still active.
 
 After these tests, the engine was stopped and `vm.compaction_proactiveness`
 restored to its original **20**. No persistent sysctl file was changed. The
-packaged settings are preserved; the next phase prepares a separate source
-checkout and compiler for an expert-dispatch operator experiment. No model
+packaged settings are preserved. A separate pinned checkout and user-local
+compiler were used for the rejected expert-dispatch experiment. No model
 weights are changed or downloaded for that work.
 
 ## Reproduce the current packaged candidate
@@ -453,8 +460,9 @@ service stopped for the isolated kernel work. Boot startup remains disabled. Per
 the original slow installer layout. Do not enable it blindly on boot; finish
 the clean-boot comparison and select a validated configuration first.
 
-No OpenClaw restart, Mac reboot, GPU driver reload, model download or engine
-source patch was performed for these comparisons. Old 27B and Qwen3.6 remain
+No OpenClaw restart, Mac reboot, GPU driver reload or model download was
+performed for these comparisons. The source-only operator experiment is
+separate from the packaged full-model measurements. Old 27B and Qwen3.6 remain
 stopped, disabled and retained.
 
 Local private artifacts: `~/.cache/strata-evaluation-20261107/performance/`.

@@ -1,0 +1,6 @@
+{
+  "source_commit": "c3b3f5035506f3e966f1b4b7b188aeaabae92f1d",
+  "binary": "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq.control",
+  "sha256": "386a8cc87c3a97ffe5dc4b8a606e7e2bd626dd2c25f87a26cd60854e825fdacc",
+  "sdk": "/home/less/.local/opt/rocm-7.14.1-strata-lab"
+}

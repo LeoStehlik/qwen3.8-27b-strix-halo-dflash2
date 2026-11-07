@@ -1,0 +1,246 @@
+[0/2] Re-checking globbed directories...
+[1/33] Building CXX object ggml/src/CMakeFiles/ggml-base.dir/ggml-threading.cpp.o
+[2/33] Building CXX object ggml/src/CMakeFiles/ggml-base.dir/ggml.cpp.o
+[3/33] Building C object ggml/src/CMakeFiles/ggml-base.dir/ggml-alloc.c.o
+[4/33] Building CXX object ggml/src/CMakeFiles/ggml-base.dir/ggml-opt.cpp.o
+[5/33] Building CXX object ggml/src/CMakeFiles/ggml-base.dir/ggml-backend.cpp.o
+[6/33] Building C object ggml/src/CMakeFiles/ggml-base.dir/ggml.c.o
+[7/33] Building HIP object CMakeFiles/strata_mmq.dir/src/prefill/moe_fused.cu.o
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_fused.cu:619:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  619 |     cudaGetDevice(&dev);
+      |     ^~~~~~~~~~~~~~~~~~~
+/home/less/src/strata-f16-dispatch-20261107/include/strata/hip_compat/cuda_runtime.h:56:23: note: expanded from macro 'cudaGetDevice'
+   56 | #define cudaGetDevice hipGetDevice
+      |                       ^
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_fused.cu:631:9: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  631 |         cudaDeviceGetAttribute(&d.sms, cudaDevAttrMultiProcessorCount, dev);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/less/src/strata-f16-dispatch-20261107/include/strata/hip_compat/cuda_runtime.h:26:32: note: expanded from macro 'cudaDeviceGetAttribute'
+   26 | #define cudaDeviceGetAttribute hipDeviceGetAttribute
+      |                                ^
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_fused.cu:635:13: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  635 |             cudaGetLastError();
+      |             ^~~~~~~~~~~~~~~~~~
+/home/less/src/strata-f16-dispatch-20261107/include/strata/hip_compat/cuda_runtime.h:60:26: note: expanded from macro 'cudaGetLastError'
+   60 | #define cudaGetLastError hipGetLastError
+      |                          ^
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_fused.cu:642:9: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  642 |         cudaGetLastError();
+      |         ^~~~~~~~~~~~~~~~~~
+/home/less/src/strata-f16-dispatch-20261107/include/strata/hip_compat/cuda_runtime.h:60:26: note: expanded from macro 'cudaGetLastError'
+   60 | #define cudaGetLastError hipGetLastError
+      |                          ^
+4 warnings generated when compiling for gfx1151.
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_fused.cu:619:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  619 |     cudaGetDevice(&dev);
+      |     ^~~~~~~~~~~~~~~~~~~
+/home/less/src/strata-f16-dispatch-20261107/include/strata/hip_compat/cuda_runtime.h:56:23: note: expanded from macro 'cudaGetDevice'
+   56 | #define cudaGetDevice hipGetDevice
+      |                       ^
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_fused.cu:631:9: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  631 |         cudaDeviceGetAttribute(&d.sms, cudaDevAttrMultiProcessorCount, dev);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/less/src/strata-f16-dispatch-20261107/include/strata/hip_compat/cuda_runtime.h:26:32: note: expanded from macro 'cudaDeviceGetAttribute'
+   26 | #define cudaDeviceGetAttribute hipDeviceGetAttribute
+      |                                ^
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_fused.cu:635:13: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  635 |             cudaGetLastError();
+      |             ^~~~~~~~~~~~~~~~~~
+/home/less/src/strata-f16-dispatch-20261107/include/strata/hip_compat/cuda_runtime.h:60:26: note: expanded from macro 'cudaGetLastError'
+   60 | #define cudaGetLastError hipGetLastError
+      |                          ^
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_fused.cu:642:9: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  642 |         cudaGetLastError();
+      |         ^~~~~~~~~~~~~~~~~~
+/home/less/src/strata-f16-dispatch-20261107/include/strata/hip_compat/cuda_runtime.h:60:26: note: expanded from macro 'cudaGetLastError'
+   60 | #define cudaGetLastError hipGetLastError
+      |                          ^
+4 warnings generated when compiling for host.
+[8/33] Building CXX object ggml/src/CMakeFiles/ggml-base.dir/gguf.cpp.o
+[9/33] Building CXX object ggml/src/CMakeFiles/ggml-base.dir/ggml-backend-meta.cpp.o
+[10/33] Building HIP object CMakeFiles/strata_mmq.dir/src/prefill/ggml_cuda_host.cu.o
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/ggml_cuda_host.cu:138:31: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  138 |         for (auto & b : bufs) cudaFree(b.p);
+      |                               ^~~~~~~~~~~~~
+/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/vendors/hip.h:69:18: note: expanded from macro 'cudaFree'
+   69 | #define cudaFree hipFree
+      |                  ^
+1 warning generated when compiling for gfx1151.
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/ggml_cuda_host.cu:138:31: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  138 |         for (auto & b : bufs) cudaFree(b.p);
+      |                               ^~~~~~~~~~~~~
+/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/vendors/hip.h:69:18: note: expanded from macro 'cudaFree'
+   69 | #define cudaFree hipFree
+      |                  ^
+1 warning generated when compiling for host.
+[11/33] Building HIP object CMakeFiles/strata_mmq.dir/src/prefill/moe_mmq.cu.o
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_mmq.cu:467:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  467 |     cudaGetDevice(&dev);
+      |     ^~~~~~~~~~~~~~~~~~~
+/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/vendors/hip.h:71:23: note: expanded from macro 'cudaGetDevice'
+   71 | #define cudaGetDevice hipGetDevice
+      |                       ^
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_mmq.cu:668:19: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  668 |         if (tail) cudaMemcpyAsync(tail_dst, tail, 16, cudaMemcpyDeviceToDevice, s);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/vendors/hip.h:91:25: note: expanded from macro 'cudaMemcpyAsync'
+   91 | #define cudaMemcpyAsync hipMemcpyAsync
+      |                         ^
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_mmq.cu:670:13: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  670 |             cudaMemsetAsync((uint8_t*) gu_dst + 2 * gu_half_bytes, 0, zero_bytes, s);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/vendors/hip.h:99:25: note: expanded from macro 'cudaMemsetAsync'
+   99 | #define cudaMemsetAsync hipMemsetAsync
+      |                         ^
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_mmq.cu:671:13: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  671 |             cudaMemsetAsync((uint8_t*) d_dst + d_bytes, 0, zero_bytes, s);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/vendors/hip.h:99:25: note: expanded from macro 'cudaMemsetAsync'
+   99 | #define cudaMemsetAsync hipMemsetAsync
+      |                         ^
+4 warnings generated when compiling for gfx1151.
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_mmq.cu:467:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  467 |     cudaGetDevice(&dev);
+      |     ^~~~~~~~~~~~~~~~~~~
+/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/vendors/hip.h:71:23: note: expanded from macro 'cudaGetDevice'
+   71 | #define cudaGetDevice hipGetDevice
+      |                       ^
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_mmq.cu:668:19: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  668 |         if (tail) cudaMemcpyAsync(tail_dst, tail, 16, cudaMemcpyDeviceToDevice, s);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/vendors/hip.h:91:25: note: expanded from macro 'cudaMemcpyAsync'
+   91 | #define cudaMemcpyAsync hipMemcpyAsync
+      |                         ^
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_mmq.cu:670:13: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  670 |             cudaMemsetAsync((uint8_t*) gu_dst + 2 * gu_half_bytes, 0, zero_bytes, s);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/vendors/hip.h:99:25: note: expanded from macro 'cudaMemsetAsync'
+   99 | #define cudaMemsetAsync hipMemsetAsync
+      |                         ^
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_mmq.cu:671:13: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+  671 |             cudaMemsetAsync((uint8_t*) d_dst + d_bytes, 0, zero_bytes, s);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/vendors/hip.h:99:25: note: expanded from macro 'cudaMemsetAsync'
+   99 | #define cudaMemsetAsync hipMemsetAsync
+      |                         ^
+4 warnings generated when compiling for host.
+[12/33] Building HIP object CMakeFiles/strata_mmq.dir/src/prefill/moe_f16_kq.cu.o
+[13/33] Building C object ggml/src/CMakeFiles/ggml-base.dir/ggml-quants.c.o
+[14/33] Building HIP object CMakeFiles/strata_mmq.dir/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/quantize.cu.o
+[15/33] Building HIP object CMakeFiles/strata_mmq.dir/src/prefill/moe_fused_iq.cu.o
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_fused_iq.cu:1774:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+ 1774 |     cudaGetDevice(&dev);
+      |     ^~~~~~~~~~~~~~~~~~~
+/home/less/src/strata-f16-dispatch-20261107/include/strata/hip_compat/cuda_runtime.h:56:23: note: expanded from macro 'cudaGetDevice'
+   56 | #define cudaGetDevice hipGetDevice
+      |                       ^
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_fused_iq.cu:1785:9: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+ 1785 |         cudaDeviceGetAttribute(&d.sms, cudaDevAttrMultiProcessorCount, dev);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/less/src/strata-f16-dispatch-20261107/include/strata/hip_compat/cuda_runtime.h:26:32: note: expanded from macro 'cudaDeviceGetAttribute'
+   26 | #define cudaDeviceGetAttribute hipDeviceGetAttribute
+      |                                ^
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_fused_iq.cu:1798:13: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+ 1798 |             cudaGetLastError();
+      |             ^~~~~~~~~~~~~~~~~~
+/home/less/src/strata-f16-dispatch-20261107/include/strata/hip_compat/cuda_runtime.h:60:26: note: expanded from macro 'cudaGetLastError'
+   60 | #define cudaGetLastError hipGetLastError
+      |                          ^
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_fused_iq.cu:1806:9: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+ 1806 |         cudaGetLastError();
+      |         ^~~~~~~~~~~~~~~~~~
+/home/less/src/strata-f16-dispatch-20261107/include/strata/hip_compat/cuda_runtime.h:60:26: note: expanded from macro 'cudaGetLastError'
+   60 | #define cudaGetLastError hipGetLastError
+      |                          ^
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_fused_iq.cu:1297:1: warning: failed to meet occupancy target given by 'amdgpu-waves-per-eu' in '_ZN6strata7prefill5fused12_GLOBAL__N_117native_w11_kernelILi22ELb1ELb1ELi8EEEvNS1_5BatchENS1_10NativeGeomENS2_6TablesEPKhPKiPhPf': desired occupancy was 8, final occupancy is 6 [-Wpass-failed]
+ 1297 | native_w11_kernel(const Batch b, const NativeGeom geo, const Tables tb, const uint8_t* __restrict__ act,
+      | ^
+5 warnings generated when compiling for gfx1151.
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_fused_iq.cu:1774:5: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+ 1774 |     cudaGetDevice(&dev);
+      |     ^~~~~~~~~~~~~~~~~~~
+/home/less/src/strata-f16-dispatch-20261107/include/strata/hip_compat/cuda_runtime.h:56:23: note: expanded from macro 'cudaGetDevice'
+   56 | #define cudaGetDevice hipGetDevice
+      |                       ^
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_fused_iq.cu:1785:9: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+ 1785 |         cudaDeviceGetAttribute(&d.sms, cudaDevAttrMultiProcessorCount, dev);
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/less/src/strata-f16-dispatch-20261107/include/strata/hip_compat/cuda_runtime.h:26:32: note: expanded from macro 'cudaDeviceGetAttribute'
+   26 | #define cudaDeviceGetAttribute hipDeviceGetAttribute
+      |                                ^
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_fused_iq.cu:1798:13: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+ 1798 |             cudaGetLastError();
+      |             ^~~~~~~~~~~~~~~~~~
+/home/less/src/strata-f16-dispatch-20261107/include/strata/hip_compat/cuda_runtime.h:60:26: note: expanded from macro 'cudaGetLastError'
+   60 | #define cudaGetLastError hipGetLastError
+      |                          ^
+/home/less/src/strata-f16-dispatch-20261107/src/prefill/moe_fused_iq.cu:1806:9: warning: ignoring return value of type 'hipError_t' declared with 'nodiscard' attribute [-Wunused-value]
+ 1806 |         cudaGetLastError();
+      |         ^~~~~~~~~~~~~~~~~~
+/home/less/src/strata-f16-dispatch-20261107/include/strata/hip_compat/cuda_runtime.h:60:26: note: expanded from macro 'cudaGetLastError'
+   60 | #define cudaGetLastError hipGetLastError
+      |                          ^
+4 warnings generated when compiling for host.
+[16/33] Building HIP object CMakeFiles/strata_mmq.dir/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/template-instances/mmq-instance-q2_0.cu.o
+[17/33] Building HIP object CMakeFiles/strata_mmq.dir/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/template-instances/mmq-instance-iq2_xxs.cu.o
+[18/33] Building HIP object CMakeFiles/strata_mmq.dir/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/template-instances/mmq-instance-iq2_xs.cu.o
+[19/33] Building HIP object CMakeFiles/strata_mmq.dir/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/template-instances/mmq-instance-iq2_s.cu.o
+[20/33] Building HIP object CMakeFiles/strata_mmq.dir/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/template-instances/mmq-instance-iq3_xxs.cu.o
+[21/33] Building HIP object CMakeFiles/strata_mmq.dir/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/template-instances/mmq-instance-iq4_nl.cu.o
+[22/33] Linking CXX static library ggml/src/libggml-base.a
+[23/33] Building HIP object CMakeFiles/strata_mmq.dir/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/template-instances/mmq-instance-iq3_s.cu.o
+[24/33] Building CXX object CMakeFiles/hip_prefill_fused_iq.dir/tests/cuda/prefill_fused_iq_test.cpp.o
+/home/less/src/strata-f16-dispatch-20261107/tests/cuda/prefill_fused_iq_test.cpp: In destructor ‘{anonymous}::Dev::~Dev()’:
+/home/less/src/strata-f16-dispatch-20261107/tests/cuda/prefill_fused_iq_test.cpp:52:22: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+   52 |     ~Dev() { cudaFree(p); }
+In file included from /home/less/.local/opt/rocm-7.14.1-strata-lab/include/hip/hip_runtime.h:49,
+                 from /home/less/src/strata-f16-dispatch-20261107/include/strata/hip_compat/cuda_runtime.h:12,
+                 from <command-line>:
+/home/less/.local/opt/rocm-7.14.1-strata-lab/include/hip/hip_runtime_api.h:4926:12: note: in call to ‘hipError_t hipFree(void*)’, declared here
+ 4926 | hipError_t hipFree(void* ptr);
+      |            ^~~~~~~
+/home/less/.local/opt/rocm-7.14.1-strata-lab/include/hip/hip_runtime_api.h:410:3: note: ‘hipError_t’ declared here
+  410 | } hipError_t;
+      |   ^~~~~~~~~~
+/home/less/src/strata-f16-dispatch-20261107/tests/cuda/prefill_fused_iq_test.cpp: In function ‘void {anonymous}::timing_part(const Pair&, int, hipStream_t)’:
+/home/less/src/strata-f16-dispatch-20261107/tests/cuda/prefill_fused_iq_test.cpp:639:21: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+  639 |     cudaEventDestroy(a);
+/home/less/.local/opt/rocm-7.14.1-strata-lab/include/hip/hip_runtime_api.h:3651:12: note: in call to ‘hipError_t hipEventDestroy(hipEvent_t)’, declared here
+ 3651 | hipError_t hipEventDestroy(hipEvent_t event);
+      |            ^~~~~~~~~~~~~~~
+/home/less/.local/opt/rocm-7.14.1-strata-lab/include/hip/hip_runtime_api.h:410:3: note: ‘hipError_t’ declared here
+  410 | } hipError_t;
+      |   ^~~~~~~~~~
+/home/less/src/strata-f16-dispatch-20261107/tests/cuda/prefill_fused_iq_test.cpp:640:21: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+  640 |     cudaEventDestroy(b);
+/home/less/.local/opt/rocm-7.14.1-strata-lab/include/hip/hip_runtime_api.h:3651:12: note: in call to ‘hipError_t hipEventDestroy(hipEvent_t)’, declared here
+ 3651 | hipError_t hipEventDestroy(hipEvent_t event);
+      |            ^~~~~~~~~~~~~~~
+/home/less/.local/opt/rocm-7.14.1-strata-lab/include/hip/hip_runtime_api.h:410:3: note: ‘hipError_t’ declared here
+  410 | } hipError_t;
+      |   ^~~~~~~~~~
+/home/less/src/strata-f16-dispatch-20261107/tests/cuda/prefill_fused_iq_test.cpp: In function ‘int main(int, char**)’:
+/home/less/src/strata-f16-dispatch-20261107/tests/cuda/prefill_fused_iq_test.cpp:672:35: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+  672 |             cudaDeviceGetAttribute(&major, cudaDevAttrComputeCapabilityMajor, 0);
+/home/less/.local/opt/rocm-7.14.1-strata-lab/include/hip/hip_runtime_api.h:2449:12: note: in call to ‘hipError_t hipDeviceGetAttribute(int*, hipDeviceAttribute_t, int)’, declared here
+ 2449 | hipError_t hipDeviceGetAttribute(int* pi, hipDeviceAttribute_t attr, int deviceId);
+      |            ^~~~~~~~~~~~~~~~~~~~~
+/home/less/.local/opt/rocm-7.14.1-strata-lab/include/hip/hip_runtime_api.h:410:3: note: ‘hipError_t’ declared here
+  410 | } hipError_t;
+      |   ^~~~~~~~~~
+/home/less/src/strata-f16-dispatch-20261107/tests/cuda/prefill_fused_iq_test.cpp:726:39: warning: ignoring returned value of type ‘hipError_t’, declared with attribute ‘nodiscard’ [-Wunused-result]
+  726 |                 cudaDeviceGetAttribute(&major, cudaDevAttrComputeCapabilityMajor, 0);
+/home/less/.local/opt/rocm-7.14.1-strata-lab/include/hip/hip_runtime_api.h:2449:12: note: in call to ‘hipError_t hipDeviceGetAttribute(int*, hipDeviceAttribute_t, int)’, declared here
+ 2449 | hipError_t hipDeviceGetAttribute(int* pi, hipDeviceAttribute_t attr, int deviceId);
+      |            ^~~~~~~~~~~~~~~~~~~~~
+/home/less/.local/opt/rocm-7.14.1-strata-lab/include/hip/hip_runtime_api.h:410:3: note: ‘hipError_t’ declared here
+  410 | } hipError_t;
+      |   ^~~~~~~~~~
+[25/33] Building HIP object CMakeFiles/strata_mmq.dir/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/template-instances/mmq-instance-iq4_xs.cu.o
+[26/33] Building HIP object CMakeFiles/strata_mmq.dir/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/template-instances/mmq-instance-q8_0.cu.o
+[27/33] Building HIP object CMakeFiles/strata_mmq.dir/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/template-instances/mmq-instance-q4_k.cu.o
+[28/33] Building HIP object CMakeFiles/strata_mmq.dir/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/template-instances/mmq-instance-q5_k.cu.o
+[29/33] Building HIP object CMakeFiles/strata_mmq.dir/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/template-instances/mmq-instance-q5_1.cu.o
+[30/33] Building HIP object CMakeFiles/strata_mmq.dir/home/less/src/llama.cpp-3cf03257f219afbe7334045ff7c6a06ac68c627d/ggml/src/ggml-cuda/template-instances/mmq-instance-q6_k.cu.o
+[31/33] Linking HIP static library libstrata_mmq.a
+[32/33] Linking HIP executable hip_prefill_fused_iq

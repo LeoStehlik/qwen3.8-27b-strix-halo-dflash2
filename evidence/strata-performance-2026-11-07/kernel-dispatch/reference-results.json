@@ -1,0 +1,461 @@
+{
+  "binary_sha256": "7bd6fd42c417262844411c72d63b50bf98436e1ecbe6e57aba8415389a7c5fcb",
+  "runs": [
+    {
+      "label": "reference-bn64-perm0-p0-q4",
+      "seconds": 4.127,
+      "exit": 0,
+      "hashes": [
+        "79b8359e4299f6e5",
+        "c21779b658a3049c"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "64",
+        "STRATA_PF_F16_KQ_PERSIST": "0"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q4_K"
+      ]
+    },
+    {
+      "label": "reference-bn64-perm0-p0-q5q8",
+      "seconds": 2.18,
+      "exit": 0,
+      "hashes": [
+        "e85d6bfcdd8e481a"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "64",
+        "STRATA_PF_F16_KQ_PERSIST": "0"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q5_K / Q8_0"
+      ]
+    },
+    {
+      "label": "reference-bn64-perm0-p1-q4",
+      "seconds": 3.923,
+      "exit": 0,
+      "hashes": [
+        "79b8359e4299f6e5",
+        "c21779b658a3049c"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "64",
+        "STRATA_PF_F16_KQ_PERSIST": "1"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q4_K"
+      ]
+    },
+    {
+      "label": "reference-bn64-perm0-p1-q5q8",
+      "seconds": 2.169,
+      "exit": 0,
+      "hashes": [
+        "e85d6bfcdd8e481a"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "64",
+        "STRATA_PF_F16_KQ_PERSIST": "1"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q5_K / Q8_0"
+      ]
+    },
+    {
+      "label": "reference-bn64-perm0-p16-q4",
+      "seconds": 3.922,
+      "exit": 0,
+      "hashes": [
+        "79b8359e4299f6e5",
+        "c21779b658a3049c"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "64",
+        "STRATA_PF_F16_KQ_PERSIST": "16"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q4_K"
+      ]
+    },
+    {
+      "label": "reference-bn64-perm0-p16-q5q8",
+      "seconds": 2.169,
+      "exit": 0,
+      "hashes": [
+        "e85d6bfcdd8e481a"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "64",
+        "STRATA_PF_F16_KQ_PERSIST": "16"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q5_K / Q8_0"
+      ]
+    },
+    {
+      "label": "reference-bn64-perm1-p0-q4",
+      "seconds": 3.922,
+      "exit": 0,
+      "hashes": [
+        "e413bc5b2b1237bc",
+        "0c5a341059d9479c"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "64",
+        "STRATA_PF_F16_KQ_PERSIST": "0"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q4_K",
+        "--reference-permuted"
+      ]
+    },
+    {
+      "label": "reference-bn64-perm1-p0-q5q8",
+      "seconds": 2.169,
+      "exit": 0,
+      "hashes": [
+        "d4233949f1d6d045"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "64",
+        "STRATA_PF_F16_KQ_PERSIST": "0"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q5_K / Q8_0",
+        "--reference-permuted"
+      ]
+    },
+    {
+      "label": "reference-bn64-perm1-p1-q4",
+      "seconds": 3.923,
+      "exit": 0,
+      "hashes": [
+        "e413bc5b2b1237bc",
+        "0c5a341059d9479c"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "64",
+        "STRATA_PF_F16_KQ_PERSIST": "1"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q4_K",
+        "--reference-permuted"
+      ]
+    },
+    {
+      "label": "reference-bn64-perm1-p1-q5q8",
+      "seconds": 2.169,
+      "exit": 0,
+      "hashes": [
+        "d4233949f1d6d045"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "64",
+        "STRATA_PF_F16_KQ_PERSIST": "1"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q5_K / Q8_0",
+        "--reference-permuted"
+      ]
+    },
+    {
+      "label": "reference-bn64-perm1-p16-q4",
+      "seconds": 3.923,
+      "exit": 0,
+      "hashes": [
+        "e413bc5b2b1237bc",
+        "0c5a341059d9479c"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "64",
+        "STRATA_PF_F16_KQ_PERSIST": "16"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q4_K",
+        "--reference-permuted"
+      ]
+    },
+    {
+      "label": "reference-bn64-perm1-p16-q5q8",
+      "seconds": 2.169,
+      "exit": 0,
+      "hashes": [
+        "d4233949f1d6d045"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "64",
+        "STRATA_PF_F16_KQ_PERSIST": "16"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q5_K / Q8_0",
+        "--reference-permuted"
+      ]
+    },
+    {
+      "label": "reference-bn128-perm0-p0-q4",
+      "seconds": 3.923,
+      "exit": 0,
+      "hashes": [
+        "79b8359e4299f6e5",
+        "c21779b658a3049c"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "128",
+        "STRATA_PF_F16_KQ_PERSIST": "0"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q4_K"
+      ]
+    },
+    {
+      "label": "reference-bn128-perm0-p0-q5q8",
+      "seconds": 2.169,
+      "exit": 0,
+      "hashes": [
+        "e85d6bfcdd8e481a"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "128",
+        "STRATA_PF_F16_KQ_PERSIST": "0"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q5_K / Q8_0"
+      ]
+    },
+    {
+      "label": "reference-bn128-perm0-p1-q4",
+      "seconds": 3.923,
+      "exit": 0,
+      "hashes": [
+        "79b8359e4299f6e5",
+        "c21779b658a3049c"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "128",
+        "STRATA_PF_F16_KQ_PERSIST": "1"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q4_K"
+      ]
+    },
+    {
+      "label": "reference-bn128-perm0-p1-q5q8",
+      "seconds": 2.171,
+      "exit": 0,
+      "hashes": [
+        "e85d6bfcdd8e481a"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "128",
+        "STRATA_PF_F16_KQ_PERSIST": "1"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q5_K / Q8_0"
+      ]
+    },
+    {
+      "label": "reference-bn128-perm0-p16-q4",
+      "seconds": 3.923,
+      "exit": 0,
+      "hashes": [
+        "79b8359e4299f6e5",
+        "c21779b658a3049c"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "128",
+        "STRATA_PF_F16_KQ_PERSIST": "16"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q4_K"
+      ]
+    },
+    {
+      "label": "reference-bn128-perm0-p16-q5q8",
+      "seconds": 2.119,
+      "exit": 0,
+      "hashes": [
+        "e85d6bfcdd8e481a"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "128",
+        "STRATA_PF_F16_KQ_PERSIST": "16"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q5_K / Q8_0"
+      ]
+    },
+    {
+      "label": "reference-bn128-perm1-p0-q4",
+      "seconds": 3.923,
+      "exit": 0,
+      "hashes": [
+        "e413bc5b2b1237bc",
+        "0c5a341059d9479c"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "128",
+        "STRATA_PF_F16_KQ_PERSIST": "0"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q4_K",
+        "--reference-permuted"
+      ]
+    },
+    {
+      "label": "reference-bn128-perm1-p0-q5q8",
+      "seconds": 2.169,
+      "exit": 0,
+      "hashes": [
+        "d4233949f1d6d045"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "128",
+        "STRATA_PF_F16_KQ_PERSIST": "0"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q5_K / Q8_0",
+        "--reference-permuted"
+      ]
+    },
+    {
+      "label": "reference-bn128-perm1-p1-q4",
+      "seconds": 3.923,
+      "exit": 0,
+      "hashes": [
+        "e413bc5b2b1237bc",
+        "0c5a341059d9479c"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "128",
+        "STRATA_PF_F16_KQ_PERSIST": "1"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q4_K",
+        "--reference-permuted"
+      ]
+    },
+    {
+      "label": "reference-bn128-perm1-p1-q5q8",
+      "seconds": 2.17,
+      "exit": 0,
+      "hashes": [
+        "d4233949f1d6d045"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "128",
+        "STRATA_PF_F16_KQ_PERSIST": "1"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q5_K / Q8_0",
+        "--reference-permuted"
+      ]
+    },
+    {
+      "label": "reference-bn128-perm1-p16-q4",
+      "seconds": 3.923,
+      "exit": 0,
+      "hashes": [
+        "e413bc5b2b1237bc",
+        "0c5a341059d9479c"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "128",
+        "STRATA_PF_F16_KQ_PERSIST": "16"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q4_K",
+        "--reference-permuted"
+      ]
+    },
+    {
+      "label": "reference-bn128-perm1-p16-q5q8",
+      "seconds": 2.169,
+      "exit": 0,
+      "hashes": [
+        "d4233949f1d6d045"
+      ],
+      "env": {
+        "STRATA_PF_F16": "1",
+        "STRATA_PF_F16_BN": "128",
+        "STRATA_PF_F16_KQ_PERSIST": "16"
+      },
+      "argv": [
+        "/home/less/src/strata-f16-dispatch-20261107/build-halo-lab/hip_prefill_fused_iq",
+        "--no-timing",
+        "--only=Q5_K / Q8_0",
+        "--reference-permuted"
+      ]
+    }
+  ]
+}

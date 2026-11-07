@@ -1,0 +1,545 @@
+diff --git a/src/prefill/moe_f16_kq.cu b/src/prefill/moe_f16_kq.cu
+index 824b8cc..cf39c60 100644
+--- a/src/prefill/moe_f16_kq.cu
++++ b/src/prefill/moe_f16_kq.cu
+@@ -34,6 +34,10 @@
+ #include "ggml.h"
+ 
+ #include <algorithm>
++#include <cstdio>
++#include <cstdlib>
++#include <map>
++#include <mutex>
+ 
+ namespace strata::prefill::fused::f16kq {
+ namespace {
+@@ -44,6 +48,36 @@ constexpr int T_Q4_K = GGML_TYPE_Q4_K, T_Q5_K = GGML_TYPE_Q5_K;
+ constexpr int GU_NS = 2560 / 64, D_NS = 640 / 64;   // stages of 64 values
+ constexpr int FEAT = 64;                             // features (gate rows = up rows) per gate/up item
+ 
++// Experiment: bound the F16 K-quant dispatch without changing its tiles or arithmetic.
++// Zero/unset keeps one block per work item. Positive values are blocks per CU.
++unsigned persistent_grid(unsigned bound) {
++    static const int per_cu = [] {
++        const char* v = std::getenv("STRATA_PF_F16_KQ_PERSIST");
++        return v ? std::clamp(std::atoi(v), 0, 16) : 0;
++    }();
++    if (per_cu == 0) return 0;
++    int device = 0;
++    if (cudaGetDevice(&device) != cudaSuccess) {
++        std::fprintf(stderr, "F16 K-quant dispatch: cannot inspect the current GPU\n");
++        std::exit(1);
++    }
++    static std::mutex mutex;
++    static std::map<int, int> cu_counts;
++    std::lock_guard<std::mutex> lock(mutex);
++    auto it = cu_counts.find(device);
++    if (it == cu_counts.end()) {
++        cudaDeviceProp prop{};
++        if (cudaGetDeviceProperties(&prop, device) != cudaSuccess || prop.multiProcessorCount <= 0) {
++            std::fprintf(stderr, "F16 K-quant dispatch: cannot inspect GPU %d's CU count\n", device);
++            std::exit(1);
++        }
++        it = cu_counts.emplace(device, prop.multiProcessorCount).first;
++        std::fprintf(stderr, "strata: F16 K-quant persistent dispatch: %d blocks/CU, GPU %d, %d CUs (opt-in)\n",
++                     per_cu, device, it->second);
++    }
++    return std::min(bound, (unsigned) (it->second * per_cu));
++}
++
+ // Byte i of the 16-byte K-quant block header (d, dmin, scales[12]).
+ __device__ __forceinline__ uint32_t header_byte(const uint4& h, uint32_t i) {
+     const uint32_t word = i < 4 ? h.x : i < 8 ? h.y : i < 12 ? h.z : h.w;
+@@ -69,7 +103,7 @@ __device__ __forceinline__ void codes_to_halves(uint32_t codes, __half2 magic, _
+ }
+ 
+ // Gate/up (Q4_K / Q5_K): code rows 0..63 are the item's gate rows, 64..127 its up rows; a thread pair per row.
+-template <int WT, int BN>
++template <int WT, int BN, bool Persistent = false>
+ __global__ void __launch_bounds__(THREADS) gate_up_kernel(const Batch b, const NativeGeom geo, const int32_t* __restrict__ ts,
+                                                           const int2* __restrict__ tiles, const int32_t* __restrict__ off,
+                                                           const uint8_t* __restrict__ act, const int32_t* __restrict__ src,
+@@ -97,116 +131,126 @@ __global__ void __launch_bounds__(THREADS) gate_up_kernel(const Batch b, const N
+     const auto swizzle = [](int row, int c) { return row * 2 + (c ^ ((row >> 2) & 1)); };
+     const __half2 magic = __floats2half2_rn(-1024.0f, -1024.0f);
+ 
+-    int fb, e, row0, nrows;
+-    if (!work_item<BN, GU_NFB>(b, ts, tiles, off, blockIdx.x, fb, e, row0, nrows)) return;
+-    const int live_tiles = (nrows + 15) / 16;
+-    const uint8_t* blob = b.blob[e - b.e0];
+-    if (tid < BN) srow[tid] = tid < nrows ? src[row0 + tid] : -1;
+-    __syncthreads();
++    const int work_items = Persistent ? (ts[b.e1] - ts[b.e0]) * GU_NFB : 0;
++    for (int work = (int) blockIdx.x;; work += (int) gridDim.x) {
++        if constexpr (Persistent) { if (work >= work_items) break; }
++        int fb, e, row0, nrows;
++        if (!work_item<BN, GU_NFB>(b, ts, tiles, off, work, fb, e, row0, nrows)) {
++            if constexpr (Persistent) continue;
++            else return;
++        }
++        const int live_tiles = (nrows + 15) / 16;
++        const uint8_t* blob = b.blob[e - b.e0];
++        if (tid < BN) srow[tid] = tid < nrows ? src[row0 + tid] : -1;
++        __syncthreads();
+ 
+-    const uint8_t* f_ptr = blob + ((tid >> 1) >= FEAT ? geo.up_off : 0) + (size_t) (fb * FEAT + ((tid >> 1) & (FEAT - 1))) * geo.gu_row;
+-    uint4 f_header = make_uint4(0u, 0u, 0u, 0u), f_codes, f_qh[2] = {};
+-    uint4 code_cache[4];   // the block's four nibble groups, this thread's chunk of each
+-    uint32_t f_high = 0;
+-    int f_sb32 = 0;
+-    ActStage<BN> as;
+-    as.init(act, GU_ACT_LD, srow, tid);   // the tokens' activation rows
++        const uint8_t* f_ptr = blob + ((tid >> 1) >= FEAT ? geo.up_off : 0) + (size_t) (fb * FEAT + ((tid >> 1) & (FEAT - 1))) * geo.gu_row;
++        uint4 f_header = make_uint4(0u, 0u, 0u, 0u), f_codes, f_qh[2] = {};
++        uint4 code_cache[4];   // the block's four nibble groups, this thread's chunk of each
++        uint32_t f_high = 0;
++        int f_sb32 = 0;
++        ActStage<BN> as;
++        as.init(act, GU_ACT_LD, srow, tid);   // the tokens' activation rows
+ 
+-    const auto fetch_stage = [&](int s) {
+-        const int kb0 = 2 * s;
+-        const uint4* blk = reinterpret_cast<const uint4*>(f_ptr) + (kb0 / 8) * BLOCK_CHUNKS;
+-        if (kb0 % 8 == 0) {   // a new 256-value block every four stages
+-            f_header = blk[0];
++        const auto fetch_stage = [&](int s) {
++            const int kb0 = 2 * s;
++            const uint4* blk = reinterpret_cast<const uint4*>(f_ptr) + (kb0 / 8) * BLOCK_CHUNKS;
++            if (kb0 % 8 == 0) {   // a new 256-value block every four stages
++                f_header = blk[0];
+ #pragma unroll
+-            for (int group = 0; group < 4; ++group) code_cache[group] = blk[CODE_CHUNK + group * 2 + f_c];
+-            if constexpr (Q5K) {
+-                f_qh[0] = blk[1];
+-                f_qh[1] = blk[2];
++                for (int group = 0; group < 4; ++group) code_cache[group] = blk[CODE_CHUNK + group * 2 + f_c];
++                if constexpr (Q5K) {
++                    f_qh[0] = blk[1];
++                    f_qh[1] = blk[2];
++                }
+             }
+-        }
+-        const int sb32 = (kb0 % 8) + f_c;
+-        {
+-            const int group = sb32 / 2;   // uniform across the wave
+-            const uint32_t low = 0u - (group & 1u), high = 0u - ((group >> 1u) & 1u);
+-            const auto select = [](uint32_t a, uint32_t bb, uint32_t mask) {
+-                uint32_t value;
+-                asm("v_cndmask_b32_e64 %0, %1, %2, %3" : "=v"(value) : "v"(a), "v"(bb), "s"(mask));
+-                return value;
+-            };
+-            const uint4 &c0 = code_cache[0], &c1 = code_cache[1], &c2 = code_cache[2], &c3 = code_cache[3];
+-            f_codes = make_uint4(select(select(c0.x, c1.x, low), select(c2.x, c3.x, low), high),
+-                                 select(select(c0.y, c1.y, low), select(c2.y, c3.y, low), high),
+-                                 select(select(c0.z, c1.z, low), select(c2.z, c3.z, low), high),
+-                                 select(select(c0.w, c1.w, low), select(c2.w, c3.w, low), high));
+-        }
+-        f_sb32 = sb32;
+-        if constexpr (Q5K) {
+-            const uint32_t qh[8] = {f_qh[0].x, f_qh[0].y, f_qh[0].z, f_qh[0].w, f_qh[1].x, f_qh[1].y, f_qh[1].z, f_qh[1].w};
+-            uint32_t hb = 0;
++            const int sb32 = (kb0 % 8) + f_c;
++            {
++                const int group = sb32 / 2;   // uniform across the wave
++                const uint32_t low = 0u - (group & 1u), high = 0u - ((group >> 1u) & 1u);
++                const auto select = [](uint32_t a, uint32_t bb, uint32_t mask) {
++                    uint32_t value;
++                    asm("v_cndmask_b32_e64 %0, %1, %2, %3" : "=v"(value) : "v"(a), "v"(bb), "s"(mask));
++                    return value;
++                };
++                const uint4 &c0 = code_cache[0], &c1 = code_cache[1], &c2 = code_cache[2], &c3 = code_cache[3];
++                f_codes = make_uint4(select(select(c0.x, c1.x, low), select(c2.x, c3.x, low), high),
++                                     select(select(c0.y, c1.y, low), select(c2.y, c3.y, low), high),
++                                     select(select(c0.z, c1.z, low), select(c2.z, c3.z, low), high),
++                                     select(select(c0.w, c1.w, low), select(c2.w, c3.w, low), high));
++            }
++            f_sb32 = sb32;
++            if constexpr (Q5K) {
++                const uint32_t qh[8] = {f_qh[0].x, f_qh[0].y, f_qh[0].z, f_qh[0].w, f_qh[1].x, f_qh[1].y, f_qh[1].z, f_qh[1].w};
++                uint32_t hb = 0;
+ #pragma unroll
+-            for (int i = 0; i < 8; ++i) hb |= gather_bit(qh[i], sb32) << (4 * i);
+-            f_high = hb;
+-        }
+-        as.fetch(s);
+-    };
++                for (int i = 0; i < 8; ++i) hb |= gather_bit(qh[i], sb32) << (4 * i);
++                f_high = hb;
++            }
++            as.fetch(s);
++        };
+ 
+-    const auto commit_stage = [&]() {
+-        const int row = tid >> 1;
+-        s_codes[swizzle(row, f_c)] = f_codes;
+-        if constexpr (Q5K) s_high[f_c * ROWS + row] = f_high;
+-        const int sb32 = f_sb32;
+-        uint32_t sc, mn;
+-        if (sb32 < 4) {
+-            sc = header_byte(f_header, 4 + sb32) & 0x3FU;
+-            mn = header_byte(f_header, 8 + sb32) & 0x3FU;
+-        } else {
+-            sc = (header_byte(f_header, 8 + sb32) & 0x0FU) | ((header_byte(f_header, sb32) >> 6U) << 4U);
+-            mn = (header_byte(f_header, 8 + sb32) >> 4U) | ((header_byte(f_header, 4 + sb32) >> 6U) << 4U);
+-        }
+-        const __half2 dm = __builtin_bit_cast(__half2, f_header.x);
+-        const float scale = __low2float(dm) * (float) sc, offset = __high2float(dm) * (float) mn;
+-        s_scale[f_c * ROWS + row] = __builtin_bit_cast(uint32_t, __floats2half2_rn(scale, -offset));
+-        as.commit(s_act);
+-    };
++        const auto commit_stage = [&]() {
++            const int row = tid >> 1;
++            s_codes[swizzle(row, f_c)] = f_codes;
++            if constexpr (Q5K) s_high[f_c * ROWS + row] = f_high;
++            const int sb32 = f_sb32;
++            uint32_t sc, mn;
++            if (sb32 < 4) {
++                sc = header_byte(f_header, 4 + sb32) & 0x3FU;
++                mn = header_byte(f_header, 8 + sb32) & 0x3FU;
++            } else {
++                sc = (header_byte(f_header, 8 + sb32) & 0x0FU) | ((header_byte(f_header, sb32) >> 6U) << 4U);
++                mn = (header_byte(f_header, 8 + sb32) >> 4U) | ((header_byte(f_header, 4 + sb32) >> 6U) << 4U);
++            }
++            const __half2 dm = __builtin_bit_cast(__half2, f_header.x);
++            const float scale = __low2float(dm) * (float) sc, offset = __high2float(dm) * (float) mn;
++            s_scale[f_c * ROWS + row] = __builtin_bit_cast(uint32_t, __floats2half2_rn(scale, -offset));
++            as.commit(s_act);
++        };
+ 
+-    v8f acc[BN / 16];
++        v8f acc[BN / 16];
+ #pragma unroll
+-    for (int j = 0; j < BN / 16; ++j) acc[j] = v8f{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
++        for (int j = 0; j < BN / 16; ++j) acc[j] = v8f{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+ 
+-    const auto compute_stage = [&]() {
+-        const int row = wave * 16 + sub_lane;   // waves 0-3: gate rows, 4-7: the matching up rows
+-        const uint4 raw0 = s_codes[swizzle(row, 0)], raw1 = s_codes[swizzle(row, 1)];
++        const auto compute_stage = [&]() {
++            const int row = wave * 16 + sub_lane;   // waves 0-3: gate rows, 4-7: the matching up rows
++            const uint4 raw0 = s_codes[swizzle(row, 0)], raw1 = s_codes[swizzle(row, 1)];
+ #pragma unroll
+-        for (int kb = 0; kb < 2; ++kb) {
+-            const __half2 sb = __builtin_bit_cast(__half2, s_scale[kb * ROWS + row]);
+-            const __half2 scale2 = __low2half2(sb), bias2 = __high2half2(sb);
+-            // elements 0-15 of K block 2s + kb are the low (kb = 0) or high (kb = 1) nibbles of chunk 0, 16-31 of chunk 1
+-            const unsigned shift = 4U * (unsigned) kb;
+-            const uint32_t words[8] = {raw0.x, raw0.y, raw0.z, raw0.w, raw1.x, raw1.y, raw1.z, raw1.w};
+-            const uint32_t hb = Q5K ? s_high[kb * ROWS + row] : 0U;
+-            __half2 h[16];
++            for (int kb = 0; kb < 2; ++kb) {
++                const __half2 sb = __builtin_bit_cast(__half2, s_scale[kb * ROWS + row]);
++                const __half2 scale2 = __low2half2(sb), bias2 = __high2half2(sb);
++                // elements 0-15 of K block 2s + kb are the low (kb = 0) or high (kb = 1) nibbles of chunk 0, 16-31 of chunk 1
++                const unsigned shift = 4U * (unsigned) kb;
++                const uint32_t words[8] = {raw0.x, raw0.y, raw0.z, raw0.w, raw1.x, raw1.y, raw1.z, raw1.w};
++                const uint32_t hb = Q5K ? s_high[kb * ROWS + row] : 0U;
++                __half2 h[16];
+ #pragma unroll
+-            for (int i = 0; i < 8; ++i) {
+-                uint32_t nib = (words[i] >> shift) & 0x0F0F0F0FU;
+-                if constexpr (Q5K) nib |= spread_high_bits((hb >> (4 * i)) & 0xFU);
+-                codes_to_halves(nib, magic, scale2, bias2, h[2 * i], h[2 * i + 1]);
++                for (int i = 0; i < 8; ++i) {
++                    uint32_t nib = (words[i] >> shift) & 0x0F0F0F0FU;
++                    if constexpr (Q5K) nib |= spread_high_bits((hb >> (4 * i)) & 0xFU);
++                    codes_to_halves(nib, magic, scale2, bias2, h[2 * i], h[2 * i + 1]);
++                }
++                v16h a_lo, a_hi;
++                __builtin_memcpy(&a_lo, &h[0], 32);
++                __builtin_memcpy(&a_hi, &h[8], 32);
++                mma_tiles<BN>(acc, a_lo, a_hi, s_act, kb, sub_lane, live_tiles);
+             }
+-            v16h a_lo, a_hi;
+-            __builtin_memcpy(&a_lo, &h[0], 32);
+-            __builtin_memcpy(&a_hi, &h[8], 32);
+-            mma_tiles<BN>(acc, a_lo, a_hi, s_act, kb, sub_lane, live_tiles);
+-        }
+-    };
++        };
+ 
+-    fetch_stage(0);
+-    for (int s = 0; s < GU_NS; ++s) {
+-        commit_stage();
+-        __syncthreads();
+-        if (s + 1 < GU_NS) fetch_stage(s + 1);
+-        compute_stage();
+-        __syncthreads();
++        fetch_stage(0);
++        for (int s = 0; s < GU_NS; ++s) {
++            commit_stage();
++            __syncthreads();
++            if (s + 1 < GU_NS) fetch_stage(s + 1);
++            compute_stage();
++            __syncthreads();
++        }
++        gu_epilogue<BN>(acc, lds, tid, live_tiles, nrows, row0, fb, out);
++        // All waves must finish the epilogue before the next item reuses LDS.
++        if constexpr (Persistent) __syncthreads();
++        else break;
+     }
+-    gu_epilogue<BN>(acc, lds, tid, live_tiles, nrows, row0, fb, out);
+ #else
+     (void) b; (void) geo; (void) ts; (void) tiles; (void) off; (void) act; (void) src; (void) out;
+     __builtin_trap();
+@@ -215,7 +259,7 @@ __global__ void __launch_bounds__(THREADS) gate_up_kernel(const Batch b, const N
+ 
+ // Q5_1 down: 128 of the 2560 output rows against a tile's (or pair's) H rows, K = 640 in 10 stages; the routed rows'
+ // FP32 outputs in `dm` (native_w11_kernel<T_Q5_1, false>'s).
+-template <int BN>
++template <int BN, bool Persistent = false>
+ __global__ void __launch_bounds__(THREADS) down_kernel(const Batch b, const NativeGeom geo, const int32_t* __restrict__ ts,
+                                                        const int2* __restrict__ tiles, const int32_t* __restrict__ off,
+                                                        const uint8_t* __restrict__ h, float* __restrict__ dm) {
+@@ -235,68 +279,78 @@ __global__ void __launch_bounds__(THREADS) down_kernel(const Batch b, const Nati
+     const auto swizzle = [](int row, int c) { return row * 2 + (c ^ ((row >> 2) & 1)); };
+     const __half2 magic = __floats2half2_rn(-1024.0f, -1024.0f);
+ 
+-    int fb, e, row0, nrows;
+-    if (!work_item<BN, D_NFB>(b, ts, tiles, off, blockIdx.x, fb, e, row0, nrows)) return;
+-    const int live_tiles = (nrows + 15) / 16;
+-    if (tid < BN) srow[tid] = tid < nrows ? row0 + tid : -1;   // H is indexed by the routed row
+-    __syncthreads();
++    const int work_items = Persistent ? (ts[b.e1] - ts[b.e0]) * D_NFB : 0;
++    for (int work = (int) blockIdx.x;; work += (int) gridDim.x) {
++        if constexpr (Persistent) { if (work >= work_items) break; }
++        int fb, e, row0, nrows;
++        if (!work_item<BN, D_NFB>(b, ts, tiles, off, work, fb, e, row0, nrows)) {
++            if constexpr (Persistent) continue;
++            else return;
++        }
++        const int live_tiles = (nrows + 15) / 16;
++        if (tid < BN) srow[tid] = tid < nrows ? row0 + tid : -1;   // H is indexed by the routed row
++        __syncthreads();
+ 
+-    const uint2* f_ptr = reinterpret_cast<const uint2*>(b.blob[e - b.e0] + geo.down_off + (size_t) (fb * ROWS + (tid >> 1)) * geo.d_row);
+-    uint4 f_codes;
+-    uint32_t f_high = 0, f_dm = 0;
+-    ActStage<BN> as;
+-    as.init(h, H_LD, srow, tid);
+-    const auto fetch_stage = [&](int s) {
+-        const uint2* words = f_ptr + (2 * s + f_c) * 3;   // block_q5_1: {d, m}, qh, qs[16]
+-        const uint2 w0 = words[0], w1 = words[1], w2 = words[2];
+-        f_codes = make_uint4(w1.x, w1.y, w2.x, w2.y);
+-        f_high = w0.y;
+-        f_dm = w0.x;
+-        as.fetch(s);
+-    };
+-    const auto commit_stage = [&]() {
+-        const int row = tid >> 1;
+-        s_codes[swizzle(row, f_c)] = f_codes;
+-        s_high[f_c * ROWS + row] = f_high;
+-        s_scale[f_c * ROWS + row] = f_dm;   // the half2 (d, m): w = q d + m
+-        as.commit(s_act);
+-    };
+-    v8f acc[BN / 16];
++        const uint2* f_ptr = reinterpret_cast<const uint2*>(b.blob[e - b.e0] + geo.down_off + (size_t) (fb * ROWS + (tid >> 1)) * geo.d_row);
++        uint4 f_codes;
++        uint32_t f_high = 0, f_dm = 0;
++        ActStage<BN> as;
++        as.init(h, H_LD, srow, tid);
++        const auto fetch_stage = [&](int s) {
++            const uint2* words = f_ptr + (2 * s + f_c) * 3;   // block_q5_1: {d, m}, qh, qs[16]
++            const uint2 w0 = words[0], w1 = words[1], w2 = words[2];
++            f_codes = make_uint4(w1.x, w1.y, w2.x, w2.y);
++            f_high = w0.y;
++            f_dm = w0.x;
++            as.fetch(s);
++        };
++        const auto commit_stage = [&]() {
++            const int row = tid >> 1;
++            s_codes[swizzle(row, f_c)] = f_codes;
++            s_high[f_c * ROWS + row] = f_high;
++            s_scale[f_c * ROWS + row] = f_dm;   // the half2 (d, m): w = q d + m
++            as.commit(s_act);
++        };
++        v8f acc[BN / 16];
+ #pragma unroll
+-    for (int j = 0; j < BN / 16; ++j) acc[j] = v8f{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
+-    const auto compute_stage = [&]() {
+-        const int row = wave * 16 + sub_lane;
+-        const uint4 raw[2] = {s_codes[swizzle(row, 0)], s_codes[swizzle(row, 1)]};
++        for (int j = 0; j < BN / 16; ++j) acc[j] = v8f{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
++        const auto compute_stage = [&]() {
++            const int row = wave * 16 + sub_lane;
++            const uint4 raw[2] = {s_codes[swizzle(row, 0)], s_codes[swizzle(row, 1)]};
+ #pragma unroll
+-        for (int kb = 0; kb < 2; ++kb) {
+-            const __half2 sb = __builtin_bit_cast(__half2, s_scale[kb * ROWS + row]);
+-            const __half2 scale2 = __low2half2(sb), bias2 = __high2half2(sb);
+-            // elements 0-15 are the low nibbles of the 16 code bytes, 16-31 the high, plus bit j of the high-bit word
+-            const uint32_t words[4] = {raw[kb].x, raw[kb].y, raw[kb].z, raw[kb].w};
+-            const uint32_t hb = s_high[kb * ROWS + row];
+-            __half2 hh[16];
++            for (int kb = 0; kb < 2; ++kb) {
++                const __half2 sb = __builtin_bit_cast(__half2, s_scale[kb * ROWS + row]);
++                const __half2 scale2 = __low2half2(sb), bias2 = __high2half2(sb);
++                // elements 0-15 are the low nibbles of the 16 code bytes, 16-31 the high, plus bit j of the high-bit word
++                const uint32_t words[4] = {raw[kb].x, raw[kb].y, raw[kb].z, raw[kb].w};
++                const uint32_t hb = s_high[kb * ROWS + row];
++                __half2 hh[16];
+ #pragma unroll
+-            for (int i = 0; i < 4; ++i) {
+-                const uint32_t lo = (words[i] & 0x0F0F0F0FU) | spread_high_bits((hb >> (4 * i)) & 0xFU);
+-                const uint32_t hi = ((words[i] >> 4U) & 0x0F0F0F0FU) | spread_high_bits((hb >> (16 + 4 * i)) & 0xFU);
+-                codes_to_halves(lo, magic, scale2, bias2, hh[2 * i], hh[2 * i + 1]);
+-                codes_to_halves(hi, magic, scale2, bias2, hh[8 + 2 * i], hh[8 + 2 * i + 1]);
++                for (int i = 0; i < 4; ++i) {
++                    const uint32_t lo = (words[i] & 0x0F0F0F0FU) | spread_high_bits((hb >> (4 * i)) & 0xFU);
++                    const uint32_t hi = ((words[i] >> 4U) & 0x0F0F0F0FU) | spread_high_bits((hb >> (16 + 4 * i)) & 0xFU);
++                    codes_to_halves(lo, magic, scale2, bias2, hh[2 * i], hh[2 * i + 1]);
++                    codes_to_halves(hi, magic, scale2, bias2, hh[8 + 2 * i], hh[8 + 2 * i + 1]);
++                }
++                v16h a_lo, a_hi;
++                __builtin_memcpy(&a_lo, &hh[0], 32);
++                __builtin_memcpy(&a_hi, &hh[8], 32);
++                mma_tiles<BN>(acc, a_lo, a_hi, s_act, kb, sub_lane, live_tiles);
+             }
+-            v16h a_lo, a_hi;
+-            __builtin_memcpy(&a_lo, &hh[0], 32);
+-            __builtin_memcpy(&a_hi, &hh[8], 32);
+-            mma_tiles<BN>(acc, a_lo, a_hi, s_act, kb, sub_lane, live_tiles);
++        };
++        fetch_stage(0);
++        for (int s = 0; s < D_NS; ++s) {
++            commit_stage();
++            __syncthreads();
++            if (s + 1 < D_NS) fetch_stage(s + 1);
++            compute_stage();
++            __syncthreads();
+         }
+-    };
+-    fetch_stage(0);
+-    for (int s = 0; s < D_NS; ++s) {
+-        commit_stage();
+-        __syncthreads();
+-        if (s + 1 < D_NS) fetch_stage(s + 1);
+-        compute_stage();
+-        __syncthreads();
++        down_epilogue<BN>(acc, lds, tid, live_tiles, nrows, row0, fb, dm);
++        // All waves must finish the epilogue before the next item reuses LDS.
++        if constexpr (Persistent) __syncthreads();
++        else break;
+     }
+-    down_epilogue<BN>(acc, lds, tid, live_tiles, nrows, row0, fb, dm);
+ #else
+     (void) b; (void) geo; (void) ts; (void) tiles; (void) off; (void) h; (void) dm;
+     __builtin_trap();
+@@ -315,6 +369,17 @@ void gate_up(const Batch& b, const NativeGeom& g, const int32_t* ts, const int2*
+     // of a tile are consecutive, so they meet its activations in L2)
+     const unsigned grid = (unsigned) std::max<int64_t>(1, work_bound * GU_NFB);
+     const bool q5k = g.gu_type == T_Q5_K;
++    const unsigned pgrid = persistent_grid(grid);
++    if (pgrid != 0) {
++        if (pick_bn(n, n_expert) == 2 * kTileRows) {
++            if (q5k) gate_up_kernel<T_Q5_K, 2 * kTileRows, true><<<pgrid, THREADS, 0, s>>>(b, g, ts, tiles, off, act, src, out);
++            else gate_up_kernel<T_Q4_K, 2 * kTileRows, true><<<pgrid, THREADS, 0, s>>>(b, g, ts, tiles, off, act, src, out);
++        } else {
++            if (q5k) gate_up_kernel<T_Q5_K, kTileRows, true><<<pgrid, THREADS, 0, s>>>(b, g, ts, tiles, off, act, src, out);
++            else gate_up_kernel<T_Q4_K, kTileRows, true><<<pgrid, THREADS, 0, s>>>(b, g, ts, tiles, off, act, src, out);
++        }
++        return;
++    }
+     if (pick_bn(n, n_expert) == 2 * kTileRows) {
+         if (q5k) gate_up_kernel<T_Q5_K, 2 * kTileRows><<<grid, THREADS, 0, s>>>(b, g, ts, tiles, off, act, src, out);
+         else gate_up_kernel<T_Q4_K, 2 * kTileRows><<<grid, THREADS, 0, s>>>(b, g, ts, tiles, off, act, src, out);
+@@ -327,6 +392,12 @@ void gate_up(const Batch& b, const NativeGeom& g, const int32_t* ts, const int2*
+ void down(const Batch& b, const NativeGeom& g, const int32_t* ts, const int2* tiles, const int32_t* off, int64_t n, int n_expert,
+           int64_t work_bound, const uint8_t* h, float* dm, cudaStream_t s) {
+     const unsigned grid = (unsigned) std::max<int64_t>(1, work_bound * D_NFB);
++    const unsigned pgrid = persistent_grid(grid);
++    if (pgrid != 0) {
++        if (pick_bn(n, n_expert) == 2 * kTileRows) down_kernel<2 * kTileRows, true><<<pgrid, THREADS, 0, s>>>(b, g, ts, tiles, off, h, dm);
++        else down_kernel<kTileRows, true><<<pgrid, THREADS, 0, s>>>(b, g, ts, tiles, off, h, dm);
++        return;
++    }
+     if (pick_bn(n, n_expert) == 2 * kTileRows) down_kernel<2 * kTileRows><<<grid, THREADS, 0, s>>>(b, g, ts, tiles, off, h, dm);
+     else down_kernel<kTileRows><<<grid, THREADS, 0, s>>>(b, g, ts, tiles, off, h, dm);
+ }
+diff --git a/tests/cuda/prefill_fused_iq_test.cpp b/tests/cuda/prefill_fused_iq_test.cpp
+index 90f52f5..b2f8c04 100644
+--- a/tests/cuda/prefill_fused_iq_test.cpp
++++ b/tests/cuda/prefill_fused_iq_test.cpp
+@@ -311,7 +311,7 @@ std::vector<int32_t> download_i(const Dev& d, size_t n) {
+ }
+ 
+ // part 1: against the double-precision reference
+-void reference_part(const Pair& p, cudaStream_t s) {
++void reference_part(const Pair& p, cudaStream_t s, bool permuted = false) {
+     constexpr int T = 256, E = 64, ZERO = 77;
+     const Geo geo(p);
+     std::mt19937 rng(136 + (unsigned) p.gu * 7 + (unsigned) p.d);
+@@ -326,7 +326,12 @@ void reference_part(const Pair& p, cudaStream_t s) {
+         blob[(size_t) e] = q;
+     }
+     const std::vector<float> x = make_x(T, rng, ZERO);
+-    const std::vector<int32_t> ids = make_ids(T, E, rng, 2, 4);   // experts 0, 1 hot (several tiles), 60-63 unused
++    std::vector<int32_t> ids = make_ids(T, E, rng, 2, 4);   // experts 0, 1 hot (several tiles), 60-63 unused
++    if (permuted) {
++        // A bijection moves empty experts into the middle, with experts 0 and 63 active.
++        for (int32_t& id : ids) id = (id * 37 + 17) % E;
++        std::printf("  reference routing: permuted expert IDs, holes 7/34/44/61, first/final active\n");
++    }
+     const int64_t rows = (int64_t) T * K;
+     const Routing r = sort_rows(ids, E);
+     std::printf("%s - reference part: %d tokens, %d experts, rows per expert: max %d, experts without rows %d\n", p.name,
+@@ -346,14 +351,34 @@ void reference_part(const Pair& p, cudaStream_t s) {
+     ck(cudaMemcpy(fb.ids.p, ids.data(), ids.size() * 4, cudaMemcpyHostToDevice), "ids");
+     ck(cudaMemset(fb.dm.p, 0xff, (size_t) rows * N * 4), "sentinel");   // an unwritten row is NaN
+     ck(cudaDeviceSynchronize(), "uploads");
+-    run_fused(p, geo, fb, x_dev.as<float>(), T, E, {0, 1, 20, E}, blob, s);
++    run_fused(p, geo, fb, x_dev.as<float>(), T, E,
++              permuted ? std::vector<int>{0, 1, 7, 8, 20, 34, 35, 44, 45, 61, 62, E} : std::vector<int>{0, 1, 20, E}, blob, s);
+     ck(cudaStreamSynchronize(s), "sync");
+     const std::vector<float> y_mmq = mq ? download(mbp->dm, (size_t) rows * N) : std::vector<float>((size_t) rows * N, 0.0f),
+                              y_f = download(fb.dm, (size_t) rows * N);
+     delete mbp;
+     const std::vector<int32_t> slot = download_i(fb.slot, (size_t) rows), fsrc = download_i(fb.src, (size_t) rows);
+     for (int64_t i = 0; i < rows; ++i)
+-        if (fsrc[(size_t) slot[(size_t) i]] != (int32_t) (i / K)) throw std::runtime_error("group: slot/src disagree");
++        if (slot[(size_t) i] < 0 || slot[(size_t) i] >= rows || fsrc[(size_t) slot[(size_t) i]] != (int32_t) (i / K)) throw std::runtime_error("group: slot/src disagree");
++
++    {   // Compare every output bit across dispatch modes, independent of grouping order.
++        uint64_t hsh = 1469598103934665603ull;
++        std::vector<bool> seen((size_t) rows, false);
++        for (size_t i = 0; i < (size_t) rows; ++i) {
++            const int e = ids[i];
++            if (slot[i] < r.off[(size_t) e] || slot[i] >= r.off[(size_t) e + 1] || seen[(size_t) slot[i]])
++                throw std::runtime_error("reference group: row ownership is not one-to-one");
++            seen[(size_t) slot[i]] = true;
++            for (size_t c = 0; c < (size_t) N; ++c) {
++                uint32_t u;
++                const float value = y_f[(size_t) slot[i] * N + c];
++                if (!std::isfinite(value)) throw std::runtime_error("reference: unwritten or non-finite output");
++                std::memcpy(&u, &value, 4);
++                hsh = (hsh ^ u) * 1099511628211ull;
++            }
++        }
++        std::printf("  reference output bits hash %016llx\n", (unsigned long long) hsh);
++    }
+ 
+     // the reference, an expert at a time on all cores
+     std::vector<float> ref((size_t) rows * N), ref2((size_t) rows * N);   // ref2: the same with the kernels' int8 rounding
+@@ -700,11 +725,12 @@ int main(int argc, char** argv) {
+         const char* only = nullptr;   // --only=NAME: the pairs whose name contains NAME
+         for (int i = 1; i < argc; ++i)
+             if (std::strncmp(argv[i], "--only=", 7) == 0) only = argv[i] + 7;
+-        bool timing = true, ref = true;   // --no-timing, --no-ref: skip a part
++        bool timing = true, ref = true, permuted = false;   // --no-timing, --no-ref: skip a part
+         std::vector<int> chunks = {2048, 3584, 8192};   // --chunks=A,B: the timing part's chunk sizes
+         for (int i = 1; i < argc; ++i) {
+             if (std::strcmp(argv[i], "--no-timing") == 0) timing = false;
+             if (std::strcmp(argv[i], "--no-ref") == 0) ref = false;
++            if (std::strcmp(argv[i], "--reference-permuted") == 0) permuted = true;
+             if (std::strncmp(argv[i], "--chunks=", 9) == 0) {
+                 chunks.clear();
+                 for (const char* c = argv[i] + 9; *c;) {
+@@ -727,7 +753,7 @@ int main(int argc, char** argv) {
+                 if ((major < 8 || turing_pair) && !only) { std::printf("%s: not set up on this device (skipped)\n", p.name); continue; }
+                 throw std::runtime_error(std::string(p.name) + ": not covered by the native kernels");
+             }
+-            if (ref) reference_part(p, s);
++            if (ref) reference_part(p, s, permuted);
+         }
+         if (timing) {
+             // the IQ2_XS pack's layers (34 of 48 IQ2_S / Q2_0, 11 IQ2_XXS / Q2_0), the IQ3_S pack's most common, IQ3_XXS's
