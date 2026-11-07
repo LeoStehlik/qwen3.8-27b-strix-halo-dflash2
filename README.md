@@ -26,6 +26,13 @@ retries without caching completed responses.
 
 ## Current direction — 2026-11-07
 
+**Performance investigation active:** the private Tiercel endpoint is temporarily
+offline while configurations are compared at loopback port 8084. Enabling the
+packaged opt-in Halo kernels raised cold prefill to 1,234 tok/s at 64K and
+1,211 at 128K; generation is still 31–33 tok/s. These are custom benchmark
+results, not broad agent validation. See the [performance record](docs/STRATA-PERFORMANCE-2026-11-07.md)
+and [handoff](handoff.md) for current state and restoration instructions.
+
 Flash-Next UD-Q4_K_XL is running on packaged Strata v0.2.11 / HIP-Halo 0.1.57
 and connected to OpenClaw's existing `tiercelmoe` provider. Select
 `/model qwen-flash-next`. The authenticated private API is
@@ -35,8 +42,9 @@ with all files retained for rollback.
 
 Direct generation, exact tool/result continuation, streaming from the Mac mini
 and Francis's live model catalog passed. OpenClaw applied the change without a
-gateway restart. Real agent quality and cold 64K/128K performance remain unmeasured;
-the published 1,211 tok/s is not a local result.
+gateway restart. Real agent quality remains under evaluation; the initial
+deployment was slow and had one native verification watchdog exit. Later
+isolated cold 64K/128K measurements are recorded above.
 See the [OpenClaw connection record](docs/STRATA-OPENCLAW-2026-11-07.md),
 [first-load evidence](docs/STRATA-FIRST-LOAD-2026-11-07.md),
 [deployment guide](docs/STRATA-FLASH-NEXT.md) and [handoff](handoff.md).

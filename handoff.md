@@ -1,12 +1,25 @@
-# Handoff for Francis — Flash-Next connected to OpenClaw, 2026-11-07
+# Handoff for Francis — Flash-Next performance investigation, 2026-11-07
+
+**Performance work is active; Tiercel is temporarily offline for isolated
+configuration comparisons at loopback port 8084.** The user set a target of
+1,100 tok/s prefill and 50–60 tok/s generation and explicitly parked tool-call
+debugging. Do not send real traffic until the private endpoint is restored.
+
+Packaged Linux Halo prompt kernels were not enabled by the installer. Enabling
+the upstream opt-in set raised cold 16K prefill from 540 to 1,027–1,082 tok/s.
+Completed cold 64K/128K requests reached 1,234/1,211 tok/s. The first all-GPU
+expert layout with mmap PLE reached 1,224 prefill / 42.2 generation at 16K;
+its large-context check is pending. Generation profiling is next. The target
+has not been fully reached and the investigation is not done.
+Read the [performance record](docs/STRATA-PERFORMANCE-2026-11-07.md) first.
 
 **Flash-Next is connected to the existing `tiercelmoe` provider.** Select
 `/model qwen-flash-next`, or the full reference
 `tiercelmoe/qwen3.8-flash-next-unsloth-ud-q4_k_xl`.
 The Mac mini's authenticated streaming check and Francis's live gateway catalog
 passed. OpenClaw applied the provider/alias change through hot reload, with PID
-369 unchanged. The user now supplies real agent requests; cold long-context
-performance and broader quality validation remain pending.
+369 unchanged. Subsequent real traffic exposed low throughput and one native
+verification watchdog exit/reload. Broader quality validation remains pending.
 
 Read the [connection record and reproducible provider patch](docs/STRATA-OPENCLAW-2026-11-07.md),
 [first-load evidence](docs/STRATA-FIRST-LOAD-2026-11-07.md) and
@@ -23,7 +36,8 @@ See the [policy check evidence](evidence/strata-2026-11-07/openclaw-picker-polic
 
 - API: `http://100.96.8.54:8083/v1`, Tailscale address only, existing provider credential required.
 - Model: `qwen3.8-flash-next-unsloth-ud-q4_k_xl`.
-- Unit: `strata-flash-next.service`, active and enabled at boot; automatic restart
+- Unit: `strata-flash-next.service`, enabled at boot, currently using an isolated
+  runtime benchmark override; automatic systemd restart
   after failure remains off. Boot validation for this unit is pending.
 - Strata v0.2.11, engine/control 0.1.57, signed HIP-Halo build `0bdcef4682c5+rocm`.
 - Context 262,144, INT8 KV, one slot, MTP depth 4, prefill 16,384, GPU vision.
@@ -45,7 +59,7 @@ Qwen3.6 also remains stopped and disabled, with frozen evidence and files retain
 The direct completion returned exactly `READY`. The synthetic tool check passed
 exact typed arguments and tool-result continuation; the continuation reused 540
 prompt tokens. A streamed completion from the Mac also passed. Disk checkpoints, streaming
-tool calls, an actual image request, 64K/128K cold benchmarks, above-150K capacity
+tool calls, an actual image request, above-150K completion
 and broader fresh-start reliability remain untested. The upstream historical 1,211 tok/s is not a local
 measurement. Do not claim broad agent quality from this smoke check.
 
@@ -53,10 +67,11 @@ The user has tested Flash-Next successfully through Ollama Cloud. Continue with
 local performance and real-prompt checks. Only the existing Tiercel provider and
 its model alias were changed; agent defaults and current session selections were
 not. Do not restart/reboot the Mac or send synthetic agent/channel turns.
-The user can select the new alias and send real prompts now.
+The user can select the new alias after the private listener is restored.
 
 Implementation worktree: `/home/less/worktrees/qwen38-strata-20261106`, branch
-`deploy/strata-flash-next-20261106`. Current local results:
+`investigate/strata-performance-20261107` (branched from deployment commit
+`92c5521`). Current local results:
 `~/.cache/strata-evaluation-20261107/`; public synthetic evidence:
 `evidence/strata-2026-11-07/`. Model data: `~/models/strata-flash-next/`.
 Config and engine log: `~/.local/share/strata/flash-next/`.

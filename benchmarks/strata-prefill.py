@@ -22,10 +22,12 @@ def main():
     ap.add_argument('--out', type=Path, required=True)
     ap.add_argument('--sizes', type=int, nargs='+', default=[65536, 131072])
     ap.add_argument('--repeat', type=int, default=2)
+    ap.add_argument('--max-tokens', type=int, default=128,
+                    help='Output allowance for benchmark requests only')
     ap.add_argument('--model', default='qwen3.8-flash-next-unsloth')
     args = ap.parse_args()
-    if args.repeat < 1 or any(n < 1024 for n in args.sizes):
-        ap.error('Use positive repeats and sizes of at least 1024 tokens')
+    if args.repeat < 1 or args.max_tokens < 1 or any(n < 1024 for n in args.sizes):
+        ap.error('Use positive repeats/output allowance and sizes of at least 1024 tokens')
     raw = args.fixture.read_bytes()
     source = raw.decode('utf-8')
     if not source.strip():
@@ -35,7 +37,7 @@ def main():
         headers['Authorization'] = 'Bearer ' + os.environ['STRATA_API_KEY']
     report = {'protocol': 'strata-cold-prefill-custom-v1',
               'fixture_sha256': hashlib.sha256(raw).hexdigest(),
-              'sampling': {'temperature': 0, 'enable_thinking': False, 'max_tokens': 128},
+              'sampling': {'temperature': 0, 'enable_thinking': False, 'max_tokens': args.max_tokens},
               'runs': [], 'completed': False}
 
     def request(path, body, timeout=1800):
@@ -65,7 +67,7 @@ def main():
         body = {'model': args.model, 'messages': msg, 'stream': True,
                 'stream_options': {'include_usage': True}, 'temperature': 0,
                 'reasoning_effort': 'none', 'chat_template_kwargs': {'enable_thinking': False},
-                'max_tokens': 128 if not warmup else 16}
+                'max_tokens': args.max_tokens if not warmup else 16}
         start = time.monotonic()
         first = None
         usage = timings = None
