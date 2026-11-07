@@ -26,24 +26,20 @@ retries without caching completed responses.
 
 ## Current direction — 2026-11-07
 
-**Paused for a user reboot:** all inference services are stopped and disabled,
-with configuration and models retained. The last F16 screen reached 1,412 tok/s
-cold prefill at 64K, but generation was 37.9 and intermittent GPU queue eviction
-remains under investigation. No optimized configuration has been promoted.
-See the [handoff](handoff.md) for the exact resume point.
-
-**Performance investigation paused:** the private Tiercel endpoint is temporarily
-offline while configurations are compared at loopback port 8084. Enabling the
-packaged opt-in Halo kernels raised cold prefill to 1,234 tok/s at 64K and
-1,211 at 128K; generation is still 31–33 tok/s. These are custom benchmark
-results, not broad agent validation. See the [performance record](docs/STRATA-PERFORMANCE-2026-11-07.md)
-and [handoff](handoff.md) for current state and restoration instructions.
+**Performance investigation resumed after a clean reboot.** Cold prefill reached
+1,418 tok/s at 64K and 1,363 at 128K with the existing model quantization and
+262,144 context capacity. Generation on that fixture remains 39–41 tok/s.
+The user prioritizes further prefill gains, then 50–60 tok/s generation.
+Intermittent GPU queue eviction remains under investigation; no optimized
+configuration has been promoted. Tests run at loopback 8084 while the private
+Tiercel endpoint is offline. See the [performance record](docs/STRATA-PERFORMANCE-2026-11-07.md)
+and [handoff](handoff.md).
 
 Flash-Next UD-Q4_K_XL was deployed on packaged Strata v0.2.11 / HIP-Halo 0.1.57
 and connected to OpenClaw's existing `tiercelmoe` provider. After service is restored, select
 `/model qwen-flash-next`. The authenticated private API is
 `http://100.96.8.54:8083/v1`, with 262,144 context, INT8 KV, MTP and vision enabled.
-The Strata unit is currently stopped and disabled for the reboot pause;
+The Strata unit is active on loopback for benchmarks and disabled at boot;
 the old dense 27B service is also stopped and disabled,
 with all files retained for rollback.
 

@@ -26,12 +26,16 @@ def main():
                     help='Output allowance for benchmark requests only')
     ap.add_argument('--spec-min-p', type=float,
                     help='Optional Strata draft-confidence override for these requests only')
+    ap.add_argument('--presence-penalty', type=float,
+                    help='Explicit request penalty; omitted retains the server default (1.5 for non-thinking Flash-Next)')
     ap.add_argument('--model', default='qwen3.8-flash-next-unsloth')
     args = ap.parse_args()
     if args.repeat < 1 or args.max_tokens < 1 or any(n < 1024 for n in args.sizes):
         ap.error('Use positive repeats/output allowance and sizes of at least 1024 tokens')
     if args.spec_min_p is not None and not 0 <= args.spec_min_p <= 1:
         ap.error('--spec-min-p must be between zero and one')
+    if args.presence_penalty is not None and not 0 <= args.presence_penalty <= 2:
+        ap.error('--presence-penalty must be between zero and two')
     raw = args.fixture.read_bytes()
     source = raw.decode('utf-8')
     if not source.strip():
@@ -44,6 +48,10 @@ def main():
               'sampling': {'temperature': 0, 'enable_thinking': False, 'max_tokens': args.max_tokens},
               'strata_tune': {} if args.spec_min_p is None else {'spec_min_p': args.spec_min_p},
               'runs': [], 'completed': False}
+    if args.presence_penalty is not None:
+        report['sampling']['presence_penalty'] = args.presence_penalty
+    else:
+        report['sampling']['presence_penalty_source'] = 'server default; not overridden'
 
     def request(path, body, timeout=1800):
         req = urllib.request.Request(args.url.rstrip('/') + path,
@@ -73,6 +81,8 @@ def main():
                 'stream_options': {'include_usage': True}, 'temperature': 0,
                 'reasoning_effort': 'none', 'chat_template_kwargs': {'enable_thinking': False},
                 'max_tokens': args.max_tokens if not warmup else 16}
+        if args.presence_penalty is not None:
+            body['presence_penalty'] = args.presence_penalty
         if report['strata_tune']:
             body['strata_tune'] = report['strata_tune']
         start = time.monotonic()

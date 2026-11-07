@@ -1,9 +1,9 @@
 # Flash-Next performance investigation — November 7, 2026
 
-**Paused for a user-performed reboot, approximately 14:49 UTC.** Strata and both
-old model services are stopped and disabled. No inference listener remains.
-The runtime benchmark override was removed. No reboot was executed by the
-agent, and no compaction/sysctl change has been made.
+**Resumed after the user's clean reboot at 14:51:52 UTC.** Strata is active only
+on loopback 8084 for isolated comparisons; all inference boot startup remains
+disabled. The first clean-boot results are below. Prefill is the user's first
+priority, including gains beyond 1,400 tok/s; generation comes next.
 
 Target: at least 1,100 tokens/s cold prefill and
 50–60 tokens/s generation on the existing UD-Q4_K_XL model. Tool-call debugging
@@ -229,13 +229,132 @@ Generation's 50–60 tok/s target remains unmet. The public workload subset in
 `benchmarks/strata-generation.py` is prepared and syntax-checked but has **not
 been run**. Tool-call investigation remains parked.
 
+## Clean-boot comparison and remaining stalls
+
+Boot ID `35917f23-eead-456d-8ed2-d368f0e68f36`, kernel taint zero, original
+`vm.compaction_proactiveness=20`, `kernel.numa_balancing=0`. Only the same F16
+candidate was loaded. It took 88.04 seconds; the 151-token warm-up prefill
+completed in 631 ms.
+
+| Cold input | Prefill tok/s | Generation tok/s | Reused / output tokens |
+|---:|---:|---:|---:|
+| 16,393 | 1,074.3 | 40.3 | 0 / 512 |
+| 65,550 | 1,417.5 | 40.9 | 0 / 512 |
+| 131,075 | 1,363.2 | 38.9 | 0 / 512 |
+
+KFD reported 2.801 seconds evicted at readiness and 7.097 seconds during the
+first 16K prefill. Successful page migrations reached 1,416,691 while daemon
+compaction scanned 2,924,729 pages. This reproduces the pauses after reboot;
+stale processes from earlier installations cannot be their sole explanation.
+A fresh identical arm with temporary `vm.compaction_proactiveness=0` completed:
+
+| Cold input | Prefill tok/s | Generation tok/s | Reused / output tokens |
+|---:|---:|---:|---:|
+| 16,392 | 1,388.5 | 42.5 | 0 / 512 |
+| 65,551 | 1,397.5 | 41.4 | 0 / 512 |
+| 131,072 | 1,350.2 | 37.5 | 0 / 512 |
+
+After readiness, inference-process eviction increased by only 130 ms, versus
+4,339 ms with policy 20. Successful page migrations after readiness fell from
+1,186,367 to 4,780. Eviction during loading still occurred (2.010 seconds by
+readiness). Large-prompt throughput differed by approximately 1–2%, so this
+supports a reduction in pauses, not a compute-speed gain. The runs occurred
+sequentially in different memory/cache states; an interleaved repeat is needed
+before claiming a durable fix. The setting remains temporary, not persisted.
+The next arm profiles prefill on this configuration; generation tuning is
+parked until the user's prioritized prefill work is finished.
+
+**Later counterexample:** with the same temporary zero policy, the chunked-GDN
+arm's 151-token warm-up stalled again: 2.647 seconds prefill and 7.152 seconds
+generation. KFD eviction rose from 4.301 seconds at readiness to 13.921 seconds,
+while successful page migrations rose from 2.787 million to 4.178 million.
+The long measured request then ran without that pause. This refutes treating
+`compaction_proactiveness=0` alone as a fix: allocation-driven background/direct
+compaction is still possible. No persistent change or stability claim is made.
+
+### Public generation subset and sampling caveat
+
+`benchmarks/strata-generation.py` completed its three public cases on the
+clean-boot F16 candidate: 49.8 tok/s for the short prose question, 45.2 for the
+16,347-token document (1,476.1 tok/s cold prefill), and 57.7 for the LRU code
+prompt. Each generated 512 tokens. This is a custom subset, not the official
+full Strata protocol, and does not establish 50–60 tok/s on long agent turns.
+
+The server source also establishes an inherited setting omitted from the
+initial benchmark report: non-thinking Flash-Next requests default to
+`presence_penalty=1.5`. The private config has no sampling block and
+`GET /settings` returned no shared defaults. Our temperature-zero probes did
+not override that penalty. OpenClaw explicitly sends zero. Existing results
+remain valid for their actual requests but are not sampling-matched OpenClaw
+results. Both probes now accept an explicit `--presence-penalty`; a comparison
+with zero is deferred until after the prioritized prefill work. Historical
+measurements are not overwritten.
+
+## Profile of the faster prefill path
+
+With `STRATA_PREFILL_TIMING=1` and `STRATA_DRAFT_TIMING=1`, the F16 candidate
+processed a cold 65,552-token request at 1,380.7 tok/s (47.477 seconds).
+The prompt-path timer covers 65,545 tokens and reports a 47.319-second GPU
+timeline. Event intervals include waiting gaps; this is not a memory-bandwidth
+or occupancy counter capture. The 16-token completion is only a termination
+check, not a generation benchmark.
+
+| Aggregate on that timeline | Time | Share |
+|---|---:|---:|
+| Routed expert computation | 11.796 s | 24.9% |
+| GDN projections, convolution/gates, recurrence and output | 11.319 s | 23.9% |
+| Hyper-connection read/write | 9.904 s | 20.9% |
+| QSA projections, selection, attention and preparation | 9.515 s | 20.1% |
+| Remaining routing/shared, combine, lookup and setup | about 4.785 s | 10.1% |
+
+The fused-expert interval is labelled `gemm gate/up` but includes the fused
+expert down work; the tiny separate `gemm down` entry is not its total cost.
+GDN recurrence alone is 3.163 seconds (6.7%), actual QSA attention 4.745 seconds
+(10.0%), HC write 4.026 seconds (8.5%). Host grouping is 6 ms, below 0.02%.
+CPU expert staging is zero. Draft-layer work after chunks is 379 ms. Do not
+optimize host grouping or treat the full old attention share as current.
+
+Next experiments keep every model/context setting fixed: first a 32K chunk
+versus the current 16K, then the existing chunked GDN kernel independently.
+The latter changes recurrence rounding and needs quality validation before
+promotion. Its theoretical gain from a 1.6x recurrence speedup here is about
+2.6% overall, not 60%. The broader profile also gives concrete targets for
+further kernel work if the packaged switches stop paying.
+
+### Larger-chunk screen: not selected
+
+Changing only `--prefill 16384` to `32768` with automatic expert-cache sizing
+reached 1,375.0 tok/s on 65,546 uncached input tokens. Automatic sizing reduced
+the GPU expert cache from 24,576 to 23,083 slots (67.38 GiB). The measured
+request read 9.502 GB of expert blobs and caused 1.094 GB of OS storage reads.
+It is therefore a combined chunk/residency outcome, not an isolated tile-size
+comparison. It showed no gain and is not selected. OS memory available during
+prefill was approximately 18.5 GiB; a later fixed-residency comparison can
+hold all 24,576 slots explicitly, with memory telemetry retained.
+
+The independent screen kept the 16K/all-resident layout and changed only
+`STRATA_GDN_CHUNKED=1`: 65,552 uncached tokens at 1,404.5 tok/s and 131,075 at
+1,363.1. Those differences are within the observed control spread, so this
+rounding-changing path is not selected. Both generated 16 tokens only; their
+reported decode rates are not sustained-speed comparisons. `STRATA_PF_BATCH=512` is not a candidate for this packaged
+HIP build: `kBatchRoom` is capped at 128 in `moe_fused.hpp`, so that setting
+would not perform the hoped-for larger expert launch.
+
+The follow-up explicitly held `--expert-cache 24576` at 32K chunks. It loaded
+all experts, completed 65,547 uncached input tokens at **1,392.5 tok/s**, and
+left about 14.3 GiB OS memory available during prefill. This resolves the
+residency confounder and shows no useful advantage over 16K. The automatic
+conversation-cache budget also shrank from 6,912 to 4,864 MiB due to the larger
+scratch buffers. That cache was not reused in the cold request. Keep 16K unless
+the following 8K screen establishes a better tradeoff.
+
 ## Operational state during measurements
 
 The production private listener at `100.96.8.54:8083` is unavailable.
 During the comparisons the service ran isolated arms at `127.0.0.1:8084`, using a runtime
 drop-in at `$XDG_RUNTIME_DIR/systemd/user/strata-flash-next.service.d/90-benchmark.conf`.
-That override has now been removed and the service stopped and disabled for
-the reboot pause. Persistent production configuration is preserved, but it is
+The override was removed for the reboot pause, then recreated for the resumed
+comparisons. Boot startup remains disabled. Persistent production configuration is preserved, but it is
 the original slow installer layout. Do not enable it blindly on boot; finish
 the clean-boot comparison and select a validated configuration first.
 

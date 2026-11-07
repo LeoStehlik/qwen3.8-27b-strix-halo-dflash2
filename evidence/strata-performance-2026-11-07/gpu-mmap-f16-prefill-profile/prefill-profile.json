@@ -1,0 +1,138 @@
+{
+  "reported_tokens": 65545,
+  "request_prompt_tokens": 65552,
+  "gpu_timeline_ms": 47319,
+  "request_prefill_ms": 47477,
+  "phases": [
+    {
+      "phase": "embed+steps",
+      "ms": 406,
+      "share_percent": 0.9
+    },
+    {
+      "phase": "hc read",
+      "ms": 52,
+      "share_percent": 0.1
+    },
+    {
+      "phase": "gdn",
+      "ms": 5311,
+      "share_percent": 11.2
+    },
+    {
+      "phase": "qsa proj",
+      "ms": 2061,
+      "share_percent": 4.4
+    },
+    {
+      "phase": "qsa indexer",
+      "ms": 7,
+      "share_percent": 0.0
+    },
+    {
+      "phase": "qsa select",
+      "ms": 1970,
+      "share_percent": 4.2
+    },
+    {
+      "phase": "qsa attn",
+      "ms": 4745,
+      "share_percent": 10.0
+    },
+    {
+      "phase": "router+shared",
+      "ms": 1744,
+      "share_percent": 3.7
+    },
+    {
+      "phase": "host grouping",
+      "ms": 6,
+      "share_percent": 0.0
+    },
+    {
+      "phase": "gather",
+      "ms": 224,
+      "share_percent": 0.5
+    },
+    {
+      "phase": "dequant",
+      "ms": 100,
+      "share_percent": 0.2
+    },
+    {
+      "phase": "gemm gate/up",
+      "ms": 11744,
+      "share_percent": 24.8
+    },
+    {
+      "phase": "gemm down",
+      "ms": 52,
+      "share_percent": 0.1
+    },
+    {
+      "phase": "combine",
+      "ms": 1735,
+      "share_percent": 3.7
+    },
+    {
+      "phase": "ple",
+      "ms": 570,
+      "share_percent": 1.2
+    },
+    {
+      "phase": "gdn conv+gates",
+      "ms": 1046,
+      "share_percent": 2.2
+    },
+    {
+      "phase": "gdn recurrence",
+      "ms": 3163,
+      "share_percent": 6.7
+    },
+    {
+      "phase": "gdn out proj",
+      "ms": 1799,
+      "share_percent": 3.8
+    },
+    {
+      "phase": "hc write",
+      "ms": 4026,
+      "share_percent": 8.5
+    },
+    {
+      "phase": "hc read: down+silu",
+      "ms": 1959,
+      "share_percent": 4.1
+    },
+    {
+      "phase": "hc read: up",
+      "ms": 3147,
+      "share_percent": 6.7
+    },
+    {
+      "phase": "hc read: inject",
+      "ms": 716,
+      "share_percent": 1.5
+    },
+    {
+      "phase": "hc read: mix",
+      "ms": 4,
+      "share_percent": 0.0
+    },
+    {
+      "phase": "qsa: indexer gemms",
+      "ms": 130,
+      "share_percent": 0.3
+    },
+    {
+      "phase": "qsa: norm/rope/kv append/q prep",
+      "ms": 602,
+      "share_percent": 1.3
+    }
+  ],
+  "limits": [
+    "GPU event intervals include device wait gaps; not a hardware-counter profile.",
+    "Fused gate/up interval also includes fused expert down work; do not interpret its label as gate/up alone.",
+    "16 generated tokens here are not a decode-speed measurement."
+  ]
+}

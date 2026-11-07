@@ -1,0 +1,10 @@
+{
+  "utc": "2026-11-07T14:56:58.987944+00:00",
+  "boot_id": "35917f23-eead-456d-8ed2-d368f0e68f36",
+  "boot_time": "2026-11-07 14:51:52",
+  "kernel": "7.0.0-42-generic",
+  "compaction_proactiveness": "20",
+  "numa_balancing": "0",
+  "meminfo": "MemTotal:       120909512 kB\nMemFree:        112023960 kB\nMemAvailable:   119051076 kB\nBuffers:           83468 kB\nCached:          7855568 kB\nSwapCached:            0 kB\nActive:           799876 kB\nInactive:        7416652 kB\nActive(anon):     287024 kB\nInactive(anon):        0 kB\nActive(file):     512852 kB\nInactive(file):  7416652 kB\nUnevictable:        9564 kB\nMlocked:            9564 kB\nSwapTotal:       8388604 kB\nSwapFree:        8388604 kB\nZswap:                 0 kB\nZswapped:              0 kB\nDirty:               400 kB\nWriteback:           504 kB\nAnonPages:        287704 kB\nMapped:           514040 kB\nShmem:              1860 kB\nKReclaimable:      74240 kB\nSlab:             266564 kB\nSReclaimable:      74240 kB\nSUnreclaim:       192324 kB\nKernelStack:       11856 kB\nPageTables:         8204 kB\nSecPageTables:      3732 kB\nNFS_Unstable:          0 kB\nBounce:                0 kB\nWritebackTmp:          0 kB\nCommitLimit:    68843360 kB\nCommitted_AS:    3023732 kB\nVmallocTotal:   34359738367 kB\nVmallocUsed:       72312 kB\nVmallocChunk:          0 kB\nPercpu:            28544 kB\nHardwareCorrupted:     0 kB\nAnonHugePages:         0 kB\nShmemHugePages:        0 kB\nShmemPmdMapped:        0 kB\nFileHugePages:     59392 kB\nFilePmdMapped:         0 kB\nCmaTotal:              0 kB\nCmaFree:        13434880 kB\nUnaccepted:            0 kB\nBalloon:               0 kB\nGPUActive:         18224 kB\nGPUReclaim:            0 kB\nHugePages_Total:       0\nHugePages_Free:        0\nHugePages_Rsvd:        0\nHugePages_Surp:        0\nHugepagesize:       2048 kB\nHugetlb:               0 kB\nDirectMap4k:      298184 kB\nDirectMap2M:     6672384 kB\nDirectMap1G:    118489088 kB\n",
+  "kernel_tainted": "0"
+}

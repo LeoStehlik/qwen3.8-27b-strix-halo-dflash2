@@ -1,39 +1,40 @@
 # Handoff for Francis — Flash-Next performance investigation, 2026-11-07
 
-**PAUSED FOR USER REBOOT, approximately 14:49 UTC.** All three inference services
-are stopped and disabled; ports 8080, 8083 and 8084 are closed. The user will
-reboot. The agent has not rebooted or changed sysctls. The runtime benchmark
-override is removed. OpenClaw on the Mac was not restarted.
+**Performance investigation resumed after the user's clean reboot at 14:51:52 UTC.**
+The original-policy F16 comparison completed: cold 16K **1,074.3 / 40.3 tok/s**,
+64K **1,417.5 / 40.9**, and 128K **1,363.2 / 38.9** (prefill/generation).
+The first request overlapped GPU queue evictions; long requests were faster.
+Rebooting did not eliminate the memory-restore warnings or page migrations.
 
-Last completed F16 results: cold 16K **1,390.5 / 41.8 tok/s** prefill/generation;
-cold 64K **1,411.7 / 37.9**. The 128K run was cancelled for this pause. Some
-first requests suffer multi-second GPU queue evictions coinciding with Linux
-memory compaction. `kernel.numa_balancing=0`, `vm.compaction_proactiveness=20`.
-The early PLE flag did not fix all pauses. Generation target remains unmet.
+**Prefill is the first priority, including gains beyond 1,400 tok/s.** Profile
+this faster build before selecting more changes. Generation's 50–60 tok/s target
+remains active but comes second; tool-call debugging stays parked. Public
+probes reached 49.8 tok/s prose, 45.2 on a 16K document, and 57.7 code. These
+are workload-dependent results, not a broad 50–60 tok/s baseline.
 
-After the user confirms reboot completion, resume the goal and first repeat
-the same F16 configuration under the original host policy. Local runner:
-`python3 ~/.cache/strata-evaluation-20261107/performance/run-arm.py gpu-mmap-f16-cleanboot --sizes 16384 65536 131072`.
-It starts an isolated 8084 service without enabling boot startup. Then consider
-the reversible compaction experiment documented in the performance record.
-The 8083 production config is still the original installer layout. Do not
-blindly enable it; select and validate the intended configuration before
-restoring the private listener and boot startup. No winning config is promoted.
+A reversible `vm.compaction_proactiveness=0` comparison completed with identical
+engine configuration: 1,389 / 1,398 / 1,350 tok/s cold prefill at 16K / 64K / 128K.
+Its first run reduced eviction after readiness from 4,339 ms to 130 ms, but
+a later GDN-arm warm-up paused for seconds with the policy still zero. This
+setting alone is NOT a fix; retain the counterexample and keep it temporary.
+The 64K prefill profile is complete: routed experts 24.9%, GDN 23.9%,
+hyper-connections 20.9%, attention-related work 20.1%. Host grouping is negligible.
+The 32K/automatic-cache screen gave 1,375 tok/s but shrank the expert cache to
+23,083 slots, so it is not selected. The independent 16K chunked-GDN test gave 1,405 / 1,363 tok/s at 64K / 128K,
+within control spread, so it is not selected. The 32K arm with all 24,576 experts
+explicitly resident reached 1,393 tok/s with greater memory use; not selected.
+The 8K screen is running. Current best remains the 16K F16 configuration. Original value: 20; no persistent sysctl file
+was changed. `kernel.numa_balancing` was already zero. Do not call the stall
+fixed until the eviction and migration counters support it. Restoring a
+nonzero proactive-compaction value can immediately start compaction; do it
+with the engine stopped if reverting the experiment.
 
-The following paragraphs summarize the investigation before the pause.
-
-**Performance work is active; Tiercel is temporarily offline for isolated
-configuration comparisons at loopback port 8084.** The user set a target of
-1,100 tok/s prefill and 50–60 tok/s generation and explicitly parked tool-call
-debugging. Do not send real traffic until the private endpoint is restored.
-
-Packaged Linux Halo prompt kernels were not enabled by the installer. Enabling
-the upstream opt-in set raised cold 16K prefill from 540 to 1,027–1,082 tok/s.
-Completed cold 64K/128K requests reached 1,234/1,211 tok/s. The first all-GPU
-expert layout with mmap PLE reached 1,224 prefill / 42.2 generation at 16K;
-its large-context check is pending. Generation profiling is next. The target
-has not been fully reached and the investigation is not done.
-Read the [performance record](docs/STRATA-PERFORMANCE-2026-11-07.md) first.
+The production Tiercel listener at 8083 is offline. The Strata service is
+active only on loopback 8084 through a runtime benchmark override, and remains
+disabled at boot. The old 27B and Qwen3.6 units remain stopped/disabled. No
+OpenClaw gateway restart or Mac reboot was performed. Persistent 8083 config
+is still the original installer layout; do not enable it blindly. No optimized
+configuration has been promoted. Read the [performance record](docs/STRATA-PERFORMANCE-2026-11-07.md).
 
 **Flash-Next is connected to the existing `tiercelmoe` provider.** Select
 `/model qwen-flash-next`, or the full reference
@@ -58,16 +59,17 @@ See the [policy check evidence](evidence/strata-2026-11-07/openclaw-picker-polic
 
 - API: `http://100.96.8.54:8083/v1`, Tailscale address only, existing provider credential required.
 - Model: `qwen3.8-flash-next-unsloth-ud-q4_k_xl`.
-- Unit: `strata-flash-next.service`, stopped and disabled for the user reboot;
-  runtime benchmark override removed. Automatic systemd restart
+- Unit: `strata-flash-next.service`, active only on loopback 8084 for benchmarks,
+  disabled at boot. Automatic systemd restart
   after failure remains off. Boot validation for this unit is pending.
 - Strata v0.2.11, engine/control 0.1.57, signed HIP-Halo build `0bdcef4682c5+rocm`.
 - Context 262,144, INT8 KV, one slot, MTP depth 4, prefill 16,384, GPU vision.
 - Route-tail skipping explicitly off; bundled gfx1151 hipBLASLt tuning active.
-- Installer memory budget: 38 GiB page-locked host experts; effective GPU expert
-  cache 6,474 slots / 18.89 GiB. File-tier reads remain active.
-- About 38 GiB system RAM available after the small checks; this is not the
-  long-context peak. GPU driver is live, taint zero, 112 GiB GTT active.
+- Current experimental memory layout: all 24,576 experts / 71.73 GiB in the GPU
+  cache, no host expert arena, full GPU KV, own prefill scratch, mmap PLE.
+  Model quantization and 262,144 context capacity are unchanged.
+- Roughly 17–20 GiB system RAM available during large-context tests.
+  GPU driver is live, taint zero, 112 GiB GTT active.
 
 The user explicitly authorized stopping the old 27B server and retaining it.
 `qwen38-dflash2.service` is stopped and disabled to prevent resource competition.

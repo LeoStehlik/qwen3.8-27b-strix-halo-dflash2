@@ -1,0 +1,39 @@
+{
+  "arm": "gpu-mmap-f16-cleanboot",
+  "load_seconds": 88.04222596900001,
+  "host_vm": {
+    "vm.compaction_proactiveness": "20",
+    "vm.swappiness": "60",
+    "kernel.numa_balancing": "0"
+  },
+  "vm_deltas_including_load": {
+    "pgmigrate_success": 1416691,
+    "compact_migrate_scanned": 3434901,
+    "compact_daemon_migrate_scanned": 2924729
+  },
+  "vm_deltas_after_ready": {
+    "pgmigrate_success": 1186367,
+    "compact_migrate_scanned": 2460317,
+    "compact_daemon_migrate_scanned": 2459875
+  },
+  "evicted_at_ready": {
+    "4682": {
+      "comm": "strata-host",
+      "evicted_ms": 2801
+    },
+    "4668": {
+      "comm": "strata-vision-h",
+      "evicted_ms": 1134
+    }
+  },
+  "evicted_at_end": {
+    "4682": {
+      "comm": "strata-host",
+      "evicted_ms": 7140
+    },
+    "4668": {
+      "comm": "strata-vision-h",
+      "evicted_ms": 1579
+    }
+  }
+}

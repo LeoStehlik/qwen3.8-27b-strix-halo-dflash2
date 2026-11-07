@@ -1,0 +1,110 @@
+{
+  "arm": "gpu-mmap-f16-gdn-chunked",
+  "started_utc": "2026-11-07T15:15:36.633681+00:00",
+  "changes": {
+    "args": {
+      "--expert-cache": "auto",
+      "--resident-budget-gib": null,
+      "--ple-io": "mmap",
+      "--mmap-experts": true,
+      "--no-prefill-borrow": true,
+      "--kv-resident": "0"
+    },
+    "env": {
+      "STRATA_PF_FUSED": "1",
+      "STRATA_PF_FUSED_KQ": "1",
+      "STRATA_PF_GEMM": "1",
+      "STRATA_HC_UPMIX": "1",
+      "STRATA_PA_FAST": "1",
+      "STRATA_HIP_WMMA": "1",
+      "STRATA_SELECT_WMMA": "1",
+      "STRATA_PF_SWITCH_MIN_T": "4096",
+      "STRATA_PREFILL_STREAM_MIN": "128",
+      "STRATA_VERIFY_EARLY_PLE_FLAG": "1",
+      "STRATA_PF_F16": "1",
+      "STRATA_GDN_CHUNKED": "1"
+    }
+  },
+  "sizes": [
+    65536,
+    131072
+  ],
+  "repeat": 1,
+  "max_tokens": 16,
+  "host_vm": {
+    "vm.compaction_proactiveness": "0",
+    "vm.swappiness": "60",
+    "kernel.numa_balancing": "0"
+  },
+  "kernel_before": {
+    "evicted": {
+      "6201": {
+        "comm": "strata-host",
+        "evicted_ms": 4979
+      },
+      "6192": {
+        "comm": "strata-vision-h",
+        "evicted_ms": 3105
+      }
+    },
+    "vmstat": {
+      "pswpin": 516148,
+      "pswpout": 1536550,
+      "pgscan_kswapd": 128624835,
+      "pgscan_direct": 20276718,
+      "pgscan_khugepaged": 0,
+      "pgscan_proactive": 0,
+      "pgscan_direct_throttle": 0,
+      "pgscan_anon": 4191188,
+      "pgscan_file": 144710365,
+      "pgmigrate_success": 2225684,
+      "pgmigrate_fail": 92875,
+      "compact_migrate_scanned": 6069980,
+      "compact_free_scanned": 10718097,
+      "compact_isolated": 4562132,
+      "compact_stall": 1208,
+      "compact_fail": 447,
+      "compact_success": 761,
+      "compact_daemon_wake": 3211,
+      "compact_daemon_migrate_scanned": 4963788,
+      "compact_daemon_free_scanned": 9414049
+    }
+  },
+  "load_seconds": 86.07020732700016,
+  "engine": {
+    "model": "qwen3.8-flash-next-unsloth-ud-q4_k_xl",
+    "max_context": 262144,
+    "images": true,
+    "version": "0.1.57",
+    "logit_bias": 1,
+    "context": 262144,
+    "kv": "int8",
+    "kv_resident": 0,
+    "expert_slots": 24576,
+    "expert_cache_mib": 73450,
+    "expert_slots_primary": 24576,
+    "expert_cache_primary_mib": 73450,
+    "spec": 6,
+    "mtp_max": 4,
+    "lookup": 3,
+    "vram_free_mib": 20019,
+    "cvec": 0,
+    "arena_mib": 0,
+    "pool_workers": 15,
+    "pcie_frac": "0.55",
+    "spec_min_p": "0.50",
+    "conversation_cache_mib": 6912,
+    "conversation_cache_slots": 4,
+    "conversation_cache_min_free_mib": 2560,
+    "conversation_cache_min_tokens": 0,
+    "tail_role_token": -1,
+    "vram_elastic": 0,
+    "prefill_cap": 16384,
+    "prefill_stages": 1,
+    "stream_all_min": 128,
+    "prefill_pipe": 0,
+    "engine": "0.1.57",
+    "drafting": "mtp",
+    "drafting_note": "Drafting: MTP (the DFlash2 drafter isn't downloaded yet)"
+  }
+}

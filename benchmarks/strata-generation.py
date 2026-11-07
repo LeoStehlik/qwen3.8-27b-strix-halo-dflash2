@@ -19,7 +19,13 @@ def main():
     p.add_argument('--model', required=True)
     p.add_argument('--strata-bundle', type=Path, required=True)
     p.add_argument('--out', type=Path, required=True)
+    p.add_argument('--presence-penalty', type=float,
+                   help='Explicit request penalty; otherwise retains server defaults')
+    p.add_argument('--temperature', type=float, default=0)
+    p.add_argument('--thinking', action='store_true')
     a = p.parse_args()
+    if a.presence_penalty is not None and not 0 <= a.presence_penalty <= 2:
+        p.error('--presence-penalty must be between zero and two')
     requests = a.strata_bundle / 'bench/prompts/standard-v1/requests'
     cases = []
     for name in ('performance-short-r1', 'performance-prompt-16k-r1'):
@@ -44,9 +50,12 @@ def main():
 
     try:
         for name, messages, source_hash in cases:
-            body = {'model': a.model, 'messages': messages, 'temperature': 0, 'seed': 1,
-                    'reasoning_effort': 'none', 'chat_template_kwargs': {'enable_thinking': False},
+            body = {'model': a.model, 'messages': messages, 'temperature': a.temperature, 'seed': 1,
+                    'reasoning_effort': 'medium' if a.thinking else 'none',
+                    'chat_template_kwargs': {'enable_thinking': a.thinking},
                     'max_tokens': 512, 'stream': True, 'stream_options': {'include_usage': True}}
+            if a.presence_penalty is not None:
+                body['presence_penalty'] = a.presence_penalty
             req = urllib.request.Request(a.url.rstrip('/') + '/v1/chat/completions',
                                          json.dumps(body).encode(), headers)
             start = time.monotonic()
