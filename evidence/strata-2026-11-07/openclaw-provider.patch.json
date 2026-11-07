@@ -1,0 +1,52 @@
+{
+  "models": {
+    "providers": {
+      "tiercelmoe": {
+        "baseUrl": "http://100.96.8.54:8083/v1",
+        "models": [
+          {
+            "id": "qwen3.8-flash-next-unsloth-ud-q4_k_xl",
+            "name": "Tiercel Qwen3.8 Flash-Next UD-Q4_K_XL (Strata)",
+            "input": [
+              "text",
+              "image"
+            ],
+            "contextWindow": 262144,
+            "maxTokens": 32768,
+            "reasoning": true,
+            "compat": {
+              "thinkingFormat": "qwen-chat-template"
+            },
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            }
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "models": {
+        "tiercelmoe/tiercel-qwen36-a3b-fast": null,
+        "tiercelmoe/qwen3.8-flash-next-unsloth-ud-q4_k_xl": {
+          "alias": "qwen-flash-next",
+          "params": {
+            "temperature": 0.3,
+            "topP": 0.95,
+            "topK": 20,
+            "minP": 0.05,
+            "presencePenalty": 0,
+            "repeatPenalty": 1,
+            "chat_template_kwargs": {
+              "enable_thinking": true
+            }
+          }
+        }
+      }
+    }
+  }
+}

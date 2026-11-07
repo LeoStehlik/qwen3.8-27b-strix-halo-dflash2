@@ -1,0 +1,18 @@
+{
+  "agent": "francis",
+  "models": [
+    {
+      "key": "tiercelmoe/qwen3.8-flash-next-unsloth-ud-q4_k_xl",
+      "name": "Tiercel Qwen3.8 Flash-Next UD-Q4_K_XL (Strata)",
+      "input": "text+image",
+      "contextWindow": 262144,
+      "local": false,
+      "available": true,
+      "tags": [
+        "configured",
+        "alias:qwen-flash-next"
+      ]
+    }
+  ],
+  "live_gateway_catalog": true
+}

@@ -1,0 +1,61 @@
+{
+  "utc": "2026-11-07T13:36:00.907598+00:00",
+  "source": "OpenClaw Mac mini",
+  "url": "http://100.96.8.54:8083/v1",
+  "health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "qwen3.8-flash-next-unsloth-ud-q4_k_xl",
+    "images": true,
+    "api_key": true,
+    "image_generation": false,
+    "loaded": true,
+    "service": "strata"
+  },
+  "models": {
+    "object": "list",
+    "data": [
+      {
+        "id": "qwen3.8-flash-next-unsloth-ud-q4_k_xl",
+        "object": "model",
+        "status": {
+          "value": "loaded"
+        },
+        "meta": {
+          "n_ctx": 262144
+        },
+        "architecture": {
+          "input_modalities": [
+            "text",
+            "image"
+          ],
+          "output_modalities": [
+            "text"
+          ]
+        }
+      }
+    ]
+  },
+  "streamed_text": "READY",
+  "finish_reason": "stop",
+  "events": 3,
+  "usage": {
+    "prompt_tokens": 17,
+    "completion_tokens": 2,
+    "total_tokens": 19,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    }
+  },
+  "elapsed_s": 0.99,
+  "passed": true,
+  "openclaw_agent_turn_sent": false,
+  "openclaw_config_applied": true,
+  "gateway_pid_before": 369,
+  "gateway_process_after": "369 Wed Nov  4 16:53:56 2026",
+  "hot_reload_evidence": [
+    "2026-11-07T14:36:12.454+01:00 [reload] config change detected; evaluating reload (agents.defaults.models.tiercelmoe/tiercel-qwen36-a3b-fast, agents.defaults.models.tiercelmoe/qwen3.8-flash-next-unsloth-ud-q4_k_xl, models.providers.tiercelmoe.baseUrl, models.providers.tiercelmoe.models)",
+    "2026-11-07T14:36:51.789+01:00 [reload] config hot reload applied (agents.defaults.models.tiercelmoe/tiercel-qwen36-a3b-fast, agents.defaults.models.tiercelmoe/qwen3.8-flash-next-unsloth-ud-q4_k_xl, models.providers.tiercelmoe.baseUrl, models.providers.tiercelmoe.models)",
+    "2026-11-07T14:36:51.914+01:00 [reload] config source revision 3 accepted (file)"
+  ]
+}

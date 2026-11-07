@@ -1,19 +1,23 @@
-# Handoff for Francis — Flash-Next loaded, 2026-11-07
+# Handoff for Francis — Flash-Next connected to OpenClaw, 2026-11-07
 
-**Flash-Next is loaded on the GPU and passes local completion and synthetic
-tool/continuation checks.** Acquisition finished at 01:34 UTC; the evaluation
-service started at 13:23 UTC and became ready in about 29 seconds. Long-context
-performance and full deployment validation are still pending.
+**Flash-Next is connected to the existing `tiercelmoe` provider.** Select
+`/model qwen-flash-next`, or the full reference
+`tiercelmoe/qwen3.8-flash-next-unsloth-ud-q4_k_xl`.
+The Mac mini's authenticated streaming check and Francis's live gateway catalog
+passed. OpenClaw applied the provider/alias change through hot reload, with PID
+369 unchanged. The user now supplies real agent requests; cold long-context
+performance and broader quality validation remain pending.
 
-Read the [first-load record, configuration, evidence and reproduction steps](docs/STRATA-FIRST-LOAD-2026-11-07.md)
-and the [deployment checklist](docs/STRATA-FLASH-NEXT.md).
+Read the [connection record and reproducible provider patch](docs/STRATA-OPENCLAW-2026-11-07.md),
+[first-load evidence](docs/STRATA-FIRST-LOAD-2026-11-07.md) and
+[deployment checklist](docs/STRATA-FLASH-NEXT.md).
 
 ## Current listener and resources
 
-- API: `http://127.0.0.1:8083/v1`, loopback only.
+- API: `http://100.96.8.54:8083/v1`, Tailscale address only, existing provider credential required.
 - Model: `qwen3.8-flash-next-unsloth-ud-q4_k_xl`.
-- Unit: `strata-flash-next.service`, active; boot startup and automatic restart
-  are not enabled during evaluation.
+- Unit: `strata-flash-next.service`, active and enabled at boot; automatic restart
+  after failure remains off. Boot validation for this unit is pending.
 - Strata v0.2.11, engine/control 0.1.57, signed HIP-Halo build `0bdcef4682c5+rocm`.
 - Context 262,144, INT8 KV, one slot, MTP depth 4, prefill 16,384, GPU vision.
 - Route-tail skipping explicitly off; bundled gfx1151 hipBLASLt tuning active.
@@ -33,15 +37,16 @@ Qwen3.6 also remains stopped and disabled, with frozen evidence and files retain
 
 The direct completion returned exactly `READY`. The synthetic tool check passed
 exact typed arguments and tool-result continuation; the continuation reused 540
-prompt tokens. Disk checkpoints, streaming tools, an actual image request,
-64K/128K cold benchmarks, above-150K capacity, repeated fresh starts and private
-reachability remain untested. The upstream historical 1,211 tok/s is not a local
+prompt tokens. A streamed completion from the Mac also passed. Disk checkpoints, streaming
+tool calls, an actual image request, 64K/128K cold benchmarks, above-150K capacity
+and broader fresh-start reliability remain untested. The upstream historical 1,211 tok/s is not a local
 measurement. Do not claim broad agent quality from this smoke check.
 
 The user has tested Flash-Next successfully through Ollama Cloud. Continue with
-local performance and deployment checks. No OpenClaw routing or gateway was
-changed; do not restart/reboot the Mac or send synthetic agent/channel turns.
-The user supplies real OpenClaw prompts after the endpoint is ready.
+local performance and real-prompt checks. Only the existing Tiercel provider and
+its model alias were changed; agent defaults and current session selections were
+not. Do not restart/reboot the Mac or send synthetic agent/channel turns.
+The user can select the new alias and send real prompts now.
 
 Implementation worktree: `/home/less/worktrees/qwen38-strata-20261106`, branch
 `deploy/strata-flash-next-20261106`. Current local results:

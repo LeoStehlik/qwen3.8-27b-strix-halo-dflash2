@@ -1,11 +1,13 @@
 # Flash-Next on packaged Strata — deployment in progress
 
-Status on 2026-11-07: acquisition and preparation are complete. Flash-Next is
-loaded on the packaged HIP-Halo engine at `http://127.0.0.1:8083/v1`; a direct
-completion and exact tool/continuation checks passed. **Long-context performance,
-full deployment checks and private endpoint promotion remain pending.** The old
-27B service is stopped and disabled, with its files retained for rollback.
-See the [first-load record and service instructions](STRATA-FIRST-LOAD-2026-11-07.md).
+Status on 2026-11-07: Flash-Next is running at the authenticated private API
+`http://100.96.8.54:8083/v1` and connected to OpenClaw's existing `tiercelmoe`
+provider as `qwen-flash-next`. Generation, synthetic tools/continuation, remote
+streaming and Francis's live catalog passed; the gateway was not restarted.
+**Cold long-context performance and real OpenClaw quality remain unmeasured.**
+The old 27B service is stopped and disabled, with its files retained for rollback.
+See the [OpenClaw connection record](STRATA-OPENCLAW-2026-11-07.md) and
+[first-load record](STRATA-FIRST-LOAD-2026-11-07.md).
 
 The November 6 authorized reboot recovered the GPU after a failed live driver
 reload. The [recovery result](STRATA-RECOVERY-RESULT-2026-11-06.md) records the
@@ -145,8 +147,7 @@ do not present a difference between those results as an isolated speedup.
    engine prompt time, client first-token latency, decode speed, peak memory,
    configuration, fixture hash and at least two comparable runs. Test a prompt
    above 150K as a capacity check. Keep cold and cached results separate.
-7. Only then switch the private endpoint and make the validated service the
-   persistent default. The OpenClaw gateway on the Mac must not be restarted.
+7. At the user's explicit request, the private endpoint and existing Tiercel provider were connected on November 7 after the small checks, ahead of long-context benchmarking. The service is enabled. Do not describe the pending performance/quality checks as passed. The OpenClaw gateway on the Mac must not be restarted.
 
 ## Performance evidence and next experiments
 

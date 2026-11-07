@@ -1,0 +1,5 @@
+# Replace this host-specific Tailscale address for another deployment.
+# Set api_key in the mode-0600 Strata run config before exposing the listener.
+[Service]
+ExecStart=
+ExecStart=%h/.local/bin/strata serve --profile %h/.local/share/strata/flash-next/strata-unsloth-ud-q4_k_xl.json --host 100.96.8.54 --port 8083

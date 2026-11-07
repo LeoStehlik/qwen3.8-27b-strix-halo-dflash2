@@ -1,12 +1,12 @@
 {
-  "phase": "loaded-local-smoke-passed",
-  "updated_utc": "2026-11-07T13:25:19.568959+00:00",
+  "phase": "connected-to-openclaw-awaiting-real-prompts",
+  "updated_utc": "2026-11-07T13:39:44.538661+00:00",
   "serving": true,
-  "url": "http://127.0.0.1:8083/v1",
-  "remote_serving": false,
+  "url": "http://100.96.8.54:8083/v1",
+  "remote_serving": true,
   "old_unit_stopped_and_disabled": true,
   "old_model_files_retained": true,
-  "new_unit_boot_enabled": false,
+  "new_unit_boot_enabled": true,
   "remaining": [
     "cold 64K/128K performance",
     "above-150K capacity",
@@ -14,6 +14,10 @@
     "image request",
     "disk state restoration",
     "fresh-start reliability",
-    "private endpoint and real OpenClaw validation"
-  ]
+    "real OpenClaw prompts",
+    "new service boot validation"
+  ],
+  "openclaw_provider": "tiercelmoe",
+  "openclaw_alias": "qwen-flash-next",
+  "gateway_restarted": false
 }

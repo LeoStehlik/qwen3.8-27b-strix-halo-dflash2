@@ -26,15 +26,19 @@ retries without caching completed responses.
 
 ## Current direction — 2026-11-07
 
-Flash-Next UD-Q4_K_XL is loaded on packaged Strata v0.2.11 / HIP-Halo 0.1.57.
-A direct completion and exact tool-argument/result-continuation checks passed.
-The evaluation API is loopback-only at `http://127.0.0.1:8083/v1`, with 262,144
-context, INT8 KV, MTP and vision enabled. The old dense 27B service is stopped
-and disabled; all its files are retained for rollback.
+Flash-Next UD-Q4_K_XL is running on packaged Strata v0.2.11 / HIP-Halo 0.1.57
+and connected to OpenClaw's existing `tiercelmoe` provider. Select
+`/model qwen-flash-next`. The authenticated private API is
+`http://100.96.8.54:8083/v1`, with 262,144 context, INT8 KV, MTP and vision enabled.
+The Strata unit is enabled; the old dense 27B service is stopped and disabled,
+with all files retained for rollback.
 
-Long-context benchmarks and private endpoint promotion remain pending. This is
-not yet the OpenClaw endpoint or a locally measured 1,211 tok/s result.
-See the [first-load record and reproducible service](docs/STRATA-FIRST-LOAD-2026-11-07.md),
+Direct generation, exact tool/result continuation, streaming from the Mac mini
+and Francis's live model catalog passed. OpenClaw applied the change without a
+gateway restart. Real agent quality and cold 64K/128K performance remain unmeasured;
+the published 1,211 tok/s is not a local result.
+See the [OpenClaw connection record](docs/STRATA-OPENCLAW-2026-11-07.md),
+[first-load evidence](docs/STRATA-FIRST-LOAD-2026-11-07.md),
 [deployment guide](docs/STRATA-FLASH-NEXT.md) and [handoff](handoff.md).
 The [pre-reboot record](docs/STRATA-RECOVERY-2026-11-06.md) and
 [successful GPU recovery](docs/STRATA-RECOVERY-RESULT-2026-11-06.md) preserve
